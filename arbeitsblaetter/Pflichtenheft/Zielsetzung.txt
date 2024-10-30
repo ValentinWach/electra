@@ -1,0 +1,71 @@
+---------- Funktionale Anforderungen ----------
+
+Muss-Kriterien:
+    - Alle 3 Hauptseiten sind erreichbar und laden
+    - Stimmabgabe:
+		-> Abgabe der 1. Stimme
+			Anzeige aller Direktkandidaten inkl. Partei & Beruf des Wahlkreises
+		-> Abgabe der 2. Stimme
+			Anzeige aller zugelassenen Parteien im Bundesland
+        - Es muss möglich sein seine Stimme abzugeben
+        - Es darf nicht möglich sein mehrmals abzustimmen
+        - Es dürfen nur gültige Stimmen gezählt werden
+    - Batch-Import:
+        - Es können mehrere Stimmen importiert werden; primär für vergleichsdaten vergangener Wahlen
+    - Analyse-Seiten
+        - Anzeige der finalen Sitzverteilung
+        - Anzeige der Erst-/Zweitstimmenverteilung
+        - Anzeige der Abgeordneten
+        - Vergleich mit letzten Wahlen (Direkter Vergleich, Anzeige der Veränderung pro Partei)
+
+Soll-Kriterien:
+    - Batch-Import:
+        - Authentifizierung: Nur autorisierte dürfen Stimmen hochladen
+    - Analyse-Seiten:
+        -> Schönes UI
+		-> Pro Region & Partei
+			-> Erst- und Zweitstimmenverteilungen
+			-> Direktmandate
+		-> Landeslisten
+		-> Direktkandidaten
+
+
+Kann-Kriterien:
+    - Stimmabgabe:
+        - Für jede Partei kann die Landesliste angezeigt werden
+        - Schönes UI
+    - Batch-Import:
+        - Schöne UI
+        - Admin-Nutzerverwaltung aus dem Frontend
+    - Analyse-Seiten:
+        -> Potentielle Koalitionen
+        -> Umschalten auf alte Sitzberechnung mit Überhangs- & Ausgleichsmandaten
+        -> Visualisierung der gewinnenden Parteien auf Landkarte
+
+---------- Nicht-Funktionale Anforderungen ----------
+
+Muss-Kriterien:
+    - Authentifizierung
+        - Man darf keinen Batch-Upload ohne Admin-Authentifizierung durchführen
+        - Es muss sichergestellt sein, dass man nicht für andere Personen ohne deren Wissen abstimmt
+        - Es muss sichergestellt sein, dass nur berechtigte wählen
+    - Fachliche Korrektheit
+    - Skalierbarkeit
+        - Es müssen millionen von Stimmen in kurzer Zeit gespeichert werden
+        - Millionen von Menschen können gleichzeitig eine Analyse anfordern
+    - Sicherheit
+        - Sicher gegen Angriffe durch die dritte Ergebnisse manipulieren können
+            - Einschleusen
+            - Löschen
+            - Verändern
+        - Sicher gegen Angriffe durch die dritte sensible Daten abgreifen können
+        - Daten wie registrierte Kandidaten, Parteien, ... müssen sicher sein
+    - Datenschutz
+        - Es darf weder über die Logs noch über die Analyse-Seite zurückverfolgbar sein, wer wen gewählt hat
+
+Soll-Kriterien:
+    - Wartbarkeit (Clean Code, Etablierte Technologien, ...)
+    - Einfache Bedienbarkeit
+    
+Kann-Kriterien:
+    - Portierbarkeit, z.B. kann leicht zu einem anderen DBS gewechselt werden
