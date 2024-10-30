@@ -1,6 +1,7 @@
 Benutzerschnittstellen:
 	Eingabemaske für Ergebnisse
 	Seite zur Analyse der Ergebnisse
+	Schnittstelle zum Batch-Import
 
 
 Funktionale Anforderungen:
@@ -13,19 +14,27 @@ Funktionale Anforderungen:
 		-> Abgabe der 2. Stimme
 			Anzeige aller zugelassenen Parteien im Bundesland
 	
+	Batch-Import:
+		-> Login Seite
+		-> Hochladen => (Formatprüfung mit potentieller Warnung) => Erfolgsmeldung
+
 	Seite zur Analyse der Ergebnisse
 		-> Sitzverteilungen
+		-> Potentielle Koalitionen
 		-> Pro Region & Partei
 			-> Erst- und Zweitstimmenverteilungen
 			-> Direktmandate
 		-> Landeslisten
 		-> Direktkandidaten
+		-> (Optional: Umschalten auf alte Sitzberechnung mit Überhangs- & Ausgleichsmandaten)
 
 Nicht-Funktionale Anforderungen
 	- Skalierbarkeit: Performance bei hohen Datenbeständen (Abrufen & Hinzufügen!), > 100 Mio
 	- Sicherheit:
 		- Nur eine Stimmabgabe mit Token! (Keine Injections, ...)
 		- Nur eine Stimmabgabe pro Token!
+		- Kein Nicht-Autorisierter auf Stimmabgabe anderer Personen (z.B. am selben Rechner) möglich
+		- Batch-Upload ist nur autorisiert möglich
 	- Einfache Bedienbarkeit/Übersichtlichkeit, beachte: Auch Rentner etc. müssen wählen!
 	- Fachliche Korrektheit
 	- Wartbarkeit
