@@ -9,11 +9,9 @@ class Erststimme(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    #Wahlkreis
+    # Relations
     wahlkreis = relationship('Wahlkreis', back_populates='erststimmen')
     wahlkreis_id = Column(Integer, ForeignKey('wahlkreis.id'), nullable=False)
-
-    #Partei
     partei = relationship('Partei', back_populates='erststimmen')
     partei_id = Column(Integer, ForeignKey('partei.id'), nullable=False)
 
@@ -22,11 +20,9 @@ class Zweitstimme(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    #Wahlkreis
+    # Relations
     wahlkreis = relationship('Wahlkreis', back_populates='zweitstimmen')
     wahlkreis_id = Column(Integer, ForeignKey('wahlkreis.id'), nullable=False)
-
-    #Partei
     partei = relationship('Partei', back_populates='zweitstimmen')
     partei_id = Column(Integer, ForeignKey('partei.id'), nullable=False)
 
@@ -36,10 +32,8 @@ class Partei(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
 
-    #Erstimmen
+    # Relations
     erststimmen = relationship('Erststimme', back_populates="partei")
-
-    #Zweitstimmen
     zweitstimmen = relationship('Zweitstimme', back_populates='partei')
 
 
@@ -49,8 +43,16 @@ class Wahlkreis(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    #Erststimmen
+    # Relations
     erststimmen = relationship('Erststimme', back_populates='wahlkreis')
-
-    #Zweitstimmen
     zweitstimmen = relationship('Zweitstimme', back_populates='wahlkreis')
+    bundesland = relationship('Bundesland', back_populates='wahlkreise')
+    bundesland_id = Column(Integer, ForeignKey('bundesland.id'), nullable=False)
+
+class Bundesland(Base):
+    __tablename__ = 'bundesland'
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # Relations
+    wahlkreise = relationship('Wahlkreis', back_populates='bundesland')
