@@ -15,6 +15,9 @@ class Erststimme(Base):
     partei = relationship('Partei', back_populates='erststimmen')
     partei_id = Column(Integer, ForeignKey('partei.id'), nullable=False)
 
+    def __repr__(self):
+        return f"Erststimme(id={self.id}, wahlkreis={self.wahlkreis}, partei='{self.partei}')"
+
 class Zweitstimme(Base):
     __tablename__ = 'zweitstimme'
 
