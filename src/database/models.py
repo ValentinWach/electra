@@ -57,7 +57,7 @@ class Wahl(Base):
     zweitstimmen = relationship('Zweitstimme', back_populates='wahl')
     abgeordnete = relationship('Abgeordnete', back_populates='wahl')
 
-class Abgeordnete(Base):
+class Abgeordneter(Base):
     __tablename__ = 'abgeordneten'
 
     id = Column(Integer, primary_key=True, index=True)
