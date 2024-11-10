@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, Enum
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Enum as SQLEnum, Year
 from sqlalchemy.orm import relationship
 from datetime import date
+from enum import Enum
 
 from connection import Base
 
@@ -65,7 +66,7 @@ class Wahl(Base):
     def __repr__(self):
         return f"<Wahl(id={self.id}, date={self.date})>"
 
-class Abgeordneter(Base):
+'''class Abgeordneter(Base):
     __tablename__ = 'abgeordnete'
 
     id = Column(Integer, primary_key=True, index=True)
@@ -79,7 +80,49 @@ class Abgeordneter(Base):
     wahl = relationship('Wahl', back_populates='abgeordnete')
 
     def __repr__(self):
-        return f"<Abgeordneter(id={self.id}, title={self.title}, name={self.name}, firstname={self.firstname})>"
+        return f"<Abgeordneter(id={self.id}, title={self.title}, name={self.name}, firstname={self.firstname})>"'''
+
+class Gender(Enum):
+    MALE = "m"
+    FEMALE = "w"
+    DIVERSE = "d"
+class Kandidat(Base):
+    __tablename__ = 'kandidaten'
+
+    name = Column(String, nullable=False)
+    firstname = Column(String, nullable=False)
+    gender = Column(SQLEnum(Gender), nullable=False)
+    profession = Column(String)
+    yearOfBirth = Column(Date)
+
+    # relations
+
+
+class Wahlkreiskandidatur(Base):
+    __tablename__ = 'wahlkreiskandidaturen'
+
+    # relations
+    kandidat = relationship('kandidaten', back_populates='wahlkreiskandidatur')
+    kandidat_id = Column(Integer, ForeignKey('kandidat.id'), nullable=False)
+    wahlkreis = relationship('wahlkreise', back_populates='wahlkreiskandidaten')
+    wahlkreis_id = Column(Integer, ForeignKey('wahlkreis.id'), nullable=False)
+    partei = relationship('parteien', back_populates='Kandidaten')
+    partei_id = Column(Integer, ForeignKey('partei.id'), nullable=False)
+    wahl = relationship('wahlen', back_populates='kandidaten')
+    wahl_id = Column(Integer, ForeignKey('wahl.id'), nullable=False)
+
+
+class Listenkandidatur(Base):
+    __tablename__ = 'listenkandidaturen'
+
+    # relations
+    kandidat = relationship('kandidaten', back_populates='wahlkreiskandidatur')
+    listPosition = Column(Integer, nullable=False)
+    bundesland = relationship('bundeslaender', back_populates='listenkandidaten')
+    partei = relationship('parteien', back_populates='Kandidaten')
+    wahl = relationship('wahlen', back_populates='kandidaten')
+
+
 
 class Wahlkreis(Base):
     __tablename__ = 'wahlkreise'
