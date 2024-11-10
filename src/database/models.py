@@ -1,11 +1,9 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, Enum as SQLEnum
 from sqlalchemy.orm import relationship
-from datetime import date
 from enum import Enum
 
-from connection import Base
-
-
+from sqlalchemy.orm import declarative_base
+Base = declarative_base()
 class Wahl(Base):
     __tablename__ = 'wahlen'
 
@@ -128,14 +126,14 @@ class Wahlkreiskandidatur(Base):
 
     # relations
     kandidat = relationship('kandidaten', back_populates='wahlkreiskandidaturen')
-    kandidat_id = Column(Integer, ForeignKey('kandidat.id'), nullable=False)
+    kandidat_id = Column(Integer, ForeignKey('kandidaten.id'), nullable=False)
     wahlkreis = relationship('wahlkreise', back_populates='wahlkreiskandidaten')
-    wahlkreis_id = Column(Integer, ForeignKey('wahlkreis.id'), nullable=False)
+    wahlkreis_id = Column(Integer, ForeignKey('wahlkreise.id'), nullable=False)
     partei = relationship('parteien', back_populates='Kandidaten')
     partei_id = Column(Integer, ForeignKey('parteien.id'), nullable=False)
     erststimmen = relationship('Erststimmen', back_populates='wahlkreiskandidatur')
     wahl = relationship('wahlen', back_populates='kandidaten')
-    wahl_id = Column(Integer, ForeignKey('wahl.id'), nullable=False)
+    wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)
 
 
 class Listenkandidatur(Base):
@@ -145,13 +143,13 @@ class Listenkandidatur(Base):
 
     # relations
     kandidat = relationship('kandidaten', back_populates='wahlkreiskandidaturen')
-    kandidat_id = Column(Integer, ForeignKey('kandidat.id'), nullable=False)
+    kandidat_id = Column(Integer, ForeignKey('kandidaten.id'), nullable=False)
     listPosition = Column(Integer, nullable=False)
     bundesland = relationship('bundeslaender', back_populates='listenkandidaten')
-    bundesland_id = Column(Integer, ForeignKey('bundesland.id'), nullable=False)
+    bundesland_id = Column(Integer, ForeignKey('bundeslaender.id'), nullable=False)
     partei = relationship('parteien', back_populates='Kandidaten')
     partei_id = Column(Integer, ForeignKey('parteien.id'), nullable=False)
     wahl = relationship('wahlen', back_populates='kandidaten')
-    wahl_id = Column(Integer, ForeignKey('wahl.id'), nullable=False)
+    wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)
 
 
