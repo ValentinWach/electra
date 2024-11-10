@@ -1,84 +1,76 @@
 from datetime import datetime
-
 import pandas as pd
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import Column, Integer, String
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship, declarative_base
 from pathlib import Path
+import os
+from src.database.models import Wahl, Wahlkreis, Partei, Wahlkreiskandidatur
 
-from src.database.models import Wahl, Wahlkreis, Wahlkreiskandidatur, Partei, Erststimme
-
+# Database configuration
 DATABASE_URL = "postgresql://admin:admin@localhost:5432/mydatabase"
-
 engine = create_engine(DATABASE_URL)
+Session = sessionmaker(bind=engine)
 
-Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
+# Load and filter data
 df = pd.read_csv(Path('sourcefiles', 'kerg2.csv'), delimiter=';')
-
-# Filtern der Zeilen, bei denen 'Stimme' == 1
 filtered_df = df[(df['Stimme'] == 1) & (df['Gruppenart'] == 'Partei') & (df['Gebietsart'] == 'Wahlkreis')]
 
 # Session starten
-db = Session()
+session = Session()
 
-# Für jedes gefilterte Tupel ein neues Objekt erstellen und in die Datenbank einfügen
-batch_size = 100000
-batch = []
+# Prepare data for bulk insert
+foreign_keys = []
 
 counter = 0
 for index, row in filtered_df.iterrows():
-    print(f"Count: {counter}")
+    if(counter % 1000 == 0):
+        print(counter)
     counter += 1
+    count = int(row['Anzahl']) if not pd.isna(row['Anzahl']) else 0
 
-    if pd.isna(row['Anzahl']):
-        continue
-
-    count = int(row['Anzahl'])
-
-    date_str = row['Wahltag']  # Assuming this is in 'DD.MM.YYYY' format, like '26.09.2021'
+    # Convert and cache date
+    date_str = row['Wahltag']
     wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
 
-    wahl = db.query(Wahl).filter_by(
-        date=wahl_date,
-    ).one()
+    # Use the session to fetch foreign key IDs
+    wahl = session.query(
+        Wahl.id
+    ).filter_by(date=wahl_date).scalar()
+    wahlkreis = session.query(
+        Wahlkreis.id
+    ).filter_by(name=row['Gebietsname']).scalar()
+    partei = session.query(
+        Partei.id
+    ).filter_by(shortName=row['Gruppenname']).scalar()
+    wahlkreiskandidatur = session.query(
+        Wahlkreiskandidatur.id
+    ).filter_by(
+        wahlkreis_id=wahlkreis,
+        wahl_id=wahl,
+        partei_id=partei
+    ).scalar()
 
-    wahlkreis = db.query(Wahlkreis).filter_by(
-        name=row['Gebietsname'],
-    ).one()
+    # If all foreign keys are valid, append `count` rows
+    if wahl and wahlkreis and partei and wahlkreiskandidatur:
+        for _ in range(count):
+            foreign_keys.append((wahlkreis, wahlkreiskandidatur, wahl))
 
-    partei = db.query(Partei).filter_by(
-        shortName=row['Gruppenname'],
-    ).one()
+# Close session after querying
+session.close()
 
-    wahlkreiskandidatur = db.query(Wahlkreiskandidatur).filter_by(
-        wahlkreis_id=wahlkreis.id,
-        wahl_id=wahl.id,
-        partei_id=partei.id
-    ).one()
+bulk_df = pd.DataFrame(foreign_keys, columns=['wahlkreis_id', 'wahlkreiskandidatur_id', 'wahl_id'])
+# Write to a temporary CSV file
+temp_csv = Path('temp_erststimme.csv')
+bulk_df.to_csv(temp_csv, index=False, header=False)
 
-    erststimme = Erststimme(
-        wahlkreis_id=wahlkreis.id,
-        wahlkreiskandidatur_id=wahlkreiskandidatur.id,
-        wahl_id=wahl.id,
-    )
+with engine.connect() as conn:
+    # Access the raw psycopg2 connection to use cursor
+    with conn.begin():  # Begin a transaction
+        raw_conn = conn.connection
+        with raw_conn.cursor() as cursor:
+            cursor.execute("TRUNCATE TABLE erststimmen") # Empty Table
+            with open(temp_csv, 'r') as f:
+                cursor.copy_expert("COPY erststimmen (wahlkreis_id, wahlkreiskandidatur_id, wahl_id) FROM stdin WITH CSV", f)
+    conn.commit()
 
-    # Inner loop to insert 'Erststimme' objects 'count' times
-    for _ in range(count):
-        # Create a new Erststimme object with the necessary data
-
-        batch.append(erststimme)
-        if len(batch) >= batch_size:
-            db.bulk_save_objects(batch)
-            db.commit()
-            batch = []
-
-# Save any remaining objects in the batch
-if batch:
-    db.bulk_save_objects(batch)
-    db.commit()
-
-db.close()
+os.remove(temp_csv)
