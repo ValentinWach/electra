@@ -8,7 +8,7 @@ from sqlalchemy.orm import relationship, declarative_base
 from datetime import datetime
 from pathlib import Path
 
-from src.database.models import Partei, Listenkandidatur, Kandidat, Bundesland, Wahl
+from src.database.models import Partei, Listenkandidatur, Kandidat, Bundesland, Wahl, Wahlkreis, Wahlkreiskandidatur
 
 DATABASE_URL = "postgresql://admin:admin@localhost:5432/mydatabase"
 
@@ -22,7 +22,7 @@ df = pd.read_csv(Path('sourcefiles', 'kandidaturen_2021.csv'), delimiter=';')
 
 # Filtern der Zeilen, bei denen 'Stimme' == 1
 # Filter for rows where 'Gruppenart_XML' is either 'PARTEI' or 'EINZELBEWERBER'
-filtered_df = df[(df['Kennzeichen'] == 'Landesliste')]
+filtered_df = df[(df['Kennzeichen'] == 'Kreiswahlvorschlag')]
 # Session starten
 db = Session()
 
@@ -36,7 +36,7 @@ for index, row in filtered_df.iterrows():
         yearOfBirth=row['Geburtsjahr'],
     ).one_or_none()
 
-    bundesland = db.query(Bundesland).filter_by(
+    wahlkreis = db.query(Wahlkreis).filter_by(
         name = row['Gebietsname'],
     ).one_or_none()
 
@@ -55,20 +55,18 @@ for index, row in filtered_df.iterrows():
     ).one_or_none()
 
     # Create a new Partei object
-    listenkandidatur = Listenkandidatur(
+    wahlkreiskandidatur = Wahlkreiskandidatur(
         kandidat_id=kandidat.id,  # Assuming 'Gruppenschluessel' is the id column
-        listPosition=row['Listenplatz'],  # Setting the type based on the condition above
-        bundesland_id=bundesland.id,  # Adjust according to actual column name for 'name'
+        wahlkreis_id=wahlkreis.id,  # Adjust according to actual column name for 'name'
         partei_id=partei.id,
         wahl_id=wahl.id,
     )
 
     # Print for debugging (optional)
-    print(listenkandidatur)
+    print(wahlkreiskandidatur)
 
     # Add to session
-    db.add(listenkandidatur)
+    db.add(wahlkreiskandidatur)
 
 db.commit()
 db.close()
-

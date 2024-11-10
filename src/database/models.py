@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, Enum as SQLEnum
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, declarative_base
 from enum import Enum
 
-from sqlalchemy.orm import declarative_base
 Base = declarative_base()
+
 class Wahl(Base):
     __tablename__ = 'wahlen'
 
@@ -33,7 +33,7 @@ class Wahlkreis(Base):
     wahlkreiskandidaturen = relationship('Wahlkreiskandidatur', back_populates='wahlkreis')
 
     def __repr__(self):
-        return f"<Wahlkreis(id={self.id}, bundesland_id={self.bundesland_id})>"
+        return f"<Wahlkreis(id={self.id}, name={self.name} einwohnerzahl={self.einwohnerzahl} bundesland_id={self.bundesland_id})>"
 
 class Bundesland(Base):
     __tablename__ = 'bundeslaender'
@@ -48,7 +48,6 @@ class Bundesland(Base):
     def __repr__(self):
         return f"<Bundesland(id={self.id})>"
 
-
 class Erststimme(Base):
     __tablename__ = 'erststimmen'
 
@@ -57,13 +56,13 @@ class Erststimme(Base):
     # Relations
     wahlkreis_id = Column(Integer, ForeignKey('wahlkreise.id'), nullable=False)
     wahlkreis = relationship('Wahlkreis', back_populates='erststimmen')
-    wahlkreiskandidatur = relationship('wahlkreiskandidaturen', back_populates='erststimmen')
+    wahlkreiskandidatur = relationship('Wahlkreiskandidatur', back_populates='erststimmen')
     wahlkreiskandidatur_id = Column(Integer, ForeignKey('wahlkreiskandidaturen.id'), nullable=False)
     wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)
     wahl = relationship('Wahl', back_populates='erststimmen')
 
     def __repr__(self):
-        return f"<Erststimme(id={self.id}, wahlkreis_id={self.wahlkreis_id}, partei_id={self.partei_id})>"
+        return f"<Erststimme(id={self.id}, wahlkreis_id={self.wahlkreis_id})>"
 
 class Zweitstimme(Base):
     __tablename__ = 'zweitstimmen'
@@ -81,27 +80,22 @@ class Zweitstimme(Base):
     def __repr__(self):
         return f"<Zweitstimme(id={self.id}, wahlkreis_id={self.wahlkreis_id}, partei_id={self.partei_id})>"
 
-
 class Partei(Base):
     __tablename__ = 'parteien'
 
     id = Column(Integer, primary_key=True, index=True)
     type = Column(String, nullable=False)
-    name = Column(String, nullable=False, unique=True)
-    shortName = Column(String, nullable=False, unique=True)
+    name = Column(String, nullable=False)
+    shortName = Column(String, nullable=False)
 
     # Relations
     wahlkreiskandidaturen = relationship('Wahlkreiskandidatur', back_populates='partei')
     listenkandidaturen = relationship('Listenkandidatur', back_populates='partei')
-    zweitstimmen = relationship('Zweitstimmen', back_populates='partei')
+    zweitstimmen = relationship('Zweitstimme', back_populates='partei')
 
     def __repr__(self):
         return f"<Partei(id={self.id}, type={self.type}, name={self.name}, shortName={self.shortName})>"
 
-class Gender(Enum):
-    MALE = "m"
-    FEMALE = "w"
-    DIVERSE = "d"
 
 class Kandidat(Base):
     __tablename__ = 'kandidaten'
@@ -109,47 +103,50 @@ class Kandidat(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     firstname = Column(String, nullable=False)
-    gender = Column(SQLEnum(Gender), nullable=False)
+    gender = Column(String, nullable=False)
     profession = Column(String)
     yearOfBirth = Column(Integer)
 
     # Relations
-    wahlkreiskandidaturen = relationship('wahlkreiskandidaturen', back_populates='kandidat')
-    listenkandidaturen = relationship('listenkandidaturen', back_populates='kandidat')
+    wahlkreiskandidaturen = relationship('Wahlkreiskandidatur', back_populates='kandidat')
+    listenkandidaturen = relationship('Listenkandidatur', back_populates='kandidat')
 
     def __repr__(self):
-        return f"<Kandidat(id={self.id}, name={self.name}, firstname={self.firstname})>"
+        return f"<Kandidat(id={self.id}, name={self.name}, firstname={self.firstname}, gender={self.gender}, profession={self.profession}, birth={self.yearOfBirth})>"
 
 class Wahlkreiskandidatur(Base):
     __tablename__ = 'wahlkreiskandidaturen'
     id = Column(Integer, primary_key=True, index=True)
 
-    # relations
-    kandidat = relationship('kandidaten', back_populates='wahlkreiskandidaturen')
+    # Relations
+    kandidat = relationship('Kandidat', back_populates='wahlkreiskandidaturen')
     kandidat_id = Column(Integer, ForeignKey('kandidaten.id'), nullable=False)
-    wahlkreis = relationship('wahlkreise', back_populates='wahlkreiskandidaten')
+    wahlkreis = relationship('Wahlkreis', back_populates='wahlkreiskandidaturen')
     wahlkreis_id = Column(Integer, ForeignKey('wahlkreise.id'), nullable=False)
-    partei = relationship('parteien', back_populates='Kandidaten')
+    partei = relationship('Partei', back_populates='wahlkreiskandidaturen')
     partei_id = Column(Integer, ForeignKey('parteien.id'), nullable=False)
-    erststimmen = relationship('Erststimmen', back_populates='wahlkreiskandidatur')
-    wahl = relationship('wahlen', back_populates='kandidaten')
+    erststimmen = relationship('Erststimme', back_populates='wahlkreiskandidatur')
+    wahl = relationship('Wahl', back_populates='wahlkreiskandidaturen')
     wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)
 
+    def __repr__(self):
+        return f"<Wahlkreiskandidatur(id={self.id}, kandidat={self.kandidat_id}, wahlkreis={self.wahlkreis_id}, partei={self.partei_id}, wahl={self.wahl_id})>"
 
 class Listenkandidatur(Base):
     __tablename__ = 'listenkandidaturen'
 
     id = Column(Integer, primary_key=True, index=True)
-
-    # relations
-    kandidat = relationship('kandidaten', back_populates='wahlkreiskandidaturen')
-    kandidat_id = Column(Integer, ForeignKey('kandidaten.id'), nullable=False)
     listPosition = Column(Integer, nullable=False)
-    bundesland = relationship('bundeslaender', back_populates='listenkandidaten')
+
+    # Relations
+    kandidat = relationship('Kandidat', back_populates='listenkandidaturen')
+    kandidat_id = Column(Integer, ForeignKey('kandidaten.id'), nullable=False)
+    bundesland = relationship('Bundesland', back_populates='listenkandidaturen')
     bundesland_id = Column(Integer, ForeignKey('bundeslaender.id'), nullable=False)
-    partei = relationship('parteien', back_populates='Kandidaten')
+    partei = relationship('Partei', back_populates='listenkandidaturen')
     partei_id = Column(Integer, ForeignKey('parteien.id'), nullable=False)
-    wahl = relationship('wahlen', back_populates='kandidaten')
+    wahl = relationship('Wahl', back_populates='listenkandidaturen')
     wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)
 
-
+    def __repr__(self):
+        return f"<Listenkandidatur(id={self.id}, kandidat={self.kandidat_id}, bundesland={self.bundesland_id}, partei={self.partei_id}, listPosition={self.listPosition}, wahl={self.wahl_id})>"

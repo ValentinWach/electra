@@ -5,18 +5,18 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, declarative_base
+from pathlib import Path
 
 from src.database.models import Partei
 
 DATABASE_URL = "postgresql://admin:admin@localhost:5432/mydatabase"
 
 engine = create_engine(DATABASE_URL)
-Base = declarative_base()
 
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-df = pd.read_csv('C:\\Users\\Valentin\\Documents\\Kurse 7. Semester\\DBS\\btw21_parteien.csv', delimiter=';')
+df = pd.read_csv(Path('sourcefiles', 'btw21_parteien.csv'), delimiter=';')
 
 # Filtern der Zeilen, bei denen 'Stimme' == 1
 # Filter for rows where 'Gruppenart_XML' is either 'PARTEI' or 'EINZELBEWERBER'
@@ -39,8 +39,8 @@ for index, row in filtered_df.iterrows():
     print(partei)
 
     # Add to session
-    #db.add(partei)
+    db.add(partei)
 
-#db.commit()
-#db.close()
+db.commit()
+db.close()
 
