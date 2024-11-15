@@ -18,7 +18,7 @@ Base = declarative_base()
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-df = pd.read_csv(Path('sourcefiles', 'kandidaturen_2021.csv'), delimiter=';')
+df = pd.read_csv(Path('sourcefiles', 'kandidaturen_2017.csv'), delimiter=';', keep_default_na=False)
 filtered_df = df[(df['Kennzeichen'] == 'Kreiswahlvorschlag') | (df['Kennzeichen'] == 'anderer Kreiswahlvorschlag')]
 db = Session()
 
@@ -45,35 +45,37 @@ for index, row in filtered_df.iterrows():
     row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
     row['GruppennameLang'] = 'Partei für schulmedizinische Verjüngungsforschung (2021: Partei für Gesundheitsforschung)' if row['GruppennameLang'] == 'Partei für Gesundheitsforschung' else row['GruppennameLang']
 
-    partei_query = db.query(Partei).filter_by(
-        shortName=row['Gruppenname'],
-        name=row['GruppennameLang']
-    ).all()
-
-    if len(partei_query) > 1:
-        print(
-            f"WARNING: Multiple results found for Partei with shortName={row['Gruppenname']} and name={row['GruppennameLang']}")
-    elif len(partei_query) == 0:
-        raise ValueError(f"Partei not found with shortName={row['Gruppenname']} and name={row['GruppennameLang']}")
-
-    partei = partei_query[0] if partei_query else None
-
-
     date_str = row['Wahltag']  # Assuming this is in 'DD.MM.YYYY' format, like '26.09.2021'
     wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
-
     wahl = db.query(Wahl).filter_by(
         date=wahl_date,
     ).one()
 
-    # Create a new Partei object
-    wahlkreiskandidatur = Wahlkreiskandidatur(
-        kandidat_id=kandidat.id,  # Assuming 'Gruppenschluessel' is the id column
-        wahlkreis_id=wahlkreis.id,  # Adjust according to actual column name for 'name'
-        partei_id=partei.id,
-        wahl_id=wahl.id,
-    )
+    if not (row['Gruppenname'].startswith("EB: ")):
+        partei_query = db.query(Partei).filter_by(
+            shortName=row['Gruppenname'],
+            #name=row['GruppennameLang']
+        ).all()
+        if len(partei_query) > 1:
+            print(
+                f"WARNING: Multiple results found for Partei with shortName={row['Gruppenname']} and name={row['GruppennameLang']}")
+        elif len(partei_query) == 0:
+            raise ValueError(f"Partei not found with shortName={row['Gruppenname']} and name={row['GruppennameLang']}")
+        partei = partei_query[0] if partei_query else None
 
+        wahlkreiskandidatur = Wahlkreiskandidatur(
+            kandidat_id=kandidat.id,  # Assuming 'Gruppenschluessel' is the id column
+            wahlkreis_id=wahlkreis.id,  # Adjust according to actual column name for 'name'
+            partei_id=partei.id,
+            wahl_id=wahl.id,
+        )
+    else:
+        wahlkreiskandidatur = Wahlkreiskandidatur(
+            kandidat_id=kandidat.id,  # Assuming 'Gruppenschluessel' is the id column
+            wahlkreis_id=wahlkreis.id,  # Adjust according to actual column name for 'name'
+            partei_id=None,
+            wahl_id=wahl.id,
+        )
     # Print for debugging (optional)
     #print(wahlkreiskandidatur)
 

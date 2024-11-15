@@ -79,7 +79,7 @@ class Partei(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     type = Column(String, nullable=False)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=True)
     shortName = Column(String, nullable=False)
 
     # Relations
@@ -90,23 +90,21 @@ class Partei(Base):
     def __repr__(self):
         return f"<Partei(id={self.id}, type={self.type}, name={self.name}, shortName={self.shortName})>"
 
-
 class Kandidat(Base):
     __tablename__ = 'kandidaten'
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     firstname = Column(String, nullable=False)
-    gender = Column(String, nullable=False)
     profession = Column(String)
-    yearOfBirth = Column(Integer)
+    yearOfBirth = Column(Integer, nullable=False)
 
     # Relations
     wahlkreiskandidaturen = relationship('Wahlkreiskandidatur', back_populates='kandidat')
     listenkandidaturen = relationship('Listenkandidatur', back_populates='kandidat')
 
     def __repr__(self):
-        return f"<Kandidat(id={self.id}, name={self.name}, firstname={self.firstname}, gender={self.gender}, profession={self.profession}, birth={self.yearOfBirth})>"
+        return f"<Kandidat(id={self.id}, name={self.name}, firstname={self.firstname}, profession={self.profession}, birth={self.yearOfBirth})>"
 
 class Wahlkreiskandidatur(Base):
     __tablename__ = 'wahlkreiskandidaturen'
@@ -118,7 +116,7 @@ class Wahlkreiskandidatur(Base):
     wahlkreis = relationship('Wahlkreis', back_populates='wahlkreiskandidaturen')
     wahlkreis_id = Column(Integer, ForeignKey('wahlkreise.id'), nullable=False)
     partei = relationship('Partei', back_populates='wahlkreiskandidaturen')
-    partei_id = Column(Integer, ForeignKey('parteien.id'), nullable=False)
+    partei_id = Column(Integer, ForeignKey('parteien.id'), nullable=True)
     erststimmen = relationship('Erststimme', back_populates='wahlkreiskandidatur')
     wahl = relationship('Wahl', back_populates='wahlkreiskandidaturen')
     wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)

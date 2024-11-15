@@ -55,6 +55,8 @@ try:
                     kandidatur = row["kandidiert im"]
                 except StopIteration:
                     break
+                if not pd.isna(row["Partei"]):
+                    partei = row["Partei"]
 
             gebietsart, kennzeichen, gebietsnummer, listenplatz = process_kandidatur(kandidatur)
             # Gebietsname anhand der Strukturdatei
@@ -75,7 +77,9 @@ try:
                 gebietsnummer,
                 gebietsname,
                 partei,
+                "",
                 listenplatz,
+                ""
             ])
 except StopIteration:
     print("completed")
@@ -84,9 +88,9 @@ except StopIteration:
 neue_daten_df = pd.DataFrame(neue_daten, columns=[
     "Wahlart", "Wahltag", "Nachname", "Vornamen", "Geburtsjahr",
     "Kennzeichen", "Gebietsart", "Gebietsnummer", "Gebietsname",
-    "Gruppenname", "Listenplatz"
+    "Gruppenname", "GruppennameLang" , "Listenplatz", "Beruf"
 ])
 
 # In CSV speichern
-neue_daten_df.to_csv("neue_daten.csv", sep=";", index=False)
-print("Umwandlung abgeschlossen. Neue Datei: neue_daten.csv")
+neue_daten_df.to_csv("kandidaturen_2017.csv", sep=";", index=False)
+print("Umwandlung abgeschlossen. Neue Datei: kandidaturen_2017.csv")

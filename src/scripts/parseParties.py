@@ -16,7 +16,7 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-df = pd.read_csv(Path('sourcefiles', 'btw21_parteien.csv'), delimiter=';')
+df = pd.read_csv(Path('sourcefiles', 'parteien_2017.csv'), delimiter=';', keep_default_na=False)
 
 # Filtern der Zeilen, bei denen 'Stimme' == 1
 # Filter for rows where 'Gruppenart_XML' is either 'PARTEI' or 'EINZELBEWERBER'
@@ -27,20 +27,18 @@ db = Session()
 # Für jedes gefilterte Tupel ein neues Objekt erstellen und in die Datenbank einfügen
 
 for index, row in filtered_df.iterrows():
-    # Create a new Partei object
-    partei = Partei(
-        id=row['Gruppenschluessel'],  # Assuming 'Gruppenschluessel' is the id column
-        type=row['Gruppenart_XML'],  # Setting the type based on the condition above
-        name=row['Gruppenname_lang'],  # Adjust according to actual column name for 'name'
-        shortName=row['Gruppenname_kurz'],  # Adjust according to actual column name for 'shortName'
-    )
-
-    # Print for debugging (optional)
-    print(partei)
-
-    # Add to session
-    db.add(partei)
-
+    if not row['Gruppenname_kurz'].startswith('EB: '):
+        partei_query = db.query(Partei).filter_by(
+            shortName=row['Gruppenname_kurz'],
+        ).all()
+        if(len(partei_query) == 0):
+            partei = Partei(
+                #id=row['Gruppenschluessel'],  haben wir 2017 eh nicht...
+                type=row['Gruppenart_XML'],  # Setting the type based on the condition above
+                name=row['Gruppenname_lang'],  # Adjust according to actual column name for 'name'
+                shortName=row['Gruppenname_kurz'],  # Adjust according to actual column name for 'shortName'
+            )
+            db.add(partei)
 db.commit()
 db.close()
 

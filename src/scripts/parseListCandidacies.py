@@ -18,7 +18,7 @@ Base = declarative_base()
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-df = pd.read_csv(Path('sourcefiles', 'kandidaturen_2021.csv'), delimiter=';')
+df = pd.read_csv(Path('sourcefiles', 'kandidaturen_2017.csv'), delimiter=';', keep_default_na=False)
 
 # Filtern der Zeilen, bei denen 'Stimme' == 1
 # Filter for rows where 'Gruppenart_XML' is either 'PARTEI' or 'EINZELBEWERBER'
@@ -43,6 +43,7 @@ for index, row in filtered_df.iterrows():
     row['Gruppenname'] = 'HEIMAT (2021: NPD)' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
     row['Gruppenname'] = 'Wir Bürger (2021: LKR)' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
     row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
+
     partei = db.query(Partei).filter_by(
         shortName = row['Gruppenname'],
     ).one()

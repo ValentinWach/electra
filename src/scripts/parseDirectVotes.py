@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from pathlib import Path
 import os
-from src.database.models import Wahl, Wahlkreis, Partei, Wahlkreiskandidatur
+from src.database.models import Wahl, Wahlkreis, Partei, Wahlkreiskandidatur, Kandidat
 
 # Database configuration
 DATABASE_URL = "postgresql://admin:admin@localhost:5432/postgres"
@@ -12,7 +12,7 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 # Load and filter data
-df = pd.read_csv(Path('sourcefiles', 'kerg2.csv'), delimiter=';')
+df = pd.read_csv(Path('sourcefiles', 'kerg2_2017.csv'), delimiter=';')
 filtered_df = df[(df['Stimme'] == 1) & ((df['Gruppenart'] == 'Partei') | (df['Gruppenart'] == 'Einzelbewerber/Wählergruppe')) & (df['Gebietsart'] == 'Wahlkreis')]
 
 # Session starten
@@ -43,31 +43,46 @@ for index, row in filtered_df.iterrows():
     wahl_id = session.query(
         Wahl.id
     ).filter_by(date=wahl_date).scalar()
+    print(row['Gebietsname'])
     wahlkreis_id = session.query(
         Wahlkreis.id
     ).filter_by(name=row['Gebietsname']).scalar()
 
-    parteiIds = session.query(Wahlkreiskandidatur.partei_id).filter_by(
-        wahlkreis_id=wahlkreis_id,
-        wahl_id=wahl_id
-    ).all()
-    partei_id = session.query(
-        Partei.id
-    ).filter(
-        Partei.id.in_(
-            session.query(Wahlkreiskandidatur.partei_id).filter_by(
-                wahlkreis_id=wahlkreis_id,
-                wahl_id=wahl_id
+    row['Gruppenname'] = 'HEIMAT (2021: NPD)' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
+    row['Gruppenname'] = 'Wir Bürger (2021: LKR)' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
+    row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
+
+    # Einzelbewerber?
+    if row['Gruppenname'].startswith('EB: '):
+        kandidat_id = session.query(
+            Kandidat.id
+        ).filter(
+            Kandidat.id.in_(
+                session.query(Wahlkreiskandidatur.kandidat_id).filter_by(
+                    wahlkreis_id=wahlkreis_id,
+                    wahl_id=wahl_id,
+                    partei_id=None
+                )
             )
-        )
-    ).filter_by(shortName=row['Gruppenname']).scalar()
-    wahlkreiskandidatur_id = session.query(
-        Wahlkreiskandidatur.id
-    ).filter_by(
-        wahlkreis_id=wahlkreis_id,
-        wahl_id=wahl_id,
-        partei_id=partei_id
-    ).scalar()
+        ).filter_by(name=row['Gruppenname'].split(":")[1].strip())
+        wahlkreiskandidatur_id = session.query(
+            Wahlkreiskandidatur.id
+        ).filter_by(
+            wahlkreis_id=wahlkreis_id,
+            wahl_id=wahl_id,
+            kandidat_id=kandidat_id
+        ).scalar()
+    else:
+        partei_id = session.query(
+            Partei.id
+        ).filter_by(shortName=row['Gruppenname']).scalar()
+        wahlkreiskandidatur_id = session.query(
+            Wahlkreiskandidatur.id
+        ).filter_by(
+            wahlkreis_id=wahlkreis_id,
+            wahl_id=wahl_id,
+            partei_id=partei_id
+        ).scalar()
 
     if not wahl_id:
         raise ValueError("Foreign key 'wahl_id' not found")
