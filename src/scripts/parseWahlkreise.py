@@ -9,7 +9,7 @@ from pathlib import Path
 
 from src.database.models import Partei, Kandidat, Wahlkreis, Bundesland
 
-DATABASE_URL = "postgresql://admin:admin@localhost:5432/mydatabase"
+DATABASE_URL = "postgresql://admin:admin@localhost:5432/postgres"
 
 engine = create_engine(DATABASE_URL)
 

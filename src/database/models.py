@@ -11,7 +11,6 @@ class Wahl(Base):
     date = Column(Date, nullable=False, unique=True)
 
     # Relations
-    erststimmen = relationship('Erststimme', back_populates='wahl')
     zweitstimmen = relationship('Zweitstimme', back_populates='wahl')
     wahlkreiskandidaturen = relationship('Wahlkreiskandidatur', back_populates='wahl')
     listenkandidaturen = relationship('Listenkandidatur', back_populates='wahl')
@@ -26,7 +25,6 @@ class Wahlkreis(Base):
     name = Column(String, nullable=False)
     einwohnerzahl = Column(Integer, nullable=False)
     # Relations
-    erststimmen = relationship('Erststimme', back_populates='wahlkreis')
     zweitstimmen = relationship('Zweitstimme', back_populates='wahlkreis')
     bundesland = relationship('Bundesland', back_populates='wahlkreise')
     bundesland_id = Column(Integer, ForeignKey('bundeslaender.id'), nullable=False)
@@ -54,15 +52,11 @@ class Erststimme(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     # Relations
-    wahlkreis_id = Column(Integer, ForeignKey('wahlkreise.id'), nullable=False)
-    wahlkreis = relationship('Wahlkreis', back_populates='erststimmen')
     wahlkreiskandidatur = relationship('Wahlkreiskandidatur', back_populates='erststimmen')
     wahlkreiskandidatur_id = Column(Integer, ForeignKey('wahlkreiskandidaturen.id'), nullable=False)
-    wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)
-    wahl = relationship('Wahl', back_populates='erststimmen')
 
     def __repr__(self):
-        return f"<Erststimme(id={self.id}, wahlkreis_id={self.wahlkreis_id})>"
+        return f"<Erststimme(id={self.id}), wahlkreiskandidatur_id={self.wahlkreiskandidatur_id}>"
 
 class Zweitstimme(Base):
     __tablename__ = 'zweitstimmen'

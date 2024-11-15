@@ -7,7 +7,7 @@ import os
 from src.database.models import Wahl, Wahlkreis, Partei, Wahlkreiskandidatur
 
 # Database configuration
-DATABASE_URL = "postgresql://admin:admin@localhost:5432/mydatabase"
+DATABASE_URL = "postgresql://admin:admin@localhost:5432/postgres"
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
@@ -21,34 +21,49 @@ session = Session()
 # Prepare data for bulk insert
 foreign_keys = []
 
-counter = 0
+rowCounter = 0
+voteCounter = 0
 for index, row in filtered_df.iterrows():
-    if(counter % 1000 == 0):
-        print(counter)
-    counter += 1
-    count = int(row['Anzahl']) if not pd.isna(row['Anzahl']) else 0
+    if(rowCounter % 1000 == 0):
+        print(rowCounter)
+    rowCounter += 1
+
+    count = 0
+    if(pd.isna(row['Anzahl'])):
+        continue
+    else:
+        count = int(row['Anzahl'])
 
     # Convert and cache date
     date_str = row['Wahltag']
     wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
 
     # Use the session to fetch foreign key IDs
-    wahl = session.query(
+    wahl_id = session.query(
         Wahl.id
     ).filter_by(date=wahl_date).scalar()
-    wahlkreis = session.query(
+    wahlkreis_id = session.query(
         Wahlkreis.id
     ).filter_by(name=row['Gebietsname']).scalar()
-    partei = session.query(
+    partei_id = session.query(
         Partei.id
     ).filter_by(shortName=row['Gruppenname']).scalar()
 
+    if not wahl_id:
+        raise ValueError("Foreign key 'wahl_id' not found")
+    if not wahlkreis_id:
+        raise ValueError("Foreign key 'wahlkreis_id' not found")
+    if not partei_id:
+        raise ValueError("Foreign key 'partei_id' not found")
+
     # If all foreign keys are valid, append `count` rows
-    if wahl and wahlkreis and partei:
+    if wahl_id and wahlkreis_id and partei_id:
         for _ in range(count):
-            foreign_keys.append((wahlkreis, partei, wahl))
+            foreign_keys.append((wahlkreis_id, partei_id, wahl_id))
+            voteCounter += 1
 
 # Close session after querying
+print(voteCounter)
 session.close()
 
 bulk_df = pd.DataFrame(foreign_keys, columns=['wahlkreis_id', 'partei_id', 'wahl_id'])
