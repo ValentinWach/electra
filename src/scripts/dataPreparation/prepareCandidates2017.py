@@ -10,7 +10,8 @@ wahlkreise = pd.read_csv("strukturdaten_2021.csv", sep=";", usecols=["Land", "Wa
 def split_name(name_vorname):
     if "," in name_vorname:
         parts = name_vorname.split(", ")
-        return parts[1], parts[0]
+        nachname = parts[0].replace("Dr. ", "").replace("Prof. ", "").replace("Prof. Dr. ", "").strip()
+        return parts[1], nachname
     raise ValueError(f"Invalid name format: {name_vorname}")
 
 
