@@ -12,7 +12,7 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 # Load and filter data
-df = pd.read_csv(Path('sourcefiles', 'kerg2.csv'), delimiter=';')
+df = pd.read_csv(Path('sourcefiles', 'kerg2_2017.csv'), delimiter=';')
 filtered_df = df[(df['Stimme'] == 2) & (df['Gruppenart'] == 'Partei') & (df['Gebietsart'] == 'Wahlkreis')]
 
 # Session starten
@@ -42,9 +42,18 @@ for index, row in filtered_df.iterrows():
     wahl_id = session.query(
         Wahl.id
     ).filter_by(date=wahl_date).scalar()
+
+    row['Gebietsname'] = 'Höxter – Gütersloh III – Lippe II' if row['Gebietsname'] == 'Höxter – Lippe II' else row['Gebietsname']
+    row['Gebietsname'] = 'Paderborn' if row['Gebietsname'] == 'Paderborn – Gütersloh III' else row['Gebietsname']
+
     wahlkreis_id = session.query(
         Wahlkreis.id
     ).filter_by(name=row['Gebietsname']).scalar()
+
+    row['Gruppenname'] = 'HEIMAT (2021: NPD)' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
+    row['Gruppenname'] = 'Wir Bürger (2021: LKR)' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
+    row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
+
     partei_id = session.query(
         Partei.id
     ).filter_by(shortName=row['Gruppenname']).scalar()

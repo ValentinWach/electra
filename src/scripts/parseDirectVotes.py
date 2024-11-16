@@ -43,7 +43,10 @@ for index, row in filtered_df.iterrows():
     wahl_id = session.query(
         Wahl.id
     ).filter_by(date=wahl_date).scalar()
-    print(row['Gebietsname'])
+
+    row['Gebietsname'] = 'Höxter – Gütersloh III – Lippe II' if row['Gebietsname'] == 'Höxter – Lippe II' else row['Gebietsname']
+    row['Gebietsname'] = 'Paderborn' if row['Gebietsname'] == 'Paderborn – Gütersloh III' else row['Gebietsname']
+
     wahlkreis_id = session.query(
         Wahlkreis.id
     ).filter_by(name=row['Gebietsname']).scalar()
@@ -64,7 +67,8 @@ for index, row in filtered_df.iterrows():
                     partei_id=None
                 )
             )
-        ).filter_by(name=row['Gruppenname'].split(":")[1].strip())
+        ).filter_by(name=row['Gruppenname'].split(":")[1].strip()).scalar()
+
         wahlkreiskandidatur_id = session.query(
             Wahlkreiskandidatur.id
         ).filter_by(
@@ -111,7 +115,6 @@ with engine.connect() as conn:
     with conn.begin():  # Begin a transaction
         raw_conn = conn.connection
         with raw_conn.cursor() as cursor:
-            cursor.execute("TRUNCATE TABLE erststimmen") # Empty Table
             with open(temp_csv, 'r') as f:
                 cursor.copy_expert("COPY erststimmen (wahlkreiskandidatur_id) FROM stdin WITH CSV", f)
     conn.commit()

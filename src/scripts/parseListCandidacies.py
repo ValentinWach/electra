@@ -65,7 +65,7 @@ for index, row in filtered_df.iterrows():
     )
 
     # Print for debugging (optional)
-    print(listenkandidatur)
+    #print(listenkandidatur)
 
     # Add to session
     db.add(listenkandidatur)
