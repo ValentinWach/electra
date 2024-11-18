@@ -85,7 +85,6 @@ with engine.connect() as conn:
     with conn.begin():  # Begin a transaction
         raw_conn = conn.connection
         with raw_conn.cursor() as cursor:
-            cursor.execute("TRUNCATE TABLE zweitstimmen") # Empty Table
             with open(temp_csv, 'r') as f:
                 cursor.copy_expert("COPY zweitstimmen (wahlkreis_id, partei_id, wahl_id) FROM stdin WITH CSV", f)
     conn.commit()
