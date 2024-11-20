@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION calculate_seats_per_party_per_bundesland_and_election
 RETURNS TABLE (
     wahl_id INT,
     bundesland_id INT,
-    parteien_id INT,
+    partei_id INT,
     sitze BIGINT
 ) AS $$ DECLARE
     rec RECORD;
@@ -16,18 +16,17 @@ BEGIN
 
         EXECUTE 'CREATE TEMP TABLE ' || quote_ident(temp_table_name) || ' AS
                  SELECT parteien_id, stimmen_sum
-                 FROM zweitstimmen_bundesland_partei_with_votes
+                 FROM zweitstimmen_bundesland_bundestags_parteien_with_votes
                  WHERE wahlen_id = ' || rec.wahlen_id || ' AND bundeslaender_id = ' || rec.bundeslaender_id;
 
         RETURN QUERY EXECUTE '
-            SELECT ' || rec.wahlen_id || ' AS wahl_id, ' || rec.bundeslaender_id || ' AS bundesland_id, sl.id AS parteien_id, sl.slots AS sitze
+            SELECT ' || rec.wahlen_id || ' AS wahl_id, ' || rec.bundeslaender_id || ' AS bundesland_id, sl.id AS partei_id, sl.slots AS sitze
             FROM sainte_lague(' || quote_literal('temp_table') || ', ' || quote_literal('parteien_id') || ', ' || quote_literal('stimmen_sum') || ', CAST((SELECT ov_sitzkontingente.slots FROM ov_sitzkontingente WHERE bundeslaender_id = ' || rec.bundeslaender_id || ') AS INT)) sl';
 
         EXECUTE 'DROP TABLE ' || quote_ident(temp_table_name);
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
-
 
 
 CREATE OR REPLACE FUNCTION sainte_lague(
@@ -54,8 +53,6 @@ BEGIN
     RETURN QUERY EXECUTE query;
 END;
 $$ LANGUAGE plpgsql;
-
-
 
 
 CREATE OR REPLACE FUNCTION sainte_lague_table(
