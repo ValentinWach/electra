@@ -34,3 +34,10 @@ CREATE OR REPLACE VIEW uv_mindestsitzanspruch_bundestag AS
 SELECT sk.wahl_id, sk.bundesland_id, sk.partei_id, sk.sitze, wahlkreissitze, GREATEST(0, (coalesce(wahlkreissitze, 0) - sk.sitze)) as drohender_ueberhang, GREATEST(TRUNC((coalesce(wahlkreissitze, 0)::NUMERIC + sk.sitze::NUMERIC)/2 + 0.5), wahlkreissitze) as mindestsitzanspruch
 FROM uv_sitzkontingente_parteien_bundestag sk left join wahlkreissitze_parteien wp on wp.wahl_id = sk.wahl_id and wp.bundesland_id = sk.bundesland_id and wp.partei_id = sk.partei_id;
 
+CREATE VIEW sitze_nach_gewinnern_ohne_partei AS
+SELECT (598 - (SELECT count(*)
+FROM wahlkreis_winners ww join wahlkreiskandidaturen wk on ww.wahl_id = wk.wahl_id and ww.kandidat_id = wk.kandidat_id
+WHERE wk.partei_id IS NULL)) AS kandidaten_sum;
+
+
+
