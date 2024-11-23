@@ -44,3 +44,8 @@ FROM zweitstimmen_partei zp
 WHERE parteien_id = 37
    or ((stimmen_sum * 1.00) / (total_stimmen)) > 0.05
    or parteien_id in (SELECT partei_id FROM three_wahlkreis_parties twp WHERE zp.wahlen_id = twp.wahl_id);
+
+--Depends on dynamic statement and can thus not be a materialized view
+CREATE TABLE uv_sitzkontingente_parteien_bundestag AS
+SELECT wahl_id, bundesland_id, partei_id, sitze
+FROM calculate_seats_per_party_per_bundesland_and_election();
