@@ -1,3 +1,70 @@
+CREATE OR REPLACE FUNCTION calculate_seats_per_party_per_election_nationwide()
+RETURNS TABLE (
+    wahl_id INT,
+    stimmen_sum NUMERIC,
+    partei_id INT,
+    mindestsitzanspruch NUMERIC,
+    verbleibender_ueberhang NUMERIC,
+    sitze_nach_erhoehung NUMERIC,
+    sum_sitze NUMERIC
+) AS $$
+DECLARE
+    counter INT := 598;
+    condition_met BOOLEAN;
+BEGIN
+    EXECUTE 'CREATE TEMP TABLE temp_table_erhoeht AS
+             SELECT wahl_id, stimmen_sum, partei_id, mindestsitzanspruch,
+                    drohender_ueberhang AS verbleibender_ueberhang, sitze AS sitze_nach_erhoehung
+             FROM ov_sitzkontingente_basis_erhoehung WHERE wahl_id = 1';
+
+    EXECUTE 'SELECT EXISTS (
+                SELECT 1
+                FROM temp_table_erhoeht
+                WHERE sitze_nach_erhoehung + verbleibender_ueberhang < mindestsitzanspruch
+                   OR verbleibender_ueberhang > 3
+             )' INTO condition_met;
+
+
+    WHILE condition_met LOOP
+        EXECUTE 'CREATE TEMP TABLE temp_table_erhoeht_helper AS
+                 SELECT 1 AS wahlen_id, basis.stimmen_sum , sl.id AS partei_id, basis.mindestsitzanspruch,
+                        GREATEST(0, (COALESCE(wahlkreissitze, 0) - sl.slots)) AS verbleibender_ueberhang,
+                        sl.slots AS sitze_nach_erhoehung
+                 FROM wahlkreissitze_parteien_bundesweit wp
+                 JOIN sainte_lague(' || quote_literal('temp_table_erhoeht') || ', ' ||quote_literal('partei_id') || ', ' || quote_literal('stimmen_sum') ||
+                                   ', ' || counter || ') sl
+                 ON wp.partei_id = sl.id
+                JOIN ov_sitzkontingente_basis_erhoehung basis ON basis.partei_id = sl.id and basis.wahl_id = wp.wahl_id join parteien p on wp.partei_id = p.id
+                 WHERE wp.wahl_id = 1 and basis.wahl_id = 1';
+
+        counter := counter + 1;
+
+        EXECUTE 'DROP TABLE temp_table_erhoeht';
+        EXECUTE 'CREATE TEMP TABLE temp_table_erhoeht AS TABLE temp_table_erhoeht_helper';
+        EXECUTE 'DROP TABLE temp_table_erhoeht_helper';
+
+        EXECUTE 'SELECT EXISTS (
+                    SELECT 1
+                    FROM temp_table_erhoeht
+                    WHERE sitze_nach_erhoehung + verbleibender_ueberhang < mindestsitzanspruch
+                       OR verbleibender_ueberhang >= 4
+                 )' INTO condition_met;
+    END LOOP;
+
+    -- Return the final result
+    RETURN QUERY EXECUTE 'WITH sum_sitze_cte AS (SELECT (sum(sitze_nach_erhoehung) + sum(verbleibender_ueberhang)) as sum_sitze FROM temp_table_erhoeht)
+    SELECT wahlen_id, stimmen_sum, partei_id, mindestsitzanspruch,
+    verbleibender_ueberhang, sitze_nach_erhoehung + verbleibender_ueberhang, (SELECT max(sum_sitze) FROM sum_sitze_cte)
+    FROM temp_table_erhoeht';
+
+    -- Clean up the temporary table
+    EXECUTE 'DROP TABLE temp_table_erhoeht';
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT wahl_id, bundesland_id, partei_id, sitze
+FROM calculate_seats_per_party_per_bundesland_and_election();
+
 CREATE OR REPLACE FUNCTION calculate_seats_per_party_per_bundesland_and_election()
 RETURNS TABLE (
     wahl_id INT,
