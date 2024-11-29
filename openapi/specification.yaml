@@ -36,7 +36,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/wahlid'
       tags:
-        - Results
         - Global
       responses:
         '200':
@@ -54,7 +53,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/wahlid'
       tags:
-        - Results
         - Global
       responses:
         '200':
@@ -75,7 +73,6 @@ paths:
         - $ref: '#/components/parameters/wahlid'
         - $ref: '#/components/parameters/wahlkreisid'
       tags:
-        - Results
         - Global
       responses:
         '200':
@@ -96,7 +93,6 @@ paths:
         - $ref: '#/components/parameters/wahlkreisid'
         - $ref: '#/components/parameters/generatefromaggregate'
       tags:
-        - Results
         - Wahlkreis
       responses:
         '200':
@@ -117,7 +113,6 @@ paths:
         - $ref: '#/components/parameters/wahlid'
         - $ref: '#/components/parameters/wahlkreisid'
       tags:
-        - Results
         - Wahlkreis
       responses:
         '200':
@@ -137,9 +132,7 @@ paths:
         - $ref: '#/components/parameters/wahlkreisid'
         - $ref: '#/components/parameters/generatefromaggregate'
       tags:
-        - Results
         - Wahlkreis
-        - Special
       responses:
         '200':
           description: Returning the overview of the election in the wahlkreis
@@ -161,9 +154,7 @@ paths:
       parameters:
           - $ref: '#/components/parameters/wahlid'
       tags:
-        - Results
         - Global
-        - Special
       responses:
         '200':
           description: Returning the closest winners of the election

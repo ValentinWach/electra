@@ -1,7 +1,6 @@
+.openapi-generator-ignore
 apis/GeneralApi.ts
 apis/GlobalApi.ts
-apis/ResultsApi.ts
-apis/SpecialApi.ts
 apis/WahlkreisApi.ts
 apis/index.ts
 index.ts
