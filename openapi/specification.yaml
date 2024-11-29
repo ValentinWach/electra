@@ -1,0 +1,341 @@
+openapi: 3.1.0
+info:
+  title: Donator-Mainframe communication
+  version: 0.1.0
+servers:
+  - url: "{protocol}://{url}/api"
+    variables:
+      url:
+        description: The URL of the server. Either localhost or deployed.
+        default: 'localhost:9000/api'
+      protocol:
+        enum:
+          - http
+          - https
+        default: https
+
+paths:
+  /wahlen:
+    get:
+      tags:
+        - General
+      responses:
+        '200':
+          description: Returning all elections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Wahl'
+  /results/{wahlid}/sitzverteilung:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+      tags:
+        - Results
+        - Global
+      responses:
+        '200':
+          description: Returning the seat distribution of the election
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeatDistribution'
+
+  #----- Abgeordnete per region ----- TODO: Bundeslaender & Wahlkreise
+  /results/{wahlid}/abgeordnete:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+      tags:
+        - Results
+        - Global
+      responses:
+        '200':
+          description: Returning the deputies of the election
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Abgeordneter'
+
+  #----- Stimmanteil per region ----- TODO: Bundeslaender
+  /results/{wahlid}/stimmanteil:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+        - $ref: '#/components/parameters/wahlkreisid'
+      tags:
+        - Results
+        - Global
+      responses:
+        '200':
+          description: Returning the global results of the election
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stimmanteil'
+
+  /results/{wahlid}/stimmanteil/wahlkreis/{wahlkreisid}:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+        - $ref: '#/components/parameters/wahlkreisid'
+        - $ref: '#/components/parameters/generatefromaggregate'
+      tags:
+        - Results
+        - Wahlkreis
+      responses:
+        '200':
+          description: Returning the results of the election in the wahlkreis
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stimmanteil'
+
+  #-----winningparties per region----- TODO: Bundeslaender
+  /results/{wahlid}/winningparties/wahlkreis/{wahlkreisid}:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+        - $ref: '#/components/parameters/wahlkreisid'
+      tags:
+        - Results
+        - Wahlkreis
+      responses:
+        '200':
+          description: Returning the winning parties of the election per wahlkreis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WinningParties'
+
+  #-----other-----
+  /results/{wahlid}/overview/wahlkreis/{wahlkreisid}:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+        - $ref: '#/components/parameters/wahlkreisid'
+        - $ref: '#/components/parameters/generatefromaggregate'
+      tags:
+        - Results
+        - Wahlkreis
+        - Special
+      responses:
+        '200':
+          description: Returning the overview of the election in the wahlkreis
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  wahlbeteiligung:
+                    type: number
+                    title: Wahlbeteiligung
+                  direktkandidat:
+                    $ref: '#/components/schemas/Abgeordneter'
+
+  /results/{wahlid}/closestwinners:
+    get:
+      parameters:
+          - $ref: '#/components/parameters/wahlid'
+      tags:
+        - Results
+        - Global
+        - Special
+      responses:
+        '200':
+          description: Returning the closest winners of the election
+          content:
+            application/json:
+                schema:
+                  type: array
+                  items:
+                      $ref: '#/components/schemas/ClosestWinners'
+
+
+components:
+  parameters:
+    wahlid:
+      name: wahlid
+      in: path
+      required: true
+      schema:
+        type: integer
+    wahlkreisid:
+      name: wahlkreisid
+      in: path
+      required: true
+      schema:
+        type: integer
+    generatefromaggregate:
+      name: generatefromaggregate
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: true
+
+  schemas:
+    Wahl:
+      type: object
+      required:
+        - id
+        - name
+        - date
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+        date:
+          type: string
+          format: date
+          title: Date
+
+    Partei:
+      type: object
+      required:
+        - id
+        - shortname
+      properties:
+        id:
+          type: integer
+          title: Id
+        shortname:
+          type: string
+          title: shortname
+        name:
+          type: string
+          title: name
+
+
+    SeatDistribution:
+      type: object
+      required:
+        - distribution
+        - numberofseats
+      properties:
+        distribution:
+          type: array
+          items:
+            type: object
+            required:
+              - seats
+              - party
+            properties:
+              party:
+                $ref: '#/components/schemas/Partei'
+              seats:
+                type: integer
+                title: Seats
+        numberofseats:
+          type: integer
+          title: NumberOfSeats
+
+    Abgeordneter:
+      type: object
+      required:
+        - id
+        - name
+        - firstname
+        - yearOfBirth
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+        firstname:
+          type: string
+          title: Firstname
+        profession:
+          type: string
+          title: Profession
+        yearOfBirth:
+          type: integer
+          title: YearOfBirth
+        party:
+          $ref: '#/components/schemas/Partei'
+
+    Stimmanteil:
+      type: object
+      required:
+        - party
+        - share
+      properties:
+        party:
+          $ref: '#/components/schemas/Partei'
+        share:
+          type: number
+          title: Share
+
+    WinningParties:
+      type: object
+      required:
+        - erststimme
+        - zweitstimme
+      properties:
+        erststimme:
+          type: array
+          items:
+            type: object
+            required:
+              - party
+              - region_id
+            properties:
+              party_name:
+                type: string
+                title: Party_Name
+              party:
+                $ref: '#/components/schemas/Partei'
+              region_id:
+                type: integer
+                title: Region_id
+              region_name:
+                type: string
+                title: Region_name
+        zweitstimme:
+          type: array
+          items:
+            required:
+              - party
+              - region_id
+            properties:
+              party:
+                $ref: '#/components/schemas/Partei'
+              region_id:
+                type: integer
+                title: Region_id
+              region_name:
+                type: integer
+                title: Region_name
+
+    ClosestWinners:
+      type: object
+      required:
+        - closest_type
+        - closestWinners
+        - party
+      properties:
+        party:
+          $ref: '#/components/schemas/Partei'
+        closest_type:
+          type: string
+          enum:
+            - Winner
+            - Loser
+          title: Closest_Type
+        closestWinners:
+            type: array
+            items:
+              - $ref: '#/components/schemas/Abgeordneter'
