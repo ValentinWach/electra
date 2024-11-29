@@ -17,6 +17,7 @@ servers:
 paths:
   /wahlen:
     get:
+      operationId: getWahlen
       tags:
         - General
       responses:
@@ -26,10 +27,12 @@ paths:
             application/json:
               schema:
                 type: array
+                title: wahlen
                 items:
                   $ref: '#/components/schemas/Wahl'
   /results/{wahlid}/sitzverteilung:
     get:
+      operationId: getSitzverteilung
       parameters:
         - $ref: '#/components/parameters/wahlid'
       tags:
@@ -41,11 +44,13 @@ paths:
           content:
             application/json:
               schema:
+                title: sitzverteilung
                 $ref: '#/components/schemas/SeatDistribution'
 
   #----- Abgeordnete per region ----- TODO: Bundeslaender & Wahlkreise
   /results/{wahlid}/abgeordnete:
     get:
+      operationId: getAbgeordnete
       parameters:
         - $ref: '#/components/parameters/wahlid'
       tags:
@@ -58,12 +63,14 @@ paths:
             application/json:
               schema:
                 type: array
+                title: abgeordnete
                 items:
                   $ref: '#/components/schemas/Abgeordneter'
 
   #----- Stimmanteil per region ----- TODO: Bundeslaender
   /results/{wahlid}/stimmanteil:
     get:
+      operationId: getStimmanteil
       parameters:
         - $ref: '#/components/parameters/wahlid'
         - $ref: '#/components/parameters/wahlkreisid'
@@ -77,11 +84,13 @@ paths:
             application/json:
               schema:
                 type: array
+                title: stimmanteil
                 items:
                   $ref: '#/components/schemas/Stimmanteil'
 
   /results/{wahlid}/stimmanteil/wahlkreis/{wahlkreisid}:
     get:
+      operationId: getStimmanteilWahlkreis
       parameters:
         - $ref: '#/components/parameters/wahlid'
         - $ref: '#/components/parameters/wahlkreisid'
@@ -96,12 +105,14 @@ paths:
             application/json:
               schema:
                 type: array
+                title: stimmanteil
                 items:
                   $ref: '#/components/schemas/Stimmanteil'
 
   #-----winningparties per region----- TODO: Bundeslaender
   /results/{wahlid}/winningparties/wahlkreis/{wahlkreisid}:
     get:
+      operationId: getWinningPartiesWahlkreis
       parameters:
         - $ref: '#/components/parameters/wahlid'
         - $ref: '#/components/parameters/wahlkreisid'
@@ -114,11 +125,13 @@ paths:
           content:
             application/json:
               schema:
+                title: winningparties
                 $ref: '#/components/schemas/WinningParties'
 
   #-----other-----
   /results/{wahlid}/overview/wahlkreis/{wahlkreisid}:
     get:
+      operationId: getOverviewWahlkreis
       parameters:
         - $ref: '#/components/parameters/wahlid'
         - $ref: '#/components/parameters/wahlkreisid'
@@ -134,6 +147,7 @@ paths:
             application/json:
               schema:
                 type: object
+                title: overview-wahlkreis
                 properties:
                   wahlbeteiligung:
                     type: number
@@ -143,6 +157,7 @@ paths:
 
   /results/{wahlid}/closestwinners:
     get:
+      operationId: getClosestWinners
       parameters:
           - $ref: '#/components/parameters/wahlid'
       tags:
@@ -155,6 +170,7 @@ paths:
           content:
             application/json:
                 schema:
+                  title: closestwinners
                   type: array
                   items:
                       $ref: '#/components/schemas/ClosestWinners'
@@ -338,4 +354,4 @@ components:
         closestWinners:
             type: array
             items:
-              - $ref: '#/components/schemas/Abgeordneter'
+              $ref: '#/components/schemas/Abgeordneter'
