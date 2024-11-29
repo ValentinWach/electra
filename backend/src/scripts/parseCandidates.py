@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, declarative_base
 from pathlib import Path
 
-from src.database.models import Partei, Kandidat
+from backend.src.database.models import Partei, Kandidat
 
 DATABASE_URL = "postgresql://admin:admin@localhost:5432/postgres"
 

@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from pathlib import Path
 import os
-from src.database.models import Wahl, Wahlkreis, Partei, Wahlkreiskandidatur
+from backend.src.database.models import Wahl, Wahlkreis, Partei, Wahlkreiskandidatur
 
 # Database configuration
 DATABASE_URL = "postgresql://admin:admin@localhost:5432/postgres"

@@ -8,7 +8,7 @@ from sqlalchemy.orm import relationship, declarative_base
 from datetime import datetime
 from pathlib import Path
 
-from src.database.models import Partei, Listenkandidatur, Kandidat, Bundesland, Wahl
+from backend.src.database.models import Partei, Listenkandidatur, Kandidat, Bundesland, Wahl
 
 DATABASE_URL = "postgresql://admin:admin@localhost:5432/postgres"
 
