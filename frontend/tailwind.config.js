@@ -2,7 +2,16 @@
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      width: {
+        'chart' : '800px',
+        'chart-lg' : '1000px',
+        'pie' : '500px'
+      },
+      height: {
+        'chart' : '600px'
+      }
+    },
   },
   plugins: [],
 }

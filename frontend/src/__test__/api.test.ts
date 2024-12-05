@@ -1,7 +1,7 @@
-import {GeneralApi} from "./api";
-import { GeneralApiMocks } from "./apiMocks/GeneralApiMock";
+import {GeneralApi} from "../api";
+import { GeneralApiMocks } from "../apiMocks/GeneralApiMock";
 
-jest.mock('./api/apis/GeneralApi', () => {
+jest.mock('../api/apis/GeneralApi.ts', () => {
     return {
         GeneralApi: jest.fn().mockImplementation(() => new GeneralApiMocks())
     };

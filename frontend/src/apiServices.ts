@@ -13,10 +13,10 @@ export async function fetchWahlen(): Promise<Wahl[]>  {
   }
 }
 
-export async function fetchSitzveteilung(): Promise<SeatDistribution> {
+export async function fetchSitzveteilung(id: number): Promise<SeatDistribution> {
   try {
     const generalApi = new GeneralApiMocks();
-    const sitzverteilung = await generalApi.getSitzverteilung();
+    const sitzverteilung = await generalApi.getSitzverteilung(id);
     console.log('Fetched Sitzverteilung:', sitzverteilung);
     return sitzverteilung;
   }
