@@ -62,7 +62,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile}: {
     }
 
     let mainData: ChartData = {
-        labels: stimmanteil?.map((partei) => `${partei.party.shortname}: ${partei.share}`),
+        labels: stimmanteil?.map((partei) => `${partei.party.shortname}: ${partei.share}%`),
         datasets: [{
             data: stimmanteil?.map((partei) => partei.share),
             backgroundColor: stimmanteil?.map((partei) => getPartyColor(partei.party.shortname)),
@@ -71,7 +71,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile}: {
     };
 
     let comparedData: ChartData = {
-        labels: comparedStimmanteil?.map((partei) => `${partei.party.shortname}: ${partei.share}`),
+        labels: comparedStimmanteil?.map((partei) => `${partei.party.shortname}: ${partei.share > 0 ? '+' : ''}${partei.share}%`),
         datasets: [{
             data: comparedStimmanteil?.map((partei) => partei.share),
             backgroundColor: comparedStimmanteil?.map((partei) => getPartyColor(partei.party.shortname)),
