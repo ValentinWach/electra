@@ -1,19 +1,25 @@
 import {useEffect, useState} from 'react';
-import {Stimmanteil} from "../api";
+import {Stimmanteil, Wahl} from "../api";
 import Charttile from "./chart-tile.tsx";
 import {ChartData} from "chart.js";
 import {useElection} from "../context/ElectionContext.tsx";
 import {getPartyColor} from "../utils/utils.tsx";
 import Barchart from "./Barchart.tsx";
+import type {DropdownType} from "../models/Chart-Data.ts";
 
-export default function Zweitstimmenanteil({fetchStimmanteile}: { fetchStimmanteile: () => Promise<Stimmanteil[]> }) {
-    const {selectedElection} = useElection();
+export default function Zweitstimmenanteil({fetchStimmanteile}: {
+    fetchStimmanteile: (wahlId: number) => Promise<Stimmanteil[]>
+}) {
+    const {elections, selectedElection} = useElection();
     const [stimmanteil, setStimmanteil] = useState<Stimmanteil[]>();
+    const [comparedStimmanteil, setComparedStimmanteil] = useState<Stimmanteil[]>()
+    const [comparedElection, setComparedElection] = useState<Wahl | null>()
 
     useEffect(() => {
         const getStimmanteile = async () => {
             try {
-                const data = await fetchStimmanteile();
+                const data = await fetchStimmanteile(selectedElection?.id ?? 0);
+                setComparedElection(null);
                 setStimmanteil(data);
             } catch (error) {
                 console.error('Error fetching Sitzverteilung:', error);
@@ -22,8 +28,40 @@ export default function Zweitstimmenanteil({fetchStimmanteile}: { fetchStimmante
         getStimmanteile();
     }, [selectedElection]); //Use for every chart; always depends on the selected election
 
-    console.log(stimmanteil);
-    let data: ChartData = {
+    const compareWahlDD: DropdownType = {
+        label: "Ergebnis Vergleichen",
+        items: [{label: "Nicht vergleichen", id: -1},
+            ...elections.filter(e => e.id != selectedElection?.id).map(election => ({
+            label: election.date.toLocaleDateString('de-DE', {month: 'long', year: 'numeric'}),
+            id: election.id
+        }))]
+    };
+
+    async function compareStimmanteile(wahlId: number) {
+        if (wahlId < 1) {
+            setComparedElection(null);
+        } else {
+            try {
+                const comparedData = await fetchStimmanteile(wahlId);
+                const comparedMap = new Map(comparedData.map(item => [item.party.id, item.share]));
+                const stimmanteilWithDifference = stimmanteil?.map(item => {
+                    const comparedShare = comparedMap.get(item.party.id) || 0;
+                    const difference = Math.round((comparedShare - item.share)*10)/10;
+                    return {
+                        ...item,
+                        share: difference
+                    };
+                }) || [];
+                setComparedStimmanteil(stimmanteilWithDifference);
+                setComparedElection(elections.find(e => e.id === wahlId) ?? elections[0]);
+
+            } catch (error) {
+                console.error('Error fetching Sitzverteilung:', error);
+            }
+        }
+    }
+
+    let mainData: ChartData = {
         labels: stimmanteil?.map((partei) => `${partei.party.shortname}: ${partei.share}`),
         datasets: [{
             data: stimmanteil?.map((partei) => partei.share),
@@ -32,10 +70,22 @@ export default function Zweitstimmenanteil({fetchStimmanteile}: { fetchStimmante
         },],
     };
 
+    let comparedData: ChartData = {
+        labels: comparedStimmanteil?.map((partei) => `${partei.party.shortname}: ${partei.share}`),
+        datasets: [{
+            data: comparedStimmanteil?.map((partei) => partei.share),
+            backgroundColor: comparedStimmanteil?.map((partei) => getPartyColor(partei.party.shortname)),
+            borderWidth: 0,
+        },],
+    };
+
     return (
         <div className={"flex-grow"}>
-            <Charttile showfilter={true} header={"Zweitstimmenanteile"}>
-                <Barchart data={data}></Barchart>
+            <Charttile  dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={"Zweitstimmenanteile"}>
+                {comparedElection ?
+                    <Barchart data={comparedData}></Barchart>
+                    :
+                    <Barchart data={mainData}></Barchart>}
             </Charttile>
         </div>
     )

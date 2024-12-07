@@ -28,8 +28,8 @@ export default function Wahlkreise() {
         setSelectedWahlkreis(wahlkreise?.find(wahlkreis => wahlkreis.id === id) ?? null);
     }
 
-    async function wrapFetchStimmanteileWahlkreis(): Promise<Stimmanteil[]> {
-        return fetchStimmanteileWahlkreis(selectedElection?.id ?? 0, selectedWahlkreis?.id ?? 0);
+    async function wrapFetchStimmanteileWahlkreis(wahlId: number): Promise<Stimmanteil[]> {
+        return fetchStimmanteileWahlkreis(wahlId, selectedWahlkreis?.id ?? 0);
     }
 
     return (

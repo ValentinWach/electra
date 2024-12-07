@@ -8,14 +8,10 @@ import {Stimmanteil} from "../api";
 export default function Stimmverteilungen() {
     const {selectedElection} = useElection();
 
-    async function WrapperFetchStimmanteile() : Promise<Stimmanteil[]> {
-        return fetchStimmanteile(selectedElection?.id ?? 0);
-    }
-
     return (
         <div className={"flex flex-col items-center"}>
             <Sitzverteilung/>
-            <Zweitstimmenanteil fetchStimmanteile={WrapperFetchStimmanteile} />
+            <Zweitstimmenanteil fetchStimmanteile={fetchStimmanteile} />
         </div>
     )
 }
