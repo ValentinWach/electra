@@ -37,40 +37,27 @@ export default function SitzverteilungC() {
         <div className={"flex-grow"}>
             <ChartTileC header={"Sitzverteilung"}>
                 <DoughnutChart data={data}></DoughnutChart>
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                <table className="table">
+                    <thead>
                     <tr>
-                        <th scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Kürzel
-                        </th>
-                        <th scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Partei
-                        </th>
-                        <th scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Sitze
-                        </th>
+                        <th scope="col">Kürzel</th>
+                        <th scope="col">Partei</th>
+                        <th scope="col">Sitze</th>
                     </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody>
                     {sitzverteilung?.distribution.map((partei) => (
                         <tr key={partei.party.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
-                                style={{color: getPartyColor(partei.party.shortname)}}>
+                            <td style={{color: getPartyColor(partei.party.shortname)}}>
                                 {partei.party.shortname}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {partei.party.name}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {partei.seats}
-                            </td>
+                            <td>{partei.party.name}</td>
+                            <td>{partei.seats}</td>
                         </tr>
                     ))}
                     </tbody>
                 </table>
+
             </ChartTileC>
         </div>
     )

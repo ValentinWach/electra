@@ -3,6 +3,7 @@ import type {WinningParties} from "../api";
 import {getPartyColor} from "../utils/utils.tsx";
 import {useElection} from "../context/ElectionContext.tsx";
 import {useEffect, useState} from "react";
+import './table.css';
 
 export default function WinningPartiesC({fetchWinningParties}: {
     fetchWinningParties: (wahlId: number) => Promise<WinningParties>
@@ -25,44 +26,40 @@ export default function WinningPartiesC({fetchWinningParties}: {
     return (
         <ChartTileC header={"Siegerparteien"}>
             {winningParties && (
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="table">
                     <thead className="bg-gray-50">
                     <tr>
-                        <th scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-
+                        <th scope="col">
                         </th>
-                        <th scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col">
                             Kürzel
                         </th>
-                        <th scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th scope="col">
                             Parteiname
                         </th>
                     </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody>
                     <tr key={winningParties.erststimmen.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-base font-medium text-gray-900">
+                        <td>
                             Erstimmen
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td>
                             {winningParties.erststimmen.shortname}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                        <td
                             style={{color: getPartyColor(winningParties.erststimmen.shortname)}}>
                             {winningParties.erststimmen.name}
                         </td>
                     </tr>
                     <tr key={winningParties.zweitstimmen.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-base font-medium text-gray-900">
+                        <td>
                             Zweitstimmen
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td>
                             {winningParties.zweitstimmen.shortname}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                        <td
                             style={{color: getPartyColor(winningParties.zweitstimmen.shortname)}}>
                             {winningParties.zweitstimmen.name}
                         </td>

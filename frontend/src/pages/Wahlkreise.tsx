@@ -42,7 +42,7 @@ export default function Wahlkreise() {
         <div className={"flex flex-col items-center"}>
             {
                 selectedWahlkreis ?
-                    <div className="w-full flex justify-start">
+                    <div className="w-chart-lg max-lg:w-char flex justify-start">
                         <button
                             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
                             onClick={() => setSelectedWahlkreis(null)}> zurück

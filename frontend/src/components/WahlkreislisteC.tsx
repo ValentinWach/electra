@@ -3,6 +3,7 @@ import {fetchWahlkreise} from "../apiServices.ts";
 import {Wahlkreis} from "../api";
 import {useElection} from "../context/ElectionContext.tsx";
 import ChartTileC from "./ChartTileC.tsx";
+import './table.css';
 
 
 export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisDetails: (id: number) => void }) {
@@ -22,44 +23,23 @@ export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisD
     }, [selectedElection]);
 
     return (
-        <ChartTileC showfilter={false} header={"Wahlkreise"}>
-            <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+        <ChartTileC header={"Wahlkreise"}>
+            <table className="table">
+                <thead>
                 <tr>
-                    <th scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Wahlkreisname
-                    </th>
-                    <th scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Bundesland
-                    </th>
-                    <th scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Abgeordneter
-                    </th>
-                    <th scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Stärkste Partei
-                    </th>
+                    <th scope="col">Wahlkreisname</th>
+                    <th scope="col">Bundesland</th>
+                    <th scope="col">Abgeordneter</th>
+                    <th scope="col">Stärkste Partei</th>
                 </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody>
                 {wahlkreise?.map((wahlkreis) => (
-                    <tr key={wahlkreis.id} className={"hover:bg-gray-50 hover:cursor-pointer"}
-                        onClick={() => showWahlkreisDetails(wahlkreis.id)}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {wahlkreis.name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            "Ein Bundesland"
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            "ein Abgeordneter"
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            "eine Partei"
-                        </td>
+                    <tr key={wahlkreis.id} className={"hover:cursor-pointer"} onClick={() => showWahlkreisDetails(wahlkreis.id)}>
+                        <td>{wahlkreis.name}</td>
+                        <td>Ein Bundesland</td>
+                        <td>ein Abgeordneter</td>
+                        <td>eine Partei</td>
                     </tr>
                 ))}
                 </tbody>
