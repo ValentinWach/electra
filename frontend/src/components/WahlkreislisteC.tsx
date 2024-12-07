@@ -2,10 +2,10 @@ import {useEffect, useState} from "react";
 import {fetchWahlkreise} from "../apiServices.ts";
 import {Wahlkreis} from "../api";
 import {useElection} from "../context/ElectionContext.tsx";
-import Charttile from "./chart-tile.tsx";
+import ChartTileC from "./ChartTileC.tsx";
 
 
-export default function Wahlkreisliste({showWahlkreisDetails}: { showWahlkreisDetails: (id: number) => void }) {
+export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisDetails: (id: number) => void }) {
 
     const {selectedElection} = useElection();
     const [wahlkreise, setWahlkreise] = useState<Wahlkreis[]>();
@@ -22,7 +22,7 @@ export default function Wahlkreisliste({showWahlkreisDetails}: { showWahlkreisDe
     }, [selectedElection]);
 
     return (
-        <Charttile showfilter={false} header={"Wahlkreise"}>
+        <ChartTileC showfilter={false} header={"Wahlkreise"}>
             <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                 <tr>
@@ -64,6 +64,6 @@ export default function Wahlkreisliste({showWahlkreisDetails}: { showWahlkreisDe
                 ))}
                 </tbody>
             </table>
-        </Charttile>
+        </ChartTileC>
     )
 }

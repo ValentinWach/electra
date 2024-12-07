@@ -1,4 +1,4 @@
-import Sidebar from './components/Sidebar.tsx';
+import Sidebar from './components/SidebarC.tsx';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import Uebersicht from "./pages/Uebersicht.tsx";
 import Wahlkreise from "./pages/Wahlkreise.tsx";

@@ -1,13 +1,13 @@
 import {useEffect, useState} from 'react';
 import {fetchSitzveteilung} from '../apiServices';
 import {SeatDistribution} from "../api";
-import Charttile from "./chart-tile.tsx";
-import DoughnutChart from "./Doughnut.tsx";
+import ChartTileC from "./ChartTileC.tsx";
+import DoughnutChart from "./DoughnutC.tsx";
 import {ChartData} from "chart.js";
 import {useElection} from "../context/ElectionContext.tsx";
 import {getPartyColor} from "../utils/utils.tsx";
 
-export default function Sitzverteilung() {
+export default function SitzverteilungC() {
     const {selectedElection} = useElection();
     const [sitzverteilung, setSitzverteilung] = useState<SeatDistribution>();
 
@@ -35,7 +35,7 @@ export default function Sitzverteilung() {
 
     return (
         <div className={"flex-grow"}>
-            <Charttile header={"Sitzverteilung"}>
+            <ChartTileC header={"Sitzverteilung"}>
                 <DoughnutChart data={data}></DoughnutChart>
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -71,7 +71,7 @@ export default function Sitzverteilung() {
                     ))}
                     </tbody>
                 </table>
-            </Charttile>
+            </ChartTileC>
         </div>
     )
 }

@@ -1,9 +1,11 @@
 import {useEffect, useState} from "react";
-import {fetchStimmanteileWahlkreis, fetchWahlkreise} from "../apiServices.ts";
+import {fetchStimmanteileWahlkreis, fetchWahlkreise, fetchWinningPartiesWahlkreis} from "../apiServices.ts";
 import {Stimmanteil, Wahlkreis} from "../api";
 import {useElection} from "../context/ElectionContext.tsx";
-import Wahlkreisliste from "../components/Wahlkreisliste.tsx";
-import Zweitstimmenanteil from "../components/Zweitstimmenanteil.tsx";
+import WahlkreislisteC from "../components/WahlkreislisteC.tsx";
+import ZweitstimmenanteilC from "../components/ZweitstimmenanteilC.tsx";
+import WinningPartiesC from "../components/WinningPartiesC.tsx";
+import type {WinningParties} from "../api.ts";
 
 export default function Wahlkreise() {
 
@@ -32,6 +34,10 @@ export default function Wahlkreise() {
         return fetchStimmanteileWahlkreis(wahlId, selectedWahlkreis?.id ?? 0);
     }
 
+    async function wrapFetchWinningPartiesWahlkreis(wahlId: number): Promise<WinningParties> {
+        return fetchWinningPartiesWahlkreis(wahlId, selectedWahlkreis?.id ?? 0);
+    }
+
     return (
         <div className={"flex flex-col items-center"}>
             {
@@ -43,11 +49,14 @@ export default function Wahlkreise() {
                         </button>
                     </div>
                     :
-                    selectedWahlkreis ? null : <Wahlkreisliste showWahlkreisDetails={showWahlkreisDetails}/>
+                    <WahlkreislisteC showWahlkreisDetails={showWahlkreisDetails}/>
             }
             {
                 selectedWahlkreis ?
-                    <Zweitstimmenanteil fetchStimmanteile={wrapFetchStimmanteileWahlkreis}/>
+                    <>
+                        <WinningPartiesC fetchWinningParties={wrapFetchWinningPartiesWahlkreis}/>
+                        <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis}/>
+                    </>
                     :
                     null
             }

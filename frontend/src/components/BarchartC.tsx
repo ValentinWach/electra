@@ -12,7 +12,7 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend, LinearScale, CategoryScale, BarElement);
 
-export default function Barchart(props: { data?: ChartData }) {
+export default function BarchartC(props: { data?: ChartData }) {
     const defaultData: ChartData = {
         labels: ['Filled', 'Empty'],
         datasets: [{data: [66, 34], backgroundColor: ['#ff6384', '#e0e0e0'], borderWidth: 0,},],

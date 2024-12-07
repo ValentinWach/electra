@@ -1,13 +1,13 @@
 import {useEffect, useState} from 'react';
 import {Stimmanteil, Wahl} from "../api";
-import Charttile from "./chart-tile.tsx";
+import ChartTileC from "./ChartTileC.tsx";
 import {ChartData} from "chart.js";
 import {useElection} from "../context/ElectionContext.tsx";
 import {getPartyColor} from "../utils/utils.tsx";
-import Barchart from "./Barchart.tsx";
+import BarchartC from "./BarchartC.tsx";
 import type {DropdownType} from "../models/Chart-Data.ts";
 
-export default function Zweitstimmenanteil({fetchStimmanteile}: {
+export default function ZweitstimmenanteilC({fetchStimmanteile}: {
     fetchStimmanteile: (wahlId: number) => Promise<Stimmanteil[]>
 }) {
     const {elections, selectedElection} = useElection();
@@ -81,12 +81,12 @@ export default function Zweitstimmenanteil({fetchStimmanteile}: {
 
     return (
         <div className={"flex-grow"}>
-            <Charttile  dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={"Zweitstimmenanteile"}>
+            <ChartTileC dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={"Zweitstimmenanteile"}>
                 {comparedElection ?
-                    <Barchart data={comparedData}></Barchart>
+                    <BarchartC data={comparedData}></BarchartC>
                     :
-                    <Barchart data={mainData}></Barchart>}
-            </Charttile>
+                    <BarchartC data={mainData}></BarchartC>}
+            </ChartTileC>
         </div>
     )
 }

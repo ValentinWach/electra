@@ -6,7 +6,7 @@ import {
     UserGroupIcon,
 } from '@heroicons/react/24/outline'
 import {Link, useLocation} from 'react-router-dom';
-import Dropdown from "./Dropdown.tsx";
+import DropdownC from "./DropdownC.tsx";
 import type {DropdownType} from "../models/Chart-Data.ts";
 import { useElection } from '../context/ElectionContext.tsx';
 
@@ -53,7 +53,7 @@ export default function Example() {
                 />
             </div>
             <div className="flex h-16 shrink-0 items-center border-b-2 border-b-gray-200 pb-5">
-                <Dropdown dropdownContent={Wahl} dropDownFunction={handleElectionChange}></Dropdown>
+                <DropdownC dropdownContent={Wahl} dropDownFunction={handleElectionChange}></DropdownC>
             </div>
             <nav className="flex flex-1 flex-col">
                 <ul role="list" className="flex flex-1 flex-col gap-y-7">

@@ -1,7 +1,7 @@
-import Sitzverteilung from "../components/Sitzverteilung.tsx";
+import SitzverteilungC from "../components/SitzverteilungC.tsx";
 import {fetchStimmanteile} from '../apiServices';
 
-import Zweitstimmenanteil from "../components/Zweitstimmenanteil.tsx";
+import ZweitstimmenanteilC from "../components/ZweitstimmenanteilC.tsx";
 import {useElection} from "../context/ElectionContext.tsx";
 import {Stimmanteil} from "../api";
 
@@ -10,8 +10,8 @@ export default function Stimmverteilungen() {
 
     return (
         <div className={"flex flex-col items-center"}>
-            <Sitzverteilung/>
-            <Zweitstimmenanteil fetchStimmanteile={fetchStimmanteile} />
+            <SitzverteilungC/>
+            <ZweitstimmenanteilC fetchStimmanteile={fetchStimmanteile} />
         </div>
     )
 }

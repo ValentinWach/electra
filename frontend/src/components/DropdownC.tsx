@@ -2,7 +2,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import type {DropdownType} from "../models/Chart-Data.ts";
 
-export default function Dropdown({dropdownContent, dropDownFunction} : {dropdownContent : DropdownType, dropDownFunction: (id: number) => void}) {
+export default function DropdownC({dropdownContent, dropDownFunction} : {dropdownContent : DropdownType, dropDownFunction: (id: number) => void}) {
     return (
         <Menu as="div" className="w-52 relative inline-block text-left">
             <div>

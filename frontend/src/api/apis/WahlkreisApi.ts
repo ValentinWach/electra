@@ -42,6 +42,11 @@ export interface GetStimmanteilWahlkreisRequest {
 
 export interface GetWinningPartiesWahlkreisRequest {
     wahlid: number;
+    wahlkreisid: number;
+}
+
+export interface GetWinningPartiesWahlkreiseRequest {
+    wahlid: number;
 }
 
 /**
@@ -143,6 +148,44 @@ export class WahlkreisApi extends runtime.BaseAPI {
             );
         }
 
+        if (requestParameters['wahlkreisid'] == null) {
+            throw new runtime.RequiredError(
+                'wahlkreisid',
+                'Required parameter "wahlkreisid" was null or undefined when calling getWinningPartiesWahlkreis().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/results/{wahlid}/winningparties/wahlkreis/{wahlkreisid}`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))).replace(`{${"wahlkreisid"}}`, encodeURIComponent(String(requestParameters['wahlkreisid']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WinningPartiesFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getWinningPartiesWahlkreis(requestParameters: GetWinningPartiesWahlkreisRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WinningParties> {
+        const response = await this.getWinningPartiesWahlkreisRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getWinningPartiesWahlkreiseRaw(requestParameters: GetWinningPartiesWahlkreiseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WinningParties>> {
+        if (requestParameters['wahlid'] == null) {
+            throw new runtime.RequiredError(
+                'wahlid',
+                'Required parameter "wahlid" was null or undefined when calling getWinningPartiesWahlkreise().'
+            );
+        }
+
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -159,8 +202,8 @@ export class WahlkreisApi extends runtime.BaseAPI {
 
     /**
      */
-    async getWinningPartiesWahlkreis(requestParameters: GetWinningPartiesWahlkreisRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WinningParties> {
-        const response = await this.getWinningPartiesWahlkreisRaw(requestParameters, initOverrides);
+    async getWinningPartiesWahlkreise(requestParameters: GetWinningPartiesWahlkreiseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WinningParties> {
+        const response = await this.getWinningPartiesWahlkreiseRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -61,3 +61,15 @@ export async function fetchStimmanteileWahlkreis(wahlId: number, wahlkreisId: nu
         throw error;
     }
 }
+
+export async function fetchWinningPartiesWahlkreis(wahlId: number, wahlkreisId: number) {
+    try {
+        const generalApi = new GeneralApiMocks();
+        const winningParties = await generalApi.getWinningPartiesWahlkreis(wahlId, wahlkreisId);
+        console.log('Fetched Winning Parties:', winningParties);
+        return winningParties;
+    } catch (error) {
+        console.error('Error fetching Winning Parties:', error);
+        throw error;
+    }
+}

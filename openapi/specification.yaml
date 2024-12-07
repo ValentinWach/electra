@@ -143,9 +143,36 @@ paths:
                   $ref: '#/components/schemas/Stimmanteil'
 
   #-----winningparties per region----- TODO: Bundeslaender
-  /results/{wahlid}/winningparties/wahlkreis:
+  /results/{wahlid}/winningparties/wahlkreis/{wahlkreisid}:
     get:
       operationId: getWinningPartiesWahlkreis
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+        - $ref: '#/components/parameters/wahlkreisid'
+      tags:
+        - Wahlkreis
+      responses:
+        '200':
+          description: Returning the winning parties for a specific wahlkreis
+          content:
+            application/json:
+              schema:
+                type: object
+                title: winningParties
+                required:
+                  - Erststimmen
+                  - Zweitstimmen
+                properties:
+                  Erststimmen:
+                    title: winnerErststimmen
+                    $ref: '#/components/schemas/Partei'
+                  Zweitstimmen:
+                    title: winnerZweitstimmen
+                    $ref: '#/components/schemas/Partei'
+
+  /results/{wahlid}/winningparties/wahlkreis:
+    get:
+      operationId: getWinningPartiesWahlkreise
       parameters:
         - $ref: '#/components/parameters/wahlid'
       tags:
@@ -156,7 +183,7 @@ paths:
           content:
             application/json:
               schema:
-                title: winningparties
+                title: winningPartiesAllWahlkreise
                 $ref: '#/components/schemas/WinningParties'
 
   #-----other-----
@@ -348,6 +375,7 @@ components:
           type: number
           title: Share
 
+
     WinningParties:
       type: object
       required:
@@ -373,6 +401,7 @@ components:
               region_name:
                 type: string
                 title: Region_name
+
         zweitstimme:
           type: array
           items:

@@ -13,20 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
-import type { WinningPartiesZweitstimmeInner } from './WinningPartiesZweitstimmeInner';
+import type { Partei } from './Partei';
 import {
-    WinningPartiesZweitstimmeInnerFromJSON,
-    WinningPartiesZweitstimmeInnerFromJSONTyped,
-    WinningPartiesZweitstimmeInnerToJSON,
-    WinningPartiesZweitstimmeInnerToJSONTyped,
-} from './WinningPartiesZweitstimmeInner';
-import type { WinningPartiesErststimmeInner } from './WinningPartiesErststimmeInner';
-import {
-    WinningPartiesErststimmeInnerFromJSON,
-    WinningPartiesErststimmeInnerFromJSONTyped,
-    WinningPartiesErststimmeInnerToJSON,
-    WinningPartiesErststimmeInnerToJSONTyped,
-} from './WinningPartiesErststimmeInner';
+    ParteiFromJSON,
+    ParteiFromJSONTyped,
+    ParteiToJSON,
+    ParteiToJSONTyped,
+} from './Partei';
 
 /**
  * 
@@ -36,24 +29,24 @@ import {
 export interface WinningParties {
     /**
      * 
-     * @type {Array<WinningPartiesErststimmeInner>}
+     * @type {Partei}
      * @memberof WinningParties
      */
-    erststimme: Array<WinningPartiesErststimmeInner>;
+    erststimmen: Partei;
     /**
      * 
-     * @type {Array<WinningPartiesZweitstimmeInner>}
+     * @type {Partei}
      * @memberof WinningParties
      */
-    zweitstimme: Array<WinningPartiesZweitstimmeInner>;
+    zweitstimmen: Partei;
 }
 
 /**
  * Check if a given object implements the WinningParties interface.
  */
 export function instanceOfWinningParties(value: object): value is WinningParties {
-    if (!('erststimme' in value) || value['erststimme'] === undefined) return false;
-    if (!('zweitstimme' in value) || value['zweitstimme'] === undefined) return false;
+    if (!('erststimmen' in value) || value['erststimmen'] === undefined) return false;
+    if (!('zweitstimmen' in value) || value['zweitstimmen'] === undefined) return false;
     return true;
 }
 
@@ -67,8 +60,8 @@ export function WinningPartiesFromJSONTyped(json: any, ignoreDiscriminator: bool
     }
     return {
         
-        'erststimme': ((json['erststimme'] as Array<any>).map(WinningPartiesErststimmeInnerFromJSON)),
-        'zweitstimme': ((json['zweitstimme'] as Array<any>).map(WinningPartiesZweitstimmeInnerFromJSON)),
+        'erststimmen': ParteiFromJSON(json['Erststimmen']),
+        'zweitstimmen': ParteiFromJSON(json['Zweitstimmen']),
     };
 }
 
@@ -83,8 +76,8 @@ export function WinningPartiesToJSONTyped(value?: WinningParties | null, ignoreD
 
     return {
         
-        'erststimme': ((value['erststimme'] as Array<any>).map(WinningPartiesErststimmeInnerToJSON)),
-        'zweitstimme': ((value['zweitstimme'] as Array<any>).map(WinningPartiesZweitstimmeInnerToJSON)),
+        'Erststimmen': ParteiToJSON(value['erststimmen']),
+        'Zweitstimmen': ParteiToJSON(value['zweitstimmen']),
     };
 }
 
