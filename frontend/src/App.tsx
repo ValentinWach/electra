@@ -1,7 +1,7 @@
 import Sidebar from './components/Sidebar.tsx';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import Uebersicht from "./pages/Uebersicht.tsx";
-import Stimmverteilungen from "./pages/Stimmverteilungen.tsx";
+import Wahlkreise from "./pages/Wahlkreise.tsx";
 import {ElectionProvider} from "./context/ElectionContext.tsx";
 
 function App() {
@@ -14,13 +14,13 @@ function App() {
                         <h2>Header Placeholder</h2>
                         <Routes>
                             <Route path="/uebersicht" element={<Uebersicht/>}/>
-                            <Route path="/Stimmverteilungen" element={<Stimmverteilungen/>}/>
+                            <Route path="/wahlkreise" element={<Wahlkreise/>}/>
                         </Routes>
                     </div>
                 </div>
             </Router>
         </ElectionProvider>
     );
-};
+}
 
 export default App;

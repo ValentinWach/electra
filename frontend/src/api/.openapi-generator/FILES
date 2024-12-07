@@ -1,10 +1,10 @@
-.openapi-generator-ignore
 apis/GeneralApi.ts
 apis/GlobalApi.ts
 apis/WahlkreisApi.ts
 apis/index.ts
 index.ts
 models/Abgeordneter.ts
+models/Bundesland.ts
 models/ClosestWinners.ts
 models/OverviewWahlkreis.ts
 models/Partei.ts
@@ -12,6 +12,7 @@ models/SeatDistribution.ts
 models/SeatDistributionDistributionInner.ts
 models/Stimmanteil.ts
 models/Wahl.ts
+models/Wahlkreis.ts
 models/WinningParties.ts
 models/WinningPartiesErststimmeInner.ts
 models/WinningPartiesZweitstimmeInner.ts

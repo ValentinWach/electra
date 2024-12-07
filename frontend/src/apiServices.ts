@@ -13,10 +13,10 @@ export async function fetchWahlen(): Promise<Wahl[]>  {
   }
 }
 
-export async function fetchSitzveteilung(id: number): Promise<SeatDistribution> {
+export async function fetchSitzveteilung(wahlId: number): Promise<SeatDistribution> {
   try {
     const generalApi = new GeneralApiMocks();
-    const sitzverteilung = await generalApi.getSitzverteilung(id);
+    const sitzverteilung = await generalApi.getSitzverteilung(wahlId);
     console.log('Fetched Sitzverteilung:', sitzverteilung);
     return sitzverteilung;
   }
@@ -24,4 +24,40 @@ export async function fetchSitzveteilung(id: number): Promise<SeatDistribution> 
     console.error('Error fetching Sitzverteilung:', error);
     throw error;
   }
+}
+
+export async function fetchWahlkreise() {
+  try {
+    const generalApi = new GeneralApiMocks();
+    const wahlkreise = await generalApi.getWahlkreise();
+    console.log('Fetched Wahlkreise:', wahlkreise);
+    return wahlkreise;
+  } catch (error) {
+    console.error('Error fetching Wahlkreise:', error);
+    throw error;
+  }
+}
+
+export async function fetchStimmanteile(wahlId: number) {
+    try {
+        const generalApi = new GeneralApiMocks();
+        const stimmanteile = await generalApi.getStimmanteile(wahlId);
+        console.log('Fetched Stimmanteile:', stimmanteile);
+        return stimmanteile;
+    } catch (error) {
+        console.error('Error fetching Stimmanteile:', error);
+        throw error;
+    }
+}
+
+export async function fetchStimmanteileWahlkreis(wahlId: number, wahlkreisId: number) {
+    try {
+        const generalApi = new GeneralApiMocks();
+        const stimmanteile = await generalApi.getStimmanteileWahlkreis(wahlId, wahlkreisId);
+        console.log('Fetched Stimmanteile:', stimmanteile);
+        return stimmanteile;
+    } catch (error) {
+        console.error('Error fetching Stimmanteile:', error);
+        throw error;
+    }
 }

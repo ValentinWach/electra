@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Donator-Mainframe communication
-  version: 0.1.0
+  version: 0.1.1
 servers:
   - url: "{protocol}://{url}/api"
     variables:
@@ -15,6 +15,8 @@ servers:
         default: https
 
 paths:
+  #----- Regionen -----
+
   /wahlen:
     get:
       operationId: getWahlen
@@ -30,6 +32,41 @@ paths:
                 title: wahlen
                 items:
                   $ref: '#/components/schemas/Wahl'
+
+  /bundeslaender:
+    get:
+      operationId: getBundeslaender
+      tags:
+        - General
+      responses:
+        '200':
+          description: Returning all bundeslaender
+          content:
+            application/json:
+              schema:
+                type: array
+                title: bundeslaender
+                items:
+                  type: object
+                  $ref: '#/components/schemas/Bundesland'
+
+  /wahlkreise:
+    get:
+      operationId: getWahlkreise
+      tags:
+        - General
+      responses:
+        '200':
+          description: Returning all wahlkreise
+          content:
+            application/json:
+              schema:
+                type: array
+                title: wahlkreise
+                items:
+                  type: object
+                  $ref: '#/components/schemas/Wahlkreis'
+
   /results/{wahlid}/sitzverteilung:
     get:
       operationId: getSitzverteilung
@@ -106,12 +143,11 @@ paths:
                   $ref: '#/components/schemas/Stimmanteil'
 
   #-----winningparties per region----- TODO: Bundeslaender
-  /results/{wahlid}/winningparties/wahlkreis/{wahlkreisid}:
+  /results/{wahlid}/winningparties/wahlkreis:
     get:
       operationId: getWinningPartiesWahlkreis
       parameters:
         - $ref: '#/components/parameters/wahlid'
-        - $ref: '#/components/parameters/wahlkreisid'
       tags:
         - Wahlkreis
       responses:
@@ -207,6 +243,32 @@ components:
           type: string
           format: date
           title: Date
+
+    Wahlkreis:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+
+    Bundesland:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
 
     Partei:
       type: object

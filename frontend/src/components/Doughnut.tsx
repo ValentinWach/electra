@@ -26,7 +26,7 @@ export default function DoughnutChart(props: { data?: ChartData }) {
         },
         plugins: {
             legend: {
-                position: 'bottom',
+                position: 'bottom' as const,
                 display: false,
                 labels: {
                     usePointStyle: true,

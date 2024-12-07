@@ -1,0 +1,18 @@
+Übersicht:
+ - Balkendiagramme nach Anteil ZS pro Partei
+
+Bundesländer:
+    - Karte mit Sieger pro Bundesland
+    - Über Karte oder Dropdown Bundesland auswählen
+        - Detailansicht: Strukturdaten, Wahlbet., Balkendiagramm ZS inkl. letzte Wahl, Abgeordnetenliste
+
+Wahlkreise:
+    - Karte mit Sieger pro Wahlkreis
+    - Balkendiagramme nach Anteil ZS pro Partei
+    - Über Karte oder Dropdown Wahlkreis auswählen
+        - Detailansicht: Strukturdaten, Wahlbet., Balkendiagramm ZS inkl. letzte Wahl, Direkt-Sieger, Überhangsmandate
+
+Parteien:
+    - List von Parteien inkl. Wahlerfolg
+    - Detailansicht
+        - Liste mit 10 knappsten Siegern

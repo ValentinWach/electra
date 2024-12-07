@@ -10,11 +10,12 @@ export interface ChartData {
     datasets: ChartDataset[];
 }
 
-export interface dropdownItem {
+export interface DropdownItem {
     label: string;
-    href: string;
+    id: number;
 }
 
-export interface dropdown {
-    items: dropdownItem[];
+export interface DropdownType {
+    label: string,
+    items: DropdownItem[];
 }

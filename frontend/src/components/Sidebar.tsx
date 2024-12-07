@@ -1,21 +1,22 @@
 import {
-    CalendarIcon,
     ChartPieIcon,
     DocumentDuplicateIcon,
-    FolderIcon,
     HomeIcon,
     UsersIcon,
     UserGroupIcon,
-    UserCircleIcon
 } from '@heroicons/react/24/outline'
 import {Link, useLocation} from 'react-router-dom';
-import Dropdown from "./dropdown.tsx";
+import Dropdown from "./Dropdown.tsx";
+import type {DropdownType} from "../models/Chart-Data.ts";
+import { useElection } from '../context/ElectionContext.tsx';
+
 const navigation = [
     {name: 'Übersicht', href: '/uebersicht', icon: HomeIcon, current: false},
-    {name: 'Stimmverteilungen', href: '/stimmverteilungen', icon: ChartPieIcon, current: false},
+    {name: 'Bundesländer', href: '#', icon: ChartPieIcon, current: false},
+    {name: 'Wahlkreise', href: '/wahlkreise', icon: ChartPieIcon, current: false},
     {name: 'Abgeordnete', href: '#', icon: UsersIcon, current: false},
+    {name: 'Parteien', href: '#', icon: UserGroupIcon, current: false},
     {name: 'Landeslisten', href: '#', icon: DocumentDuplicateIcon, current: false},
-    {name: 'Direktkandidaten', href: '#', icon: UserCircleIcon, current: false},
 ]
 const teams = [
     {id: 1, name: 'Heroicons', href: '#', initial: 'H', current: false},
@@ -23,12 +24,25 @@ const teams = [
     {id: 3, name: 'Workcation', href: '#', initial: 'W', current: false},
 ]
 
-function classNames(...classes) {
+function classNames(...classes : any[]) {
     return classes.filter(Boolean).join(' ')
 }
 
 export default function Example() {
     const location = useLocation();
+    const { elections, selectedElection, setSelectedElection } = useElection();
+    const handleElectionChange = (newElectionId: number) => {
+        setSelectedElection(elections.find(e => e.id === newElectionId) ?? elections[0]);
+    };
+
+    const Wahl: DropdownType = {
+        label: selectedElection ? selectedElection.date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }) : 'Select Election',
+        items: elections.map(election => ({
+            label: election.date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }),
+            id: election.id
+        }))
+    };
+
     return (
         <div className="sticky top-0 flex w-64 flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
             <div className="flex h-16 shrink-0 items-center">
@@ -39,7 +53,7 @@ export default function Example() {
                 />
             </div>
             <div className="flex h-16 shrink-0 items-center border-b-2 border-b-gray-200 pb-5">
-                <Dropdown></Dropdown>
+                <Dropdown dropdownContent={Wahl} dropDownFunction={handleElectionChange}></Dropdown>
             </div>
             <nav className="flex flex-1 flex-col">
                 <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -65,14 +79,6 @@ export default function Example() {
                                                 )}
                                             />
                                             {item.name}
-                                            {item.count ? (
-                                                <span
-                                                    aria-hidden="true"
-                                                    className="ml-auto w-9 min-w-max whitespace-nowrap rounded-full bg-white px-2.5 py-0.5 text-center text-xs/5 font-medium text-gray-600 ring-1 ring-inset ring-gray-200"
-                                                >
-                        {item.count}
-                      </span>
-                                            ) : null}
                                         </a>
                                     </Link>
                                 </li>

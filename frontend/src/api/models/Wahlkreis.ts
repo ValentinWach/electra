@@ -16,44 +16,37 @@ import { mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface Wahl
+ * @interface Wahlkreis
  */
-export interface Wahl {
+export interface Wahlkreis {
     /**
      * 
      * @type {number}
-     * @memberof Wahl
+     * @memberof Wahlkreis
      */
     id: number;
     /**
      * 
      * @type {string}
-     * @memberof Wahl
+     * @memberof Wahlkreis
      */
     name: string;
-    /**
-     * 
-     * @type {Date}
-     * @memberof Wahl
-     */
-    date: Date;
 }
 
 /**
- * Check if a given object implements the Wahl interface.
+ * Check if a given object implements the Wahlkreis interface.
  */
-export function instanceOfWahl(value: object): value is Wahl {
+export function instanceOfWahlkreis(value: object): value is Wahlkreis {
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
-    if (!('date' in value) || value['date'] === undefined) return false;
     return true;
 }
 
-export function WahlFromJSON(json: any): Wahl {
-    return WahlFromJSONTyped(json, false);
+export function WahlkreisFromJSON(json: any): Wahlkreis {
+    return WahlkreisFromJSONTyped(json, false);
 }
 
-export function WahlFromJSONTyped(json: any, ignoreDiscriminator: boolean): Wahl {
+export function WahlkreisFromJSONTyped(json: any, ignoreDiscriminator: boolean): Wahlkreis {
     if (json == null) {
         return json;
     }
@@ -61,15 +54,14 @@ export function WahlFromJSONTyped(json: any, ignoreDiscriminator: boolean): Wahl
         
         'id': json['id'],
         'name': json['name'],
-        'date': (new Date(json['date'])),
     };
 }
 
-export function WahlToJSON(json: any): Wahl {
-    return WahlToJSONTyped(json, false);
+export function WahlkreisToJSON(json: any): Wahlkreis {
+    return WahlkreisToJSONTyped(json, false);
 }
 
-export function WahlToJSONTyped(value?: Wahl | null, ignoreDiscriminator: boolean = false): any {
+export function WahlkreisToJSONTyped(value?: Wahlkreis | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -78,7 +70,6 @@ export function WahlToJSONTyped(value?: Wahl | null, ignoreDiscriminator: boolea
         
         'id': value['id'],
         'name': value['name'],
-        'date': ((value['date']).toISOString().substring(0,10)),
     };
 }
 
