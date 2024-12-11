@@ -39,6 +39,12 @@ export interface Stimmanteil {
      * @memberof Stimmanteil
      */
     share: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Stimmanteil
+     */
+    absolute: number;
 }
 
 /**
@@ -47,6 +53,7 @@ export interface Stimmanteil {
 export function instanceOfStimmanteil(value: object): value is Stimmanteil {
     if (!('party' in value) || value['party'] === undefined) return false;
     if (!('share' in value) || value['share'] === undefined) return false;
+    if (!('absolute' in value) || value['absolute'] === undefined) return false;
     return true;
 }
 
@@ -62,6 +69,7 @@ export function StimmanteilFromJSONTyped(json: any, ignoreDiscriminator: boolean
         
         'party': ParteiFromJSON(json['party']),
         'share': json['share'],
+        'absolute': json['absolute'],
     };
 }
 
@@ -78,6 +86,7 @@ export function StimmanteilToJSONTyped(value?: Stimmanteil | null, ignoreDiscrim
         
         'party': ParteiToJSON(value['party']),
         'share': value['share'],
+        'absolute': value['absolute'],
     };
 }
 

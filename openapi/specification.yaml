@@ -67,6 +67,25 @@ paths:
                   type: object
                   $ref: '#/components/schemas/Wahlkreis'
 
+  /parteien:
+    get:
+      operationId: getParteien
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+      tags:
+        - General
+      responses:
+        '200':
+          description: Returning all parteien
+          content:
+            application/json:
+              schema:
+                type: array
+                title: parteien
+                items:
+                  type: object
+                  $ref: '#/components/schemas/Partei'
+
   /results/{wahlid}/sitzverteilung:
     get:
       operationId: getSitzverteilung
@@ -211,11 +230,12 @@ paths:
                   direktkandidat:
                     $ref: '#/components/schemas/Abgeordneter'
 
-  /results/{wahlid}/closestwinners:
+  /results/{wahlid}/{parteiid}/closestwinners:
     get:
       operationId: getClosestWinners
       parameters:
           - $ref: '#/components/parameters/wahlid'
+          - $ref: '#/components/parameters/parteiid'
       tags:
         - Global
       responses:
@@ -224,16 +244,19 @@ paths:
           content:
             application/json:
                 schema:
-                  title: closestwinners
-                  type: array
-                  items:
-                      $ref: '#/components/schemas/ClosestWinners'
+                  $ref: '#/components/schemas/ClosestWinners'
 
 
 components:
   parameters:
     wahlid:
       name: wahlid
+      in: path
+      required: true
+      schema:
+        type: integer
+    parteiid:
+      name: parteiid
       in: path
       required: true
       schema:
@@ -368,12 +391,16 @@ components:
       required:
         - party
         - share
+        - absolute
       properties:
         party:
           $ref: '#/components/schemas/Partei'
         share:
           type: number
           title: Share
+        absolute:
+          type: integer
+          title: Absolute
 
 
     WinningParties:
@@ -433,7 +460,16 @@ components:
             - Winner
             - Loser
           title: Closest_Type
-        closestWinners:
-            type: array
-            items:
-              $ref: '#/components/schemas/Abgeordneter'
+        ClosestWinners:
+          type: array
+          items:
+            type: object
+            title: ClosestWinner
+            required:
+              - abgeordneter
+              - wahlkreis
+            properties:
+              abgeordneter:
+                $ref: '#/components/schemas/Abgeordneter'
+              wahlkreis:
+                $ref: '#/components/schemas/Wahlkreis'

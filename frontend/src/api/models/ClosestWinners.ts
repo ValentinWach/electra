@@ -13,13 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
-import type { Abgeordneter } from './Abgeordneter';
+import type { ClosestWinner } from './ClosestWinner';
 import {
-    AbgeordneterFromJSON,
-    AbgeordneterFromJSONTyped,
-    AbgeordneterToJSON,
-    AbgeordneterToJSONTyped,
-} from './Abgeordneter';
+    ClosestWinnerFromJSON,
+    ClosestWinnerFromJSONTyped,
+    ClosestWinnerToJSON,
+    ClosestWinnerToJSONTyped,
+} from './ClosestWinner';
 import type { Partei } from './Partei';
 import {
     ParteiFromJSON,
@@ -48,10 +48,10 @@ export interface ClosestWinners {
     closestType: ClosestWinnersClosestTypeEnum;
     /**
      * 
-     * @type {Array<Abgeordneter>}
+     * @type {Array<ClosestWinner>}
      * @memberof ClosestWinners
      */
-    closestWinners: Array<Abgeordneter>;
+    closestWinners?: Array<ClosestWinner>;
 }
 
 
@@ -71,7 +71,6 @@ export type ClosestWinnersClosestTypeEnum = typeof ClosestWinnersClosestTypeEnum
 export function instanceOfClosestWinners(value: object): value is ClosestWinners {
     if (!('party' in value) || value['party'] === undefined) return false;
     if (!('closestType' in value) || value['closestType'] === undefined) return false;
-    if (!('closestWinners' in value) || value['closestWinners'] === undefined) return false;
     return true;
 }
 
@@ -87,7 +86,7 @@ export function ClosestWinnersFromJSONTyped(json: any, ignoreDiscriminator: bool
         
         'party': ParteiFromJSON(json['party']),
         'closestType': json['closest_type'],
-        'closestWinners': ((json['closestWinners'] as Array<any>).map(AbgeordneterFromJSON)),
+        'closestWinners': json['ClosestWinners'] == null ? undefined : ((json['ClosestWinners'] as Array<any>).map(ClosestWinnerFromJSON)),
     };
 }
 
@@ -104,7 +103,7 @@ export function ClosestWinnersToJSONTyped(value?: ClosestWinners | null, ignoreD
         
         'party': ParteiToJSON(value['party']),
         'closest_type': value['closestType'],
-        'closestWinners': ((value['closestWinners'] as Array<any>).map(AbgeordneterToJSON)),
+        'ClosestWinners': value['closestWinners'] == null ? undefined : ((value['closestWinners'] as Array<any>).map(ClosestWinnerToJSON)),
     };
 }
 

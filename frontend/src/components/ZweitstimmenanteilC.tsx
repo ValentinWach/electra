@@ -7,8 +7,8 @@ import {getPartyColor} from "../utils/utils.tsx";
 import BarchartC from "./BarchartC.tsx";
 import type {DropdownType} from "../models/Chart-Data.ts";
 
-export default function ZweitstimmenanteilC({fetchStimmanteile}: {
-    fetchStimmanteile: (wahlId: number) => Promise<Stimmanteil[]>
+export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVotes}: {
+    fetchStimmanteile: (wahlId: number) => Promise<Stimmanteil[]>, showAbsoluteVotes?: boolean | null
 }) {
     const {elections, selectedElection} = useElection();
     const [stimmanteil, setStimmanteil] = useState<Stimmanteil[]>();
@@ -32,9 +32,9 @@ export default function ZweitstimmenanteilC({fetchStimmanteile}: {
         label: "Ergebnis Vergleichen",
         items: [{label: "Nicht vergleichen", id: -1},
             ...elections.filter(e => e.id != selectedElection?.id).map(election => ({
-            label: election.date.toLocaleDateString('de-DE', {month: 'long', year: 'numeric'}),
-            id: election.id
-        }))]
+                label: election.date.toLocaleDateString('de-DE', {month: 'long', year: 'numeric'}),
+                id: election.id
+            }))]
     };
 
     async function compareStimmanteile(wahlId: number) {
@@ -43,13 +43,15 @@ export default function ZweitstimmenanteilC({fetchStimmanteile}: {
         } else {
             try {
                 const comparedData = await fetchStimmanteile(wahlId);
-                const comparedMap = new Map(comparedData.map(item => [item.party.id, item.share]));
+                const comparedMap = new Map(comparedData.map(item => [item.party.id, item]));
                 const stimmanteilWithDifference = stimmanteil?.map(item => {
-                    const comparedShare = comparedMap.get(item.party.id) || 0;
-                    const difference = Math.round((comparedShare - item.share)*10)/10;
+                    const comparedItem = comparedMap.get(item.party.id) || {share: 0, absolute: 0};
+                    const shareDifference = Math.round((comparedItem.share - item.share) * 10) / 10;
+                    const absoluteDifference = comparedItem.absolute - item.absolute;
                     return {
                         ...item,
-                        share: difference
+                        share: shareDifference,
+                        absolute: absoluteDifference
                     };
                 }) || [];
                 setComparedStimmanteil(stimmanteilWithDifference);
@@ -86,6 +88,31 @@ export default function ZweitstimmenanteilC({fetchStimmanteile}: {
                     <BarchartC data={comparedData}></BarchartC>
                     :
                     <BarchartC data={mainData}></BarchartC>}
+                {showAbsoluteVotes ?
+                    <table className="table mt-10">
+                        <thead>
+                        <tr>
+                            <th scope="col">Kürzel</th>
+                            <th scope="col">Partei</th>
+                            <th scope="col">{comparedElection ? "Differenz zum Vergleichszeitraum" : "Anzahl Zweitstimmen"}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {stimmanteil?.map((partei) => (
+                            <tr key={partei.party.id}>
+                                <td style={{color: getPartyColor(partei.party.shortname)}}>
+                                    {partei.party.shortname}
+                                </td>
+                                <td>{partei.party.name}</td>
+                                {!comparedElection && <td>{partei.absolute}</td> }
+                                {comparedElection && <td>{comparedStimmanteil?.find(p => p.party.id === partei.party.id)?.absolute > 0 ? '+' : ''}{comparedStimmanteil?.find(p => p.party.id === partei.party.id)?.absolute}</td>}
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                    :
+                    null
+                }
             </ChartTileC>
         </div>
     )

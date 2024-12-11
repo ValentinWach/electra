@@ -2,6 +2,7 @@
 /* eslint-disable */
 export * from './Abgeordneter';
 export * from './Bundesland';
+export * from './ClosestWinner';
 export * from './ClosestWinners';
 export * from './OverviewWahlkreis';
 export * from './Partei';

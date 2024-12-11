@@ -16,17 +16,24 @@
 import * as runtime from '../runtime';
 import type {
   Bundesland,
+  Partei,
   Wahl,
   Wahlkreis,
 } from '../models/index';
 import {
     BundeslandFromJSON,
     BundeslandToJSON,
+    ParteiFromJSON,
+    ParteiToJSON,
     WahlFromJSON,
     WahlToJSON,
     WahlkreisFromJSON,
     WahlkreisToJSON,
 } from '../models/index';
+
+export interface GetParteienRequest {
+    wahlid: number;
+}
 
 /**
  * 
@@ -54,6 +61,37 @@ export class GeneralApi extends runtime.BaseAPI {
      */
     async getBundeslaender(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Bundesland>> {
         const response = await this.getBundeslaenderRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getParteienRaw(requestParameters: GetParteienRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Partei>>> {
+        if (requestParameters['wahlid'] == null) {
+            throw new runtime.RequiredError(
+                'wahlid',
+                'Required parameter "wahlid" was null or undefined when calling getParteien().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/parteien`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(ParteiFromJSON));
+    }
+
+    /**
+     */
+    async getParteien(requestParameters: GetParteienRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Partei>> {
+        const response = await this.getParteienRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -37,6 +37,7 @@ export interface GetAbgeordneteRequest {
 
 export interface GetClosestWinnersRequest {
     wahlid: number;
+    parteiid: number;
 }
 
 export interface GetSitzverteilungRequest {
@@ -86,11 +87,18 @@ export class GlobalApi extends runtime.BaseAPI {
 
     /**
      */
-    async getClosestWinnersRaw(requestParameters: GetClosestWinnersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ClosestWinners>>> {
+    async getClosestWinnersRaw(requestParameters: GetClosestWinnersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClosestWinners>> {
         if (requestParameters['wahlid'] == null) {
             throw new runtime.RequiredError(
                 'wahlid',
                 'Required parameter "wahlid" was null or undefined when calling getClosestWinners().'
+            );
+        }
+
+        if (requestParameters['parteiid'] == null) {
+            throw new runtime.RequiredError(
+                'parteiid',
+                'Required parameter "parteiid" was null or undefined when calling getClosestWinners().'
             );
         }
 
@@ -99,18 +107,18 @@ export class GlobalApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/results/{wahlid}/closestwinners`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))),
+            path: `/results/{wahlid}/{parteiid}/closestwinners`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))).replace(`{${"parteiid"}}`, encodeURIComponent(String(requestParameters['parteiid']))),
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(ClosestWinnersFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClosestWinnersFromJSON(jsonValue));
     }
 
     /**
      */
-    async getClosestWinners(requestParameters: GetClosestWinnersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ClosestWinners>> {
+    async getClosestWinners(requestParameters: GetClosestWinnersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClosestWinners> {
         const response = await this.getClosestWinnersRaw(requestParameters, initOverrides);
         return await response.value();
     }

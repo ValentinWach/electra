@@ -1,17 +1,27 @@
 import {useEffect, useState} from "react";
-import {fetchStimmanteileWahlkreis, fetchWahlkreise, fetchWinningPartiesWahlkreis} from "../apiServices.ts";
-import {Stimmanteil, Wahlkreis} from "../api";
+import {
+    fetchStimmanteileWahlkreis,
+    fetchWahlkreise,
+    fetchWinningPartiesWahlkreis,
+    fetchWahlkreisOverview
+} from "../apiServices.ts";
+import {OverviewWahlkreis, Stimmanteil, Wahlkreis} from "../api";
 import {useElection} from "../context/ElectionContext.tsx";
 import WahlkreislisteC from "../components/WahlkreislisteC.tsx";
 import ZweitstimmenanteilC from "../components/ZweitstimmenanteilC.tsx";
 import WinningPartiesC from "../components/WinningPartiesC.tsx";
 import type {WinningParties} from "../api.ts";
+import {getPartyColor} from "../utils/utils.tsx";
+import ChartTileC from "../components/ChartTileC.tsx";
+import DoughnutChart from "../components/DoughnutC.tsx";
+import {ChartData} from "chart.js";
 
 export default function Wahlkreise() {
 
     const {selectedElection} = useElection();
     const [wahlkreise, setWahlkreise] = useState<Wahlkreis[]>();
     const [selectedWahlkreis, setSelectedWahlkreis] = useState<Wahlkreis | null>(null);
+    const [overview, setOverview] = useState<OverviewWahlkreis>();
 
 
     useEffect(() => {
@@ -25,6 +35,27 @@ export default function Wahlkreise() {
         };
         getWahlkreise();
     }, [selectedElection]);
+
+    useEffect(() => {
+        const getOverview = async () => {
+            try {
+                const data = await fetchWahlkreisOverview(selectedElection?.id ?? 0, selectedWahlkreis?.id ?? 0);
+                setOverview(data);
+            } catch (error) {
+                console.error('Error fetching Wahlkreis Overview:', error);
+            }
+        }
+        getOverview()
+    }, [selectedElection, selectedWahlkreis]);
+    const nichtWaehler = Math.round((100 - overview?.wahlbeteiligung)*10)/10;
+    let wahlbeteiligungData: ChartData = {
+        labels: [`Wähler: ${overview?.wahlbeteiligung}%`, `Nichtwähler: ${nichtWaehler}%`],
+        datasets: [{
+            data: [overview?.wahlbeteiligung, nichtWaehler],
+            backgroundColor: ['#008000', '#d3d3d3'],
+            borderWidth: 0,
+        },],
+    };
 
     const showWahlkreisDetails = (id: number) => {
         setSelectedWahlkreis(wahlkreise?.find(wahlkreis => wahlkreis.id === id) ?? null);
@@ -54,11 +85,38 @@ export default function Wahlkreise() {
             {
                 selectedWahlkreis ?
                     <>
-                        <WinningPartiesC fetchWinningParties={wrapFetchWinningPartiesWahlkreis}/>
-                        <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis}/>
-                    </>
-                    :
-                    null
+                    <WinningPartiesC fetchWinningParties={wrapFetchWinningPartiesWahlkreis}/>
+                    <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis} showAbsoluteVotes={true}/>
+                    <ChartTileC header={"Direktkandidat"}>
+                        <table className="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Vorname</th>
+                                <th scope="col">Geburtsjahr</th>
+                                <th scope="col">Beruf</th>
+                                <th scope="col">Partei</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr key={overview?.direktkandidat?.id}>
+                                <td>{overview?.direktkandidat?.name}</td>
+                                <td>{overview?.direktkandidat?.firstname}</td>
+                                <td>{overview?.direktkandidat?.yearOfBirth}</td>
+                                <td>{overview?.direktkandidat?.profession}</td>
+                                <td style={{color: getPartyColor(overview?.direktkandidat.party.shortname)}}>
+                                    {overview?.direktkandidat.party.shortname}
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </ChartTileC>
+                    <ChartTileC header={"Wahlbeteiligung"}>
+                        <DoughnutChart data={wahlbeteiligungData} fullCircle={true}></DoughnutChart>
+                    </ChartTileC>
+                </>
+                :
+                null
             }
         </div>
     )
