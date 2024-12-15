@@ -6,6 +6,7 @@ export default {
       width: {
         'chart' : '800px',
         'chart-lg' : '1000px',
+        'chart-xl' : '1300px',
         'pie' : '500px'
       },
       height: {

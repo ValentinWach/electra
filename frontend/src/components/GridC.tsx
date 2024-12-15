@@ -1,0 +1,141 @@
+
+import ChartTileC from "./ChartTileC.tsx";
+import './table.css';
+import {GridData} from "../models/GridData.ts";
+import InputC from "./InputC.tsx";
+import {useEffect, useState} from "react";
+import PaginationC from "./PaginationC.tsx";
+
+export default function GridC({gridData, header, usePagination, pageSize, onRowClick}: {
+    gridData: GridData,
+    header: string,
+    usePagination: boolean,
+    pageSize?: number,
+    onRowClick?: (id: number) => void
+}) {
+
+    const [filteredGridData, setFilteredGridData] = useState<GridData>({
+        rows: [],
+        columns: [],
+    });
+    const [currentPageGridData, setCurrentPageGridData] = useState<GridData>({
+        rows: [],
+        columns: [],
+    });
+    const [currentFilters, setCurrentFilters] = useState<Map<number, string>>(new Map());
+
+    const [sortConfig, setSortConfig] = useState<{
+        columnId: number,
+        direction: 'asc' | 'desc'
+    }>({columnId: gridData.columns[0]?.id ?? 0, direction: 'asc'});
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    pageSize = pageSize ?? 50;
+
+    useEffect(() => {
+        const filterAndSortData = () => {
+            console.log("Filtering and sorting data");
+            let data = [...(gridData.rows ?? [])];
+
+            // Apply filters
+            data = data.filter(row => {
+                return Array.from(currentFilters.entries()).every(([key, value]) =>
+                    row.values.some(col => col.column_id === key && col.value.toLowerCase().startsWith(value.toLowerCase()))
+                );
+            });
+
+            if (sortConfig.columnId !== null && sortConfig.direction !== null) {
+                data.sort((a, b) => {
+                    const aValue = a.values.find(col => col.column_id === sortConfig.columnId)?.value || "";
+                    const bValue = b.values.find(col => col.column_id === sortConfig.columnId)?.value || "";
+
+                    if (sortConfig.direction === 'asc') {
+                        return aValue.localeCompare(bValue, undefined, {numeric: true, sensitivity: 'base'});
+                    } else {
+                        return bValue.localeCompare(aValue, undefined, {numeric: true, sensitivity: 'base'});
+                    }
+                });
+            }
+
+            setFilteredGridData({...gridData, rows: data});
+            setCurrentPage(1);
+        };
+
+        filterAndSortData();
+    }, [currentFilters, sortConfig, gridData]);
+
+    function setFilters(col_id: number, filter_val: string) {
+        let filters = new Map(currentFilters);
+        if (filter_val.trim() === "") {
+            filters.delete(col_id);
+        } else {
+            filters.set(col_id, filter_val.trim());
+        }
+        setCurrentFilters(filters);
+    }
+
+    function handleSort(columnKey: number) {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortConfig.columnId === columnKey && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        } else if (sortConfig.columnId === columnKey && sortConfig.direction === 'desc') {
+            direction = 'asc';
+        }
+        setSortConfig({columnId: columnKey, direction});
+    }
+
+    useEffect(() => {
+        const pageinateData = () => {
+            if (usePagination) {
+                const maxPage = Math.max(Math.ceil(filteredGridData.rows.length / pageSize), 1);
+                if (maxPage < currentPage)
+                    setCurrentPage(maxPage);
+                else if (currentPage < 1)
+                    setCurrentPage(1);
+
+                console.log("Rows", filteredGridData.rows);
+                let newRows = filteredGridData.rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+                setCurrentPageGridData({...filteredGridData, rows: newRows});
+            } else {
+                setCurrentPageGridData(filteredGridData);
+            }
+        };
+        pageinateData();
+    }, [currentPage, filteredGridData, pageSize]);
+
+
+    return (
+        <ChartTileC header={header} doubleSize={gridData.columns.length > 4}>
+            <table className="table">
+                <thead>
+                <tr>
+                    {gridData.columns.map(column => (
+                        <th key={column.id} scope="col">
+                            <div onClick={() => handleSort(column.id)}>
+                                {column.label} {sortConfig.columnId === column.id ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
+                            </div>
+                            <InputC placeholder={column.label + " filtern"}
+                                    onInputFunction={(filter_val) => setFilters(column.id, filter_val)}
+                                    hidden={!column.searchable} id={column.id.toString()} name={column.label}/>
+                        </th>
+                    ))}
+                </tr>
+                </thead>
+                <tbody>
+                {currentPageGridData.rows.map((row) => (
+                    <tr key={row.key} className={`${onRowClick ? "hover:cursor-pointer" : ""}`} onClick={() => onRowClick && onRowClick(row.key)}>
+                        {row.values.map((col, index) => (
+                            <td key={index}>{col.value}</td>
+                        ))}
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+            {usePagination &&
+                <PaginationC numOfPages={Math.ceil(filteredGridData.rows.length / pageSize)}
+                             selectedPageProp={currentPage} switchPage={(p: number) => {
+                    setCurrentPage(p)
+                }}/>
+            }
+        </ChartTileC>
+    );
+}

@@ -2,16 +2,19 @@ import {useEffect, useState} from "react";
 import {fetchWahlkreise} from "../apiServices.ts";
 import {Wahlkreis} from "../api";
 import {useElection} from "../context/ElectionContext.tsx";
-import ChartTileC from "./ChartTileC.tsx";
 import './table.css';
+import {GridData} from "../models/GridData.ts";
+import GridC from "./GridC.tsx";
 
 
 export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisDetails: (id: number) => void }) {
 
     const {selectedElection} = useElection();
     const [wahlkreise, setWahlkreise] = useState<Wahlkreis[]>();
+    const [wahlkreisGridData, setWahlkreisGridData] = useState<GridData>({columns: [], rows: []});
+
     useEffect(() => {
-        const getSitzverteilung = async () => {
+        const getWahlkreise = async () => {
             try {
                 const data = await fetchWahlkreise();
                 setWahlkreise(data);
@@ -19,31 +22,33 @@ export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisD
                 console.error('Error fetching Wahlkreise:', error);
             }
         };
-        getSitzverteilung();
+        getWahlkreise();
     }, [selectedElection]);
 
+    useEffect(() => {
+        const wahlkreisGridDataNew = {
+            columns: [
+                {id: 1, label: 'Wahlkreisnummer', searchable: true},
+                {id: 2, label: 'Wahlkreisname', searchable: true},
+                {id: 3, label: 'Bundesland', searchable: true},
+                {id: 4, label: 'Abgeordneter', searchable: true},
+                {id: 5, label: 'Stärkste Partei', searchable: true}
+            ],
+            rows: wahlkreise?.map((wahlkreis) => ({
+                key: wahlkreis.id,
+                values: [
+                    {column_id: 1, value: wahlkreis.id.toString()},
+                    {column_id: 2, value: wahlkreis.name},
+                    {column_id: 3, value: "Bundesland_Platzhalter"},
+                    {column_id: 4, value: "Abgeordneter_Platzhalter"},
+                    {column_id: 5, value: "Stärkste Partei_Platzhalter"}
+                ]
+            })) ?? []
+        };
+        setWahlkreisGridData(wahlkreisGridDataNew);
+    }, [wahlkreise]);
+
     return (
-        <ChartTileC header={"Wahlkreise"}>
-            <table className="table">
-                <thead>
-                <tr>
-                    <th scope="col">Wahlkreisname</th>
-                    <th scope="col">Bundesland</th>
-                    <th scope="col">Abgeordneter</th>
-                    <th scope="col">Stärkste Partei</th>
-                </tr>
-                </thead>
-                <tbody>
-                {wahlkreise?.map((wahlkreis) => (
-                    <tr key={wahlkreis.id} className={"hover:cursor-pointer"} onClick={() => showWahlkreisDetails(wahlkreis.id)}>
-                        <td>{wahlkreis.name}</td>
-                        <td>Ein Bundesland</td>
-                        <td>ein Abgeordneter</td>
-                        <td>eine Partei</td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-        </ChartTileC>
+        <GridC gridData={wahlkreisGridData} header={"Wahlkreise"} usePagination={true} pageSize={10} onRowClick={(id) => showWahlkreisDetails(id)} />
     )
 }

@@ -1,9 +1,9 @@
 import {useEffect, useState} from "react";
 import {Abgeordneter} from "../api";
 import {useElection} from "../context/ElectionContext.tsx";
-import ChartTileC from "./ChartTileC.tsx";
 import './table.css';
-import {getPartyColor} from "../utils/utils.tsx";
+import GridC from "./GridC.tsx";
+import {GridData} from "../models/GridData.ts";
 
 
 export default function AbgeordneteC({fetchAbgeordnete}: {
@@ -12,6 +12,7 @@ export default function AbgeordneteC({fetchAbgeordnete}: {
 
     const {selectedElection} = useElection();
     const [abgeordnete, setAbgeordnete] = useState<Abgeordneter[]>();
+    const [abgeordneteGridData, setAbgeordneteGridData] = useState<GridData>({columns: [], rows: []});
 
     useEffect(() => {
         const getAbgeordnete = async () => {
@@ -25,30 +26,30 @@ export default function AbgeordneteC({fetchAbgeordnete}: {
         getAbgeordnete();
     }, [selectedElection]);
 
+    useEffect(() => {
+        const abgeordneteGridDataNew = {
+            columns: [
+                {id: 1, label: 'Name', searchable: true},
+                {id: 2, label: 'Vorname', searchable: true},
+                {id: 3, label: 'Beruf', searchable: true},
+                {id: 4, label: 'Geburtsjahr', searchable: true},
+                {id: 5, label: 'Partei', searchable: true}
+            ],
+            rows: abgeordnete?.map((abgeordneter) => ({
+                key: abgeordneter.id,
+                values: [
+                    {column_id: 1, value: abgeordneter.name},
+                    {column_id: 2, value: abgeordneter.firstname},
+                    {column_id: 3, value: abgeordneter.profession ?? ''},
+                    {column_id: 4, value: abgeordneter.yearOfBirth ? abgeordneter.yearOfBirth.toString() : ''},
+                    {column_id: 5, value: abgeordneter.party ? abgeordneter.party.shortname : "Einzelbewerber"}
+                ]
+            })) ?? []
+        };
+        setAbgeordneteGridData(abgeordneteGridDataNew);
+    }, [abgeordnete]);
+
     return (
-        <ChartTileC header={"Abgeordnete"}>
-            <table className="table">
-                <thead>
-                <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Vorname</th>
-                    <th scope="col">Beruf</th>
-                    <th scope="col">Geburtsjahr</th>
-                    <th scope="col">Partei</th>
-                </tr>
-                </thead>
-                <tbody>
-                {abgeordnete?.map((abgeordneter) => (
-                    <tr key={abgeordneter.id}>
-                        <td>{abgeordneter.name}</td>
-                        <td>{abgeordneter.firstname}</td>
-                        <td>{abgeordneter.profession}</td>
-                        <td>{abgeordneter.yearOfBirth}</td>
-                        <td style={{color: abgeordneter.party ? getPartyColor(abgeordneter.party.shortname) : 'black'}}>{abgeordneter.party ? abgeordneter.party.shortname : "Einzelbewerber"}</td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-        </ChartTileC>
+        <GridC gridData={abgeordneteGridData} header={"Abgeordnete"} usePagination={true} pageSize={5} />
     )
 }
