@@ -1,9 +1,8 @@
 import {useEffect, useState} from "react";
-import {Abgeordneter, ClosestWinners} from "../api";
+import {ClosestWinners} from "../api";
 import {useElection} from "../context/ElectionContext.tsx";
 import ChartTileC from "./ChartTileC.tsx";
 import './table.css';
-import {getPartyColor} from "../utils/utils.tsx";
 
 
 export default function ClosestWinnersC({fetchClostestWinners}: {

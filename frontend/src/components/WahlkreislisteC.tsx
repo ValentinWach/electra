@@ -26,15 +26,15 @@ export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisD
     }, [selectedElection]);
 
     useEffect(() => {
-        const wahlkreisGridDataNew = {
-            columns: [
+        const wahlkreisGridDataNew = new GridData(
+            [
                 {id: 1, label: 'Wahlkreisnummer', searchable: true},
                 {id: 2, label: 'Wahlkreisname', searchable: true},
                 {id: 3, label: 'Bundesland', searchable: true},
                 {id: 4, label: 'Abgeordneter', searchable: true},
                 {id: 5, label: 'Stärkste Partei', searchable: true}
             ],
-            rows: wahlkreise?.map((wahlkreis) => ({
+            wahlkreise?.map((wahlkreis) => ({
                 key: wahlkreis.id,
                 values: [
                     {column_id: 1, value: wahlkreis.id.toString()},
@@ -44,10 +44,9 @@ export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisD
                     {column_id: 5, value: "Stärkste Partei_Platzhalter"}
                 ]
             })) ?? []
-        };
+        );
         setWahlkreisGridData(wahlkreisGridDataNew);
     }, [wahlkreise]);
-
     return (
         <GridC gridData={wahlkreisGridData} header={"Wahlkreise"} usePagination={true} pageSize={10} onRowClick={(id) => showWahlkreisDetails(id)} />
     )

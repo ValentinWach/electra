@@ -27,15 +27,15 @@ export default function AbgeordneteC({fetchAbgeordnete}: {
     }, [selectedElection]);
 
     useEffect(() => {
-        const abgeordneteGridDataNew = {
-            columns: [
+        const abgeordneteGridDataNew = new GridData(
+            [
                 {id: 1, label: 'Name', searchable: true},
                 {id: 2, label: 'Vorname', searchable: true},
                 {id: 3, label: 'Beruf', searchable: true},
                 {id: 4, label: 'Geburtsjahr', searchable: true},
                 {id: 5, label: 'Partei', searchable: true}
             ],
-            rows: abgeordnete?.map((abgeordneter) => ({
+            abgeordnete?.map((abgeordneter) => ({
                 key: abgeordneter.id,
                 values: [
                     {column_id: 1, value: abgeordneter.name},
@@ -45,7 +45,7 @@ export default function AbgeordneteC({fetchAbgeordnete}: {
                     {column_id: 5, value: abgeordneter.party ? abgeordneter.party.shortname : "Einzelbewerber"}
                 ]
             })) ?? []
-        };
+        );
         setAbgeordneteGridData(abgeordneteGridDataNew);
     }, [abgeordnete]);
 

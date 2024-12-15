@@ -14,9 +14,14 @@ export interface GridRow {
     key: number;
 }
 
-export interface GridData {
+export class GridData {
     columns: GridColumn[];
     rows: GridRow[];
+
+    constructor(columns: GridColumn[], rows: GridRow[]) {
+        this.columns = columns;
+        this.rows = rows;
+    }
 }
 
 
