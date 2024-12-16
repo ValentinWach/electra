@@ -1,3 +1,86 @@
+CREATE OR REPLACE FUNCTION calculate_increased_seats_per_party_per_bundesland_and_election()
+    RETURNS TABLE
+            (
+                wahl_id             INT,
+                bundesland_id       INT,
+                partei_id           INT,
+                stimmen_sum         NUMERIC,
+                landeslistensitze   NUMERIC,
+                mindestsitzanspruch BIGINT,
+                sitze_final         NUMERIC
+            )
+AS
+$$
+DECLARE
+    counter         INT;
+    condition_met   BOOLEAN;
+    rec             RECORD;
+    temp_table_name TEXT;
+
+BEGIN
+
+    FOR rec IN (SELECT DISTINCT nw.wahl_id, nw.partei_id
+                FROM ov_sitzkontingente_erhoehung nw)
+        LOOP
+            temp_table_name := 'temp_table';
+
+                    counter     := (SELECT sitze_nach_erhoehung
+                            FROM ov_sitzkontingente_erhoehung nw
+                            WHERE nw.wahl_id = rec.wahl_id
+                              AND nw.partei_id = rec.partei_id);
+
+            EXECUTE 'CREATE TEMP TABLE temp_table_verringert AS
+    SELECT nw.wahl_id, ma.bundesland_id, nw.partei_id, zbp.stimmen_sum , ma.mindestsitzzahlen, 0 as sitze_berechnet, ma.mindestsitzzahlen as max_sitze_mindestsitze
+    FROM ov_sitzkontingente_erhoehung nw JOIN uv_mindestsitzanspruch_bundestag ma
+    ON nw.wahl_id = ma.wahl_id AND nw.partei_id = ma.partei_id
+    JOIN zweitstimmen_bundesland_partei zbp on zbp.bundeslaender_id = ma.bundesland_id AND zbp.wahlen_id = ma.wahl_id AND zbp.parteien_id = ma.partei_id
+    WHERE nw.wahl_id = ' || rec.wahl_id || ' AND nw.partei_id = ' || rec.partei_id || '';
+
+            EXECUTE 'SELECT EXISTS (
+            SELECT 1
+         )' INTO condition_met;
+
+            WHILE condition_met
+                LOOP
+                    EXECUTE 'CREATE TEMP TABLE temp_table_verringert_helper AS
+                    SELECT verr.wahl_id, bundesland_id, partei_id, stimmen_sum, mindestsitzzahlen, sl.slots as sitze_berechnet, GREATEST(mindestsitzzahlen, sl.slots) as max_sitze_mindestsitze
+                    FROM sainte_lague(' || quote_literal('temp_table_verringert') || ', ' ||
+                            quote_literal('bundesland_id') ||
+                            ', ' || quote_literal('stimmen_sum') || ', ' || counter || ') sl
+                    JOIN temp_table_verringert verr on verr.bundesland_id = sl.id';
+
+                    counter := counter - 1;
+
+                    EXECUTE 'DROP TABLE temp_table_verringert';
+                    EXECUTE 'CREATE TEMP TABLE temp_table_verringert AS TABLE temp_table_verringert_helper';
+                    EXECUTE 'DROP TABLE temp_table_verringert_helper';
+
+                    EXECUTE '
+    WITH total_max_sitze AS (
+        SELECT SUM(max_sitze_mindestsitze) AS total_max_sitze
+        FROM temp_table_verringert
+    )
+    SELECT EXISTS (
+        SELECT 1
+        FROM total_max_sitze
+        WHERE total_max_sitze > (SELECT sitze_nach_erhoehung FROM ov_sitzkontingente_erhoehung WHERE wahl_id = ' ||
+                            rec.wahl_id || ' AND partei_id = ' || rec.partei_id || ')
+    )'
+                        INTO condition_met;
+                END LOOP;
+
+
+            -- Return the final result
+            RETURN QUERY EXECUTE '
+    SELECT wahl_id, bundesland_id, partei_id, stimmen_sum, mindestsitzzahlen, sitze_berechnet, max_sitze_mindestsitze
+    FROM temp_table_verringert';
+
+            -- Clean up the temporary table
+            EXECUTE 'DROP TABLE temp_table_verringert';
+        END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION calculate_seats_per_party_per_election_nationwide(wahl_id_init INT)
 RETURNS TABLE (
     wahl_id INT,

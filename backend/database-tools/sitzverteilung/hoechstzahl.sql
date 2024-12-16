@@ -51,9 +51,4 @@ SELECT wahl_id, partei_id, GREATEST(sum(sitze), sum(mindestsitzzahlen)) as minde
 FROM uv_mindestsitzanspruch_bundestag msa join zweitstimmen_partei zs on zs.wahlen_id = msa.wahl_id and zs.parteien_id = msa.partei_id
 GROUP BY wahl_id, partei_id, zs.stimmen_sum;
 
-CREATE OR REPLACE VIEW ov_sitzkontingente_erhoehung AS
-SELECT partei_id as parteien_id, mindestsitzanspruch, verbleibender_ueberhang, sitze_nach_erhoehung, sum_sitze, wahl_id from calculate_seats_per_party_per_election_nationwide(1)
-UNION
-SELECT partei_id as parteien_id, mindestsitzanspruch, verbleibender_ueberhang, sitze_nach_erhoehung, sum_sitze, wahl_id from calculate_seats_per_party_per_election_nationwide(2);
-
 
