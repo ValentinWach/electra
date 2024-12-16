@@ -9,6 +9,8 @@ from openapi_server.database.models import Wahl as WahlModel
 from openapi_server.database.models import Bundesland as BundelandModel
 from openapi_server.database.connection import Session as db_session  # Import Session from connection.py
 from openapi_server.models.wahlkreis import Wahlkreis
+from openapi_server.database.models import Partei as ParteiModel
+from openapi_server.models.partei import Partei
 from openapi_server.database.models import Wahlkreis as WahlkreisModel
 
 
@@ -80,6 +82,26 @@ class BaseGeneralApi:
             wahlkreis_list = [Wahlkreis.model_validate(wahlkreis) for wahlkreis in wahlkreis_dicts]  # Use model_validate()
 
             return wahlkreis_list
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    async def get_parteien(
+            self
+    ) -> List[Partei]:
+        try:
+            with db_session() as db:
+                parteien = db.query(ParteiModel).all()
+
+            if not parteien:
+                raise HTTPException(status_code=404, detail="No wahlkreise found")
+
+            partei_dicts = [to_dict(partei) for partei in parteien]
+
+            partei_list = [Partei.model_validate(partei) for partei in
+                              partei_dicts]
+
+            return partei_list
 
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))

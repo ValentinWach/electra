@@ -9,9 +9,12 @@ from typing import List, Optional
 from openapi_server.models.overview_wahlkreis import OverviewWahlkreis
 from openapi_server.models.stimmanteil import Stimmanteil
 from openapi_server.models.winning_parties import WinningParties
+from openapi_server.models.abgeordneter import Abgeordneter
 from openapi_server.models.partei import Partei
 from openapi_server.models.winning_parties_erststimme_inner import WinningPartiesErststimmeInner
 from openapi_server.models.winning_parties_zweitstimme_inner import WinningPartiesZweitstimmeInner
+from openapi_server.models.auslaenderanteil import Auslaenderanteil
+from openapi_server.models.einkommen import Einkommen
 
 
 class BaseWahlkreisApi:
@@ -21,13 +24,89 @@ class BaseWahlkreisApi:
         super().__init_subclass__(**kwargs)
         BaseWahlkreisApi.subclasses = BaseWahlkreisApi.subclasses + (cls,)
     async def get_overview_wahlkreis(
-        self,
         wahlid: StrictInt,
         wahlkreisid: StrictInt,
         generatefromaggregate: Optional[StrictBool],
+        self
     ) -> OverviewWahlkreis:
-        ...
+        try:
+            with db_session() as db:
+                # SQL query for `generatefromaggregate=True`
+                if generatefromaggregate:
+                    abgeordneter_query = text('''
+                                SELECT k.id, k.name, k.firstname, k.profession, k."yearOfBirth", ww.partei_id 
+                                FROM wahlkreis_winners ww 
+                                JOIN kandidaten k ON ww.kandidat_id = k.id 
+                                WHERE ww.wahlkreis_id = :wahlkreisId AND ww.wahl_id = :wahlId;
+                            ''')
+                else:
+                    # SQL query for `generatefromaggregate=False`
+                    abgeordneter_query = text('''
+                                WITH candidate_votes AS
+                                    (SELECT w.kandidat_id, w.partei_id, COUNT(*) AS votes
+                                    FROM erststimmen e
+                                          JOIN wahlkreiskandidaturen w ON e.wahlkreiskandidatur_id = w.id
+                                    WHERE wahlkreis_id = :wahlkreisId AND w.wahl_id = :wahlId
+                                    GROUP BY w.kandidat_id, w.partei_id),
+                                max_votes AS (SELECT kandidat_id, partei_id
+                                    FROM candidate_votes
+                                    WHERE votes = (SELECT MAX(votes) FROM candidate_votes)) 
+                                SELECT k.id, k.name, k.firstname, k.profession, k."yearOfBirth", mv.partei_id
+                                FROM max_votes mv JOIN kandidaten k ON mv.kandidat_id = k.id;
+                            ''')
 
+                # Execute the abgeordneter query
+                abgeordneter_results = db.execute(
+                    abgeordneter_query,
+                    {"wahlId": wahlid, "wahlkreisId": wahlkreisid}
+                ).fetchall()
+
+                if not abgeordneter_results:
+                    raise HTTPException(status_code=404, detail="No direktkandidat found")
+
+                direktkandidat = abgeordneter_results[0]
+
+                # Fetch the Partei details
+                partei = db.execute(
+                    text('SELECT id, name, "shortName" FROM parteien WHERE id = :partei_id'),
+                    {"partei_id": direktkandidat[5]}
+                ).fetchone()
+
+                if not partei:
+                    raise HTTPException(status_code=404, detail="No Partei details found")
+
+                # Fetch the Wahlbeteiligung
+                wahlbeteiligung_query = text('''
+                            SELECT wahlbeteiligung 
+                            FROM strukturdaten 
+                            WHERE wahl_id = :wahlId AND wahlkreis_id = :wahlkreisId;
+                        ''')
+
+                wahlbeteiligung_results = db.execute(
+                    wahlbeteiligung_query,
+                    {"wahlId": wahlid, "wahlkreisId": wahlkreisid}
+                ).fetchone()
+
+                if not wahlbeteiligung_results:
+                    raise HTTPException(status_code=404, detail="No wahlbeteiligung found")
+
+                # Construct the response
+                overview = OverviewWahlkreis(
+                    wahlbeteiligung=wahlbeteiligung_results[0],
+                    direktkandidat=Abgeordneter(
+                        id=direktkandidat[0],
+                        name=direktkandidat[1],
+                        firstname=direktkandidat[2],
+                        profession=direktkandidat[3],
+                        year_of_birth=direktkandidat[4],
+                        party=Partei(id=partei[0], name=partei[1], shortName=partei[2])
+                    )
+                )
+
+                return overview
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
     async def get_stimmanteil_wahlkreis(
         wahlid: StrictInt,
@@ -73,7 +152,7 @@ class BaseWahlkreisApi:
                 ).fetchall()
 
             if not stimmanteil_results:
-                raise HTTPException(status_code=404, detail="No winners found")
+                raise HTTPException(status_code=404, detail="No stimmanteil found")
 
             # Return the WinningParties object with the filled lists
             stimmanteile = []
@@ -95,7 +174,7 @@ class BaseWahlkreisApi:
                 # Map the result to the schema
                 stimmanteile.append(
                     Stimmanteil(
-                        party=Partei(id=partei.id, name=partei.name, shortname=partei.shortName),
+                        party=Partei(id=partei.id, name=partei.name, shortName=partei.shortName),
                         share=prozentualer_anteil,
                         absolute=int(stimmenanzahl)
                     )
@@ -134,14 +213,14 @@ class BaseWahlkreisApi:
                 raise HTTPException(status_code=404, detail="No winners found")
             erststimme_winners = [
                 WinningPartiesErststimmeInner(
-                    party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
+                    party=Partei(id=row[1], shortName=row[0], name=row[2]),  # Assuming Partei is an existing class
                     region_id=wahlkreisId,
                 ) for row in erstimmen_winner_results
             ]
 
             zweitstimme_winners = [
                 WinningPartiesZweitstimmeInner(
-                    party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
+                    party=Partei(id=row[1], shortName=row[0], name=row[2]),  # Assuming Partei is an existing class
                     region_id=wahlkreisId,
                 ) for row in zweitstimmen_winner_results
             ]
@@ -182,14 +261,14 @@ class BaseWahlkreisApi:
                 raise HTTPException(status_code=404, detail="No winners found")
             erststimme_winners = [
                 WinningPartiesErststimmeInner(
-                    party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
+                    party=Partei(id=row[1], shortName=row[0], name=row[2]),  # Assuming Partei is an existing class
                     region_id=row[3],
                 ) for row in erstimmen_winner_results
             ]
 
             zweitstimme_winners = [
                 WinningPartiesZweitstimmeInner(
-                    party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
+                    party=Partei(id=row[1], shortName=row[0], name=row[2]),  # Assuming Partei is an existing class
                     region_id=row[3],
                 ) for row in zweitstimmen_winner_results
             ]
@@ -202,3 +281,74 @@ class BaseWahlkreisApi:
 
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+    async def get_foreigners(
+            wahlid: StrictInt,
+            parteiid: StrictInt,
+            self
+    ) -> Auslaenderanteil:
+        try:
+            with db_session() as db:
+                auslaenderanteil_query = text('''
+                            SELECT
+                                parteien_id,
+                                stimmen_sum,
+                                ROUND(
+                                    (stimmen_sum * 100.0) /
+                                    (SELECT SUM(stimmen_sum)
+                                     FROM zweitstimmen_wahlkreis_partei
+                                     WHERE wahlen_id = z.wahlen_id and wahlkreise_id = z.wahlkreise_id),
+                                    2
+                                ) AS prozentualer_anteil
+                            FROM
+                                zweitstimmen_wahlkreis_partei z
+                            WHERE wahlen_id = :wahlId and wahlkreise_id = :wahlkreisId;
+                            ''')
+
+
+                # Execute the query with parameterized input, avoiding direct string interpolation
+                stimmanteil_results = db.execute(auslaenderanteil_query,
+                    {"wahlId": wahlid, "wahlkreisId": wahlkreisid}
+                ).fetchall()
+
+            if not stimmanteil_results:
+                raise HTTPException(status_code=404, detail="No stimmanteil found")
+
+            # Return the WinningParties object with the filled lists
+            stimmanteile = []
+            for result in stimmanteil_results:
+                partei_id, stimmenanzahl, prozentualer_anteil = result
+
+                # Fetch the Partei details from the database or cache
+                partei = db.execute(
+                    text('SELECT id, name, "shortName" FROM parteien WHERE id = :partei_id'),
+                    {"partei_id": partei_id}
+                ).fetchone()
+
+                if not partei:
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"Partei with id {partei_id} not found"
+                    )
+
+                # Map the result to the schema
+                stimmanteile.append(
+                    Stimmanteil(
+                        party=Partei(id=partei.id, name=partei.name, shortName=partei.shortName),
+                        share=prozentualer_anteil,
+                        absolute=int(stimmenanzahl)
+                    )
+                )
+
+            return stimmanteile
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+    async def get_income(
+            wahlid: StrictInt,
+            parteiid: StrictInt,
+            self
+    ) -> Einkommen:
+        ...

@@ -3,11 +3,11 @@ info:
   title: Donator-Mainframe communication
   version: 0.1.1
 servers:
-  - url: "{protocol}://{url}/api"
+  - url: "http://localhost/"
     variables:
       url:
         description: The URL of the server. Either localhost or deployed.
-        default: 'localhost:9000/api'
+        default: 'localhost:8000/'
       protocol:
         enum:
           - http
@@ -127,7 +127,6 @@ paths:
       operationId: getStimmanteil
       parameters:
         - $ref: '#/components/parameters/wahlid'
-        - $ref: '#/components/parameters/wahlkreisid'
       tags:
         - Global
       responses:
@@ -235,6 +234,41 @@ paths:
             application/json:
                 schema:
                   $ref: '#/components/schemas/ClosestWinners'
+
+
+
+  /results/{wahlid}/auslaenderanteil/{parteiid}/:
+    get:
+      operationId: getForeigners
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+        - $ref: '#/components/parameters/parteiid'
+      tags:
+        - Wahlkreis
+      responses:
+        '200':
+          description: Returning the auslaenderanteil and zweitstimmen per selected party for all wahlkreise
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Auslaenderanteil'
+
+  /results/{wahlid}/income/{parteiid}/:
+    get:
+      operationId: getIncome
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+        - $ref: '#/components/parameters/parteiid'
+      tags:
+        - Wahlkreis
+      responses:
+        '200':
+          description: Returning the income and zweitstimmen per selected party for all wahlkreise
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Einkommen'
+
 
 
 components:
@@ -463,3 +497,51 @@ components:
                 $ref: '#/components/schemas/Abgeordneter'
               wahlkreis:
                 $ref: '#/components/schemas/Wahlkreis'
+
+    Auslaenderanteil:
+      type: object
+      required:
+        - wahlkreise
+      properties:
+        wahlkreise:
+          type: array
+          items:
+            type: object
+            required:
+              - wahlkreis_id
+              - auslaenderanteil
+              - stimmen
+            properties:
+              wahlkreis_id:
+                type: integer
+                title: Wahlkreis_Id
+              auslaenderanteil:
+                type: number
+                title: Wahlkreis_Id
+              stimmen:
+                type: integer
+                title: Stimmen
+
+    Einkommen:
+      type: object
+      required:
+        - wahlkreise
+      properties:
+        wahlkreise:
+          type: array
+          items:
+            type: object
+            required:
+              - wahlkreis_id
+              - einkommen
+              - stimmen
+            properties:
+              wahlkreis_id:
+                type: integer
+                title: Wahlkreis_Id
+              einkommen:
+                type: number
+                title: Wahlkreis_Id
+              stimmen:
+                type: integer
+                title: Stimmen

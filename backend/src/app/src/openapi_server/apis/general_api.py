@@ -24,6 +24,7 @@ from fastapi import (  # noqa: F401
 from openapi_server.models.extra_models import TokenModel  # noqa: F401
 from typing import List
 from openapi_server.models.bundesland import Bundesland
+from openapi_server.models.partei import Partei
 from openapi_server.models.wahl import Wahl
 from openapi_server.models.wahlkreis import Wahlkreis
 # app/src/openapi_server/apis/general_api.py
@@ -80,3 +81,19 @@ self=None) -> List[Bundesland]:
 async def get_wahlkreise(
 self=None) -> List[Wahlkreis]:
     return await BaseGeneralApi.get_wahlkreise(self)
+
+
+@router.get(
+    "/parteien",
+    responses={
+        200: {"model": List[Partei], "description": "Returning all parties"},
+    },
+    tags=["General"],
+    response_model_by_alias=True,
+)
+async def get_parteien(
+self=None) -> List[Partei]:
+    return await BaseGeneralApi.get_parteien(self)
+
+
+

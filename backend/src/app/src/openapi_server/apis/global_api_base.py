@@ -69,7 +69,7 @@ class BaseGlobalApi:
 
                     # Create the ClosestWinners instance for the current party
                     closest_winner = ClosestWinners(
-                        party=Partei(id=party_results[0][0], name=party_results[0][1], shortname=party_results[0][2]),
+                        party=Partei(id=party_results[0][0], name=party_results[0][1], shortName=party_results[0][2]),
                         closest_type=closest_for_party_results[0][3],  # 'result_status' from closest query
                         closest_winners=[]  # Initialize an empty list for the closest winners
                     )
@@ -93,7 +93,7 @@ class BaseGlobalApi:
                                     firstname=abgeordneter_results[0][2],
                                     year_of_birth=abgeordneter_results[0][3],
                                     profession=abgeordneter_results[0][4],
-                                    party=Partei(id=party_id, name=party_results[0][1], shortname=party_results[0][2])
+                                    party=Partei(id=party_id, name=party_results[0][1], shortName=party_results[0][2])
                                 )
                             )
 
@@ -129,7 +129,7 @@ class BaseGlobalApi:
                 shortname, name, party_id, seats, total = row
 
                 # Parse individual party details
-                party = Partei(id=party_id, name=name, shortname=shortname)
+                party = Partei(id=party_id, name=name, shortName=shortname)
 
                 # Add to distribution list
                 distribution_inner = SeatDistributionDistributionInner(
@@ -196,7 +196,7 @@ class BaseGlobalApi:
                 # Map the result to the schema
                 stimmanteile.append(
                     Stimmanteil(
-                        party=Partei(id=partei.id, name=partei.name, shortname=partei.shortName),
+                        party=Partei(id=partei.id, name=partei.name, shortName=partei.shortName),
                         share=prozentualer_anteil,
                         absolute=int(stimmenanzahl)
                     )
