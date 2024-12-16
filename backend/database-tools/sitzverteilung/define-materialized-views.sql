@@ -61,4 +61,4 @@ SELECT wahl_id, partei_id, stimmen_sum, mindestsitzanspruch, verbleibender_ueber
 
 --Depends on dynamic statement and can thus not be a materialized view
 CREATE TABLE uv_landeslisten_erhoeht AS
-SELECT calc.bundesland_id, calc.partei_id, calc.landeslistensitze, calc.stimmen_sum, calc.mindestsitzanspruch, calc.sitze_final as sum FROM calculate_increased_seats_per_party_per_bundesland_and_election() calc;
+SELECT calc.wahl_id, calc.bundesland_id, calc.partei_id, calc.landeslistensitze, calc.stimmen_sum, calc.mindestsitzanspruch, calc.sitze_final as sum FROM calculate_increased_seats_per_party_per_bundesland_and_election() calc;

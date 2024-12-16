@@ -4,7 +4,6 @@ REFRESH MATERIALIZED VIEW zweitstimmen_bundesland_partei;
 REFRESH MATERIALIZED VIEW zweitstimmen_partei;
 REFRESH MATERIALIZED VIEW wahlkreis_winners;
 REFRESH MATERIALIZED VIEW bundestag_parties;
-REFRESH MATERIALIZED VIEW wahlkreis_knappste_sieger;
 
 
 --Depends on dynamic statement and can thus not be a materialized view
@@ -25,6 +24,6 @@ SELECT wahl_id, partei_id, stimmen_sum, mindestsitzanspruch, verbleibender_ueber
 
 --Depends on dynamic statement and can thus not be a materialized view
 TRUNCATE TABLE uv_landeslisten_erhoeht;
-INSERT INTO uv_landeslisten_erhoeht (bundesland_id, partei_id, landeslistensitze, stimmen_sum, mindestsitzanspruch, sum)
-SELECT calc.bundesland_id, calc.partei_id, calc.landeslistensitze, calc.stimmen_sum, calc.mindestsitzanspruch, calc.sitze_final as sum FROM calculate_increased_seats_per_party_per_bundesland_and_election() calc;
+INSERT INTO uv_landeslisten_erhoeht (wahl_id, bundesland_id, partei_id, landeslistensitze, stimmen_sum, mindestsitzanspruch, sum)
+SELECT calc.wahl_id, calc.bundesland_id, calc.partei_id, calc.landeslistensitze, calc.stimmen_sum, calc.mindestsitzanspruch, calc.sitze_final as sum FROM calculate_increased_seats_per_party_per_bundesland_and_election() calc;
 COMMIT;

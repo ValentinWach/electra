@@ -46,7 +46,7 @@ BEGIN
                     SELECT verr.wahl_id, bundesland_id, partei_id, stimmen_sum, mindestsitzzahlen, sl.slots as sitze_berechnet, GREATEST(mindestsitzzahlen, sl.slots) as max_sitze_mindestsitze
                     FROM sainte_lague(' || quote_literal('temp_table_verringert') || ', ' ||
                             quote_literal('bundesland_id') ||
-                            ', ' || quote_literal('stimmen_sum') || ', ' || counter || ') sl
+                            ', ' || quote_literal('stimmen_sum') || ', ' || counter || ', '|| rec.wahl_id ||') sl
                     JOIN temp_table_verringert verr on verr.bundesland_id = sl.id';
 
                     counter := counter - 1;
