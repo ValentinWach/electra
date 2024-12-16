@@ -176,18 +176,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                title: winningParties
-                required:
-                  - Erststimmen
-                  - Zweitstimmen
-                properties:
-                  Erststimmen:
-                    title: winnerErststimmen
-                    $ref: '#/components/schemas/Partei'
-                  Zweitstimmen:
-                    title: winnerZweitstimmen
-                    $ref: '#/components/schemas/Partei'
+                title: winningPartiesAllWahlkreise
+                $ref: '#/components/schemas/WinningParties'
 
   /results/{wahlid}/winningparties/wahlkreis:
     get:

@@ -1,0 +1,557 @@
+openapi: 3.0.8
+info:
+  title: Donator-Mainframe communication
+  version: 0.1.0
+servers:
+- url: "{protocol}://{url}/api"
+  variables:
+    url:
+      default: localhost:9000/api
+      description: The URL of the server. Either localhost or deployed.
+    protocol:
+      default: https
+      enum:
+      - http
+      - https
+paths:
+  /wahlen:
+    get:
+      operationId: getWahlen
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Wahl'
+                title: wahlen
+                type: array
+          description: Returning all elections
+      tags:
+      - General
+  /results/{wahlid}/sitzverteilung:
+    get:
+      operationId: getSitzverteilung
+      parameters:
+      - explode: false
+        in: path
+        name: wahlid
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeatDistribution'
+          description: Returning the seat distribution of the election
+      tags:
+      - Global
+  /results/{wahlid}/abgeordnete:
+    get:
+      operationId: getAbgeordnete
+      parameters:
+      - explode: false
+        in: path
+        name: wahlid
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Abgeordneter'
+                title: abgeordnete
+                type: array
+          description: Returning the deputies of the election
+      tags:
+      - Global
+  /results/{wahlid}/stimmanteil/{wahlkreisid}:
+    get:
+      operationId: getStimmanteil
+      parameters:
+      - explode: false
+        in: path
+        name: wahlid
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - explode: false
+        in: path
+        name: wahlkreisid
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Stimmanteil'
+                title: stimmanteil
+                type: array
+          description: Returning the global results of the election
+      tags:
+      - Global
+  /results/{wahlid}/stimmanteil/wahlkreis/{wahlkreisid}:
+    get:
+      operationId: getStimmanteilWahlkreis
+      parameters:
+      - explode: false
+        in: path
+        name: wahlid
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - explode: false
+        in: path
+        name: wahlkreisid
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - explode: true
+        in: query
+        name: generatefromaggregate
+        required: false
+        schema:
+          default: true
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Stimmanteil'
+                title: stimmanteil
+                type: array
+          description: Returning the results of the election in the wahlkreis
+      tags:
+      - Wahlkreis
+  /results/{wahlid}/winningparties/wahlkreis/{wahlkreisid}:
+    get:
+      operationId: getWinningPartiesWahlkreis
+      parameters:
+      - explode: false
+        in: path
+        name: wahlid
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - explode: false
+        in: path
+        name: wahlkreisid
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WinningParties'
+          description: Returning the winning parties of the election per wahlkreis
+      tags:
+      - Wahlkreis
+  /results/{wahlid}/overview/wahlkreis/{wahlkreisid}:
+    get:
+      operationId: getOverviewWahlkreis
+      parameters:
+      - explode: false
+        in: path
+        name: wahlid
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - explode: false
+        in: path
+        name: wahlkreisid
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - explode: true
+        in: query
+        name: generatefromaggregate
+        required: false
+        schema:
+          default: true
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/overview_wahlkreis'
+          description: Returning the overview of the election in the wahlkreis
+      tags:
+      - Wahlkreis
+  /results/{wahlid}/closestwinners:
+    get:
+      operationId: getClosestWinners
+      parameters:
+      - explode: false
+        in: path
+        name: wahlid
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ClosestWinners'
+                title: closestwinners
+                type: array
+          description: Returning the closest winners of the election
+      tags:
+      - Global
+components:
+  parameters:
+    wahlid:
+      explode: false
+      in: path
+      name: wahlid
+      required: true
+      schema:
+        type: integer
+      style: simple
+    wahlkreisid:
+      explode: false
+      in: path
+      name: wahlkreisid
+      required: true
+      schema:
+        type: integer
+      style: simple
+    generatefromaggregate:
+      explode: true
+      in: query
+      name: generatefromaggregate
+      required: false
+      schema:
+        default: true
+        type: boolean
+      style: form
+  schemas:
+    Wahl:
+      example:
+        date: 2000-01-23
+        name: name
+        id: 0
+      properties:
+        id:
+          title: Id
+          type: integer
+        name:
+          title: Name
+          type: string
+        date:
+          format: date
+          title: Date
+          type: string
+      required:
+      - date
+      - id
+      - name
+      title: Wahl
+      type: object
+    Partei:
+      example:
+        name: name
+        id: 0
+        shortname: shortname
+      properties:
+        id:
+          title: Id
+          type: integer
+        shortname:
+          title: shortname
+          type: string
+        name:
+          title: name
+          type: string
+      required:
+      - id
+      - shortname
+      title: Partei
+      type: object
+    SeatDistribution:
+      example:
+        numberofseats: 1
+        distribution:
+        - seats: 6
+          party:
+            name: name
+            id: 0
+            shortname: shortname
+        - seats: 6
+          party:
+            name: name
+            id: 0
+            shortname: shortname
+      properties:
+        distribution:
+          items:
+            $ref: '#/components/schemas/SeatDistribution_distribution_inner'
+          title: distribution
+          type: array
+        numberofseats:
+          title: NumberOfSeats
+          type: integer
+      required:
+      - distribution
+      - numberofseats
+      title: SeatDistribution
+      type: object
+    Abgeordneter:
+      example:
+        profession: profession
+        firstname: firstname
+        name: name
+        id: 0
+        party:
+          name: name
+          id: 0
+          shortname: shortname
+        yearOfBirth: 6
+      properties:
+        id:
+          title: Id
+          type: integer
+        name:
+          title: Name
+          type: string
+        firstname:
+          title: Firstname
+          type: string
+        profession:
+          title: Profession
+          type: string
+        yearOfBirth:
+          title: YearOfBirth
+          type: integer
+        party:
+          $ref: '#/components/schemas/Partei'
+      required:
+      - firstname
+      - id
+      - name
+      - yearOfBirth
+      title: Abgeordneter
+      type: object
+    Stimmanteil:
+      example:
+        share: 0.8008281904610115
+        party:
+          name: name
+          id: 0
+          shortname: shortname
+      properties:
+        party:
+          $ref: '#/components/schemas/Partei'
+        share:
+          title: Share
+          type: number
+      required:
+      - party
+      - share
+      title: Stimmanteil
+      type: object
+    WinningParties:
+      example:
+        zweitstimme:
+        - region_id: 6
+          region_name: 1
+          party:
+            name: name
+            id: 0
+            shortname: shortname
+        - region_id: 6
+          region_name: 1
+          party:
+            name: name
+            id: 0
+            shortname: shortname
+        erststimme:
+        - party_name: party_name
+          region_id: 0
+          region_name: region_name
+          party:
+            name: name
+            id: 0
+            shortname: shortname
+        - party_name: party_name
+          region_id: 0
+          region_name: region_name
+          party:
+            name: name
+            id: 0
+            shortname: shortname
+      properties:
+        erststimme:
+          items:
+            $ref: '#/components/schemas/WinningParties_erststimme_inner'
+          title: erststimme
+          type: array
+        zweitstimme:
+          items:
+            $ref: '#/components/schemas/WinningParties_zweitstimme_inner'
+          title: zweitstimme
+          type: array
+      required:
+      - erststimme
+      - zweitstimme
+      title: WinningParties
+      type: object
+    ClosestWinners:
+      example:
+        closestWinners:
+        - profession: profession
+          firstname: firstname
+          name: name
+          id: 0
+          party:
+            name: name
+            id: 0
+            shortname: shortname
+          yearOfBirth: 6
+        - profession: profession
+          firstname: firstname
+          name: name
+          id: 0
+          party:
+            name: name
+            id: 0
+            shortname: shortname
+          yearOfBirth: 6
+        closest_type: Winner
+        party:
+          name: name
+          id: 0
+          shortname: shortname
+      properties:
+        party:
+          $ref: '#/components/schemas/Partei'
+        closest_type:
+          enum:
+          - Winner
+          - Loser
+          title: Closest_Type
+          type: string
+        closestWinners:
+          items:
+            $ref: '#/components/schemas/Abgeordneter'
+          title: closestWinners
+          type: array
+      required:
+      - closestWinners
+      - closest_type
+      - party
+      title: ClosestWinners
+      type: object
+    overview_wahlkreis:
+      example:
+        direktkandidat:
+          profession: profession
+          firstname: firstname
+          name: name
+          id: 0
+          party:
+            name: name
+            id: 0
+            shortname: shortname
+          yearOfBirth: 6
+        wahlbeteiligung: 0.8008281904610115
+      properties:
+        wahlbeteiligung:
+          title: Wahlbeteiligung
+          type: number
+        direktkandidat:
+          $ref: '#/components/schemas/Abgeordneter'
+      title: overview-wahlkreis
+      type: object
+    SeatDistribution_distribution_inner:
+      example:
+        seats: 6
+        party:
+          name: name
+          id: 0
+          shortname: shortname
+      properties:
+        party:
+          $ref: '#/components/schemas/Partei'
+        seats:
+          title: Seats
+          type: integer
+      required:
+      - party
+      - seats
+      title: SeatDistribution_distribution_inner
+      type: object
+    WinningParties_erststimme_inner:
+      example:
+        party_name: party_name
+        region_id: 0
+        region_name: region_name
+        party:
+          name: name
+          id: 0
+          shortname: shortname
+      properties:
+        party_name:
+          title: Party_Name
+          type: string
+        party:
+          $ref: '#/components/schemas/Partei'
+        region_id:
+          title: Region_id
+          type: integer
+        region_name:
+          title: Region_name
+          type: string
+      required:
+      - party
+      - region_id
+      title: WinningParties_erststimme_inner
+      type: object
+    WinningParties_zweitstimme_inner:
+      example:
+        region_id: 6
+        region_name: 1
+        party:
+          name: name
+          id: 0
+          shortname: shortname
+      properties:
+        party:
+          $ref: '#/components/schemas/Partei'
+        region_id:
+          title: Region_id
+          type: integer
+        region_name:
+          title: Region_name
+          type: integer
+      required:
+      - party
+      - region_id
+      title: WinningParties_zweitstimme_inner
