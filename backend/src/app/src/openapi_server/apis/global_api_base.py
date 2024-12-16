@@ -113,9 +113,9 @@ class BaseGlobalApi:
             # Query the database for elections
             with db_session() as db:
                 query = text('''
-                                SELECT parteien."shortName", name, parteien_id, ov_sitzkontingente_erhoehung.sitze_nach_erhoehung, sum_sitze 
+                                SELECT parteien."shortName", name, partei_id, ov_sitzkontingente_erhoehung.sitze_nach_erhoehung, stimmen_sum 
                                 FROM ov_sitzkontingente_erhoehung
-                                JOIN parteien ON ov_sitzkontingente_erhoehung.parteien_id = parteien.id
+                                JOIN parteien ON ov_sitzkontingente_erhoehung.partei_id = parteien.id
                                 WHERE ov_sitzkontingente_erhoehung.wahl_id = :wahlid
                             ''')
                 # Execute the query with parameterized input, avoiding direct string interpolation
