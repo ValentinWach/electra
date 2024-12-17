@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
-  title: Donator-Mainframe communication
+  title: Bundestagswahlsystem API
   version: 0.1.1
 servers:
-  - url: "http://localhost/"
+  - url: "http://localhost:8000/"
     variables:
       url:
         description: The URL of the server. Either localhost or deployed.
@@ -440,10 +440,8 @@ components:
             required:
               - party
               - region_id
+              - region_name
             properties:
-              party_name:
-                type: string
-                title: Party_Name
               party:
                 $ref: '#/components/schemas/Partei'
               region_id:

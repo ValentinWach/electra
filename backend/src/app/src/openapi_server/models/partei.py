@@ -32,7 +32,7 @@ class Partei(BaseModel):
     Partei
     """ # noqa: E501
     id: StrictInt
-    shortName: StrictStr
+    shortname: StrictStr
     name: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["id", "shortname", "name"]
 

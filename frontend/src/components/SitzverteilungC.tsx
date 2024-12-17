@@ -15,6 +15,7 @@ export default function SitzverteilungC() {
         const getSitzverteilung = async () => {
             try {
                 const data = await fetchSitzveteilung(selectedElection?.id ?? 0);
+                console.log("SitzverteilungC: data", data);
                 setSitzverteilung(data);
             } catch (error) {
                 console.error('Error fetching Sitzverteilung:', error);

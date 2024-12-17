@@ -98,8 +98,8 @@ class BaseGeneralApi:
 
             partei_dicts = [to_dict(partei) for partei in parteien]
 
-            partei_list = [Partei.model_validate(partei) for partei in
-                              partei_dicts]
+            partei_list = [Partei.model_validate({**partei, "shortname": partei.pop("shortName")}) for partei in
+                           partei_dicts]
 
             return partei_list
 

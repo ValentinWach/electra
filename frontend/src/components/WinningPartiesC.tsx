@@ -40,28 +40,28 @@ export default function WinningPartiesC({fetchWinningParties}: {
                     </tr>
                     </thead>
                     <tbody>
-                    <tr key={winningParties.erststimmen.id}>
+                    <tr key={winningParties.erststimme[0].party.id}>
                         <td>
                             Erstimmen
                         </td>
                         <td>
-                            {winningParties.erststimmen.shortname}
+                            {winningParties.erststimme[0].party.shortname}
                         </td>
                         <td
-                            style={{color: getPartyColor(winningParties.erststimmen.shortname)}}>
-                            {winningParties.erststimmen.name}
+                            style={{color: getPartyColor(winningParties.erststimme[0].party.shortname)}}>
+                            {winningParties.erststimme[0].party.name}
                         </td>
                     </tr>
-                    <tr key={winningParties.zweitstimmen.id}>
+                    <tr key={winningParties.zweitstimme[0].party.id}>
                         <td>
                             Zweitstimmen
                         </td>
                         <td>
-                            {winningParties.zweitstimmen.shortname}
+                            {winningParties.zweitstimme[0].party.shortname}
                         </td>
                         <td
-                            style={{color: getPartyColor(winningParties.zweitstimmen.shortname)}}>
-                            {winningParties.zweitstimmen.name}
+                            style={{color: getPartyColor(winningParties.zweitstimme[0].party.shortname)}}>
+                            {winningParties.zweitstimme[0].party.name}
                         </td>
                     </tr>
                     </tbody>

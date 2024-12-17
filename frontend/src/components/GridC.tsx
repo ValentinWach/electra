@@ -104,7 +104,7 @@ export default function GridC({gridData, header, usePagination, pageSize, onRowC
 
 
     return (
-        <ChartTileC header={header} doubleSize={gridData.columns.length > 4}>
+        <ChartTileC header={header} doubleSize={true}>
             <table className="table">
                 <thead>
                 <tr>

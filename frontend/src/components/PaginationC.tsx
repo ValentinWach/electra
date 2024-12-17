@@ -29,13 +29,22 @@ export default function PaginationC({numOfPages, switchPage, selectedPageProp}: 
         );
     }
 
-    function renderEllipses() {
+    function renderEllipses(i:number) {
         return (
             <span
-                className="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500"
+                className="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:cursor-pointer"
+                onClick={() => {
+                    if (selectedPage < 5 || selectedPage > numOfPages - 4) {
+                        switchPage(5);
+                        setSelectedPage(5);
+                    } else {
+                        switchPage(i === 3 ? 3 : numOfPages - 2);
+                        setSelectedPage(i === 3 ? 3 : numOfPages - 2);
+                    }
+                }}
             >
-                ...
-            </span>
+    ...
+</span>
         );
     }
 
@@ -60,7 +69,7 @@ export default function PaginationC({numOfPages, switchPage, selectedPageProp}: 
             </div>
             <div className="hidden md:-mt-px md:flex">
                 {
-                    Array.from({ length: numOfPages }, (_, j) => j + 1).map(i => {
+                    Array.from({length: numOfPages}, (_, j) => j + 1).map(i => {
                         if (numOfPages <= 9) {
                             return renderPageLink(i);
                         } else if (selectedPage < 5 || selectedPage > numOfPages - 4) { //Ellipsis in the middle
@@ -68,14 +77,14 @@ export default function PaginationC({numOfPages, switchPage, selectedPageProp}: 
                             if (i < 5)
                                 return renderPageLink(i);
                             else if (i === 5)
-                                return renderEllipses();
+                                return renderEllipses(i);
                             else if (i > numOfPages - 4)
                                 return renderPageLink(i);
                         } else { //Numbers shifting
                             if (i < 3)
                                 return renderPageLink(i);
                             else if (i === 3)
-                                return [renderEllipses()];
+                                return [renderEllipses(i)];
 
                             if (i === selectedPage - 1 || i === selectedPage || i === selectedPage + 1)
                                 return renderPageLink(i);
@@ -83,7 +92,7 @@ export default function PaginationC({numOfPages, switchPage, selectedPageProp}: 
                             else if (i > numOfPages - 2)
                                 return renderPageLink(i);
                             else if (i === numOfPages - 2)
-                                return renderEllipses();
+                                return renderEllipses(i);
                         }
                     })
                 }

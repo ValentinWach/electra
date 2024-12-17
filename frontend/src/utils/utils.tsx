@@ -1,10 +1,11 @@
 const partyColors: { [key: string]: string } = {
-    'CDU/CSU': '#121212',
+    'CDU': '#121212',
+    'CSU': '#266FD5',
     'SPD': '#D71F1D',
     'FDP': '#FFCC00',
     'GRÜNE': '#64A12D',
     'AfD': '#0021C8',
-    'LINKE': '#BD3075',
+    'DIE LINKE': '#BD3075',
     'SSW': '#266FD5',
 };
 

@@ -5,6 +5,7 @@ import {useElection} from "../context/ElectionContext.tsx";
 import ChartTileC from "../components/ChartTileC.tsx";
 import {getPartyColor} from "../utils/utils.tsx";
 import ClosestWinnersC from "../components/ClosestWinnersC.tsx";
+import GridC from "../components/GridC.tsx";
 
 export default function Parteien() {
 
@@ -44,24 +45,25 @@ export default function Parteien() {
                         </button>
                     </div>
                     :
-                    <ChartTileC header={"Parteien"}>
-                        <table className="table">
-                            <thead>
-                            <tr>
-                                <th scope="col">Name</th>
-                                <th scope="col">Kurzname</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {parteien?.map((partei) => (
-                                <tr key={partei.id} onClick={() => showParteiDetails(partei.id)}>
-                                    <td>{partei.name}</td>
-                                    <td style={{color: getPartyColor(partei.shortname)}}>{partei.shortname}</td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </ChartTileC>
+                    <GridC
+                        gridData={{
+                            columns: [
+                                {id: 1, label: 'Name', searchable: true},
+                                {id: 2, label: 'Kurzname', searchable: true}
+                            ],
+                            rows: parteien?.map(partei => ({
+                                key: partei.id,
+                                values: [
+                                    {column_id: 1, value: partei.name},
+                                    {column_id: 2, value: partei.shortname}
+                                ]
+                            })) ?? []
+                        }}
+                        header={"Parteien"}
+                        usePagination={true}
+                        pageSize={10}
+                        onRowClick={(id) => showParteiDetails(id)}
+                    />
             }
             {
                 selectedPartei ?

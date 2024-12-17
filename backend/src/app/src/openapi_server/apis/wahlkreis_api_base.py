@@ -99,7 +99,7 @@ class BaseWahlkreisApi:
                         firstname=direktkandidat[2],
                         profession=direktkandidat[3],
                         year_of_birth=direktkandidat[4],
-                        party=Partei(id=partei[0], name=partei[1], shortName=partei[2])
+                        party=Partei(id=partei[0], name=partei[1], shortname=partei[2])
                     )
                 )
 
@@ -174,7 +174,7 @@ class BaseWahlkreisApi:
                 # Map the result to the schema
                 stimmanteile.append(
                     Stimmanteil(
-                        party=Partei(id=partei.id, name=partei.name, shortName=partei.shortName),
+                        party=Partei(id=partei.id, name=partei.name, shortname=partei.shortName),
                         share=prozentualer_anteil,
                         absolute=int(stimmenanzahl)
                     )
@@ -213,14 +213,14 @@ class BaseWahlkreisApi:
                 raise HTTPException(status_code=404, detail="No winners found")
             erststimme_winners = [
                 WinningPartiesErststimmeInner(
-                    party=Partei(id=row[1], shortName=row[0], name=row[2]),  # Assuming Partei is an existing class
+                    party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
                     region_id=wahlkreisId,
                 ) for row in erstimmen_winner_results
             ]
 
             zweitstimme_winners = [
                 WinningPartiesZweitstimmeInner(
-                    party=Partei(id=row[1], shortName=row[0], name=row[2]),  # Assuming Partei is an existing class
+                    party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
                     region_id=wahlkreisId,
                 ) for row in zweitstimmen_winner_results
             ]
@@ -261,14 +261,14 @@ class BaseWahlkreisApi:
                 raise HTTPException(status_code=404, detail="No winners found")
             erststimme_winners = [
                 WinningPartiesErststimmeInner(
-                    party=Partei(id=row[1], shortName=row[0], name=row[2]),  # Assuming Partei is an existing class
+                    party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
                     region_id=row[3],
                 ) for row in erstimmen_winner_results
             ]
 
             zweitstimme_winners = [
                 WinningPartiesZweitstimmeInner(
-                    party=Partei(id=row[1], shortName=row[0], name=row[2]),  # Assuming Partei is an existing class
+                    party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
                     region_id=row[3],
                 ) for row in zweitstimmen_winner_results
             ]
@@ -334,7 +334,7 @@ class BaseWahlkreisApi:
                 # Map the result to the schema
                 stimmanteile.append(
                     Stimmanteil(
-                        party=Partei(id=partei.id, name=partei.name, shortName=partei.shortName),
+                        party=Partei(id=partei.id, name=partei.name, shortname=partei.shortName),
                         share=prozentualer_anteil,
                         absolute=int(stimmenanzahl)
                     )

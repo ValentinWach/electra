@@ -1,5 +1,6 @@
  .table {
-    @apply min-w-full divide-y divide-gray-200 rounded-t overflow-hidden;
+    @apply w-full divide-y divide-gray-200 rounded-t overflow-hidden;
+     table-layout: fixed; /*TODO: Only fix max width*/
 }
 
 .table thead {
@@ -16,6 +17,9 @@
 
 .table td {
     @apply px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .table tbody tr {

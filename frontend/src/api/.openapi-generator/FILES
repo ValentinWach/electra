@@ -4,9 +4,13 @@ apis/WahlkreisApi.ts
 apis/index.ts
 index.ts
 models/Abgeordneter.ts
+models/Auslaenderanteil.ts
+models/AuslaenderanteilWahlkreiseInner.ts
 models/Bundesland.ts
 models/ClosestWinner.ts
 models/ClosestWinners.ts
+models/Einkommen.ts
+models/EinkommenWahlkreiseInner.ts
 models/OverviewWahlkreis.ts
 models/Partei.ts
 models/SeatDistribution.ts
