@@ -1,4 +1,5 @@
 # coding: utf-8
+# installation with: uv pip install -e .
 # Start-up with: uvicorn main:app --reload
 
 """

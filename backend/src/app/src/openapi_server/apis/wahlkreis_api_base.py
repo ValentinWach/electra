@@ -6,6 +6,9 @@ from sqlalchemy import text
 from openapi_server.database.connection import Session as db_session
 from pydantic import StrictBool, StrictInt
 from typing import List, Optional
+
+from openapi_server.models.auslaenderanteil_wahlkreise_inner import AuslaenderanteilWahlkreiseInner
+from openapi_server.models.einkommen_wahlkreise_inner import EinkommenWahlkreiseInner
 from openapi_server.models.overview_wahlkreis import OverviewWahlkreis
 from openapi_server.models.stimmanteil import Stimmanteil
 from openapi_server.models.winning_parties import WinningParties
@@ -288,62 +291,69 @@ class BaseWahlkreisApi:
             self
     ) -> Auslaenderanteil:
         try:
+            # Use the context manager for the database session
             with db_session() as db:
+                # Query to fetch foreigner share for the specified election
                 auslaenderanteil_query = text('''
-                            SELECT
-                                parteien_id,
-                                stimmen_sum,
-                                ROUND(
-                                    (stimmen_sum * 100.0) /
-                                    (SELECT SUM(stimmen_sum)
-                                     FROM zweitstimmen_wahlkreis_partei
-                                     WHERE wahlen_id = z.wahlen_id and wahlkreise_id = z.wahlkreise_id),
-                                    2
-                                ) AS prozentualer_anteil
-                            FROM
-                                zweitstimmen_wahlkreis_partei z
-                            WHERE wahlen_id = :wahlId and wahlkreise_id = :wahlkreisId;
-                            ''')
+                    SELECT wahlkreis_id, auslaenderanteil 
+                    FROM strukturdaten 
+                    WHERE wahl_id = :wahlId;
+                ''')
 
-
-                # Execute the query with parameterized input, avoiding direct string interpolation
-                stimmanteil_results = db.execute(auslaenderanteil_query,
-                    {"wahlId": wahlid, "wahlkreisId": wahlkreisid}
+                auslaenderanteil_results = db.execute(
+                    auslaenderanteil_query,
+                    {"wahlId": wahlid}
                 ).fetchall()
 
-            if not stimmanteil_results:
-                raise HTTPException(status_code=404, detail="No stimmanteil found")
-
-            # Return the WinningParties object with the filled lists
-            stimmanteile = []
-            for result in stimmanteil_results:
-                partei_id, stimmenanzahl, prozentualer_anteil = result
-
-                # Fetch the Partei details from the database or cache
-                partei = db.execute(
-                    text('SELECT id, name, "shortName" FROM parteien WHERE id = :partei_id'),
-                    {"partei_id": partei_id}
-                ).fetchone()
-
-                if not partei:
+                if not auslaenderanteil_results:
                     raise HTTPException(
                         status_code=404,
-                        detail=f"Partei with id {partei_id} not found"
+                        detail=f"No foreigner share data found for Wahl ID: {wahlid}"
                     )
 
-                # Map the result to the schema
-                stimmanteile.append(
-                    Stimmanteil(
-                        party=Partei(id=partei.id, name=partei.name, shortname=partei.shortName),
-                        share=prozentualer_anteil,
-                        absolute=int(stimmenanzahl)
-                    )
-                )
+                # Initialize the response object
+                auslaenderanteil_response = Auslaenderanteil(wahlkreise=[])
 
-            return stimmanteile
+                # Iterate through results and fetch associated votes for each wahlkreis
+                for result in auslaenderanteil_results:
+                    wahlkreis_id, auslaenderanteil_value = result
+                    print(wahlkreis_id)
+
+
+                    # Fetch the vote sum for the specified party, election, and wahlkreis
+                    stimmen_query = text('''
+                        SELECT stimmen_sum 
+                        FROM zweitstimmen_wahlkreis_partei 
+                        WHERE wahlen_id = :wahlId 
+                          AND wahlkreise_id = :wahlkreisId 
+                          AND parteien_id = :parteiId;
+                    ''')
+
+                    stimmen_result = db.execute(
+                        stimmen_query,
+                        {"wahlId": wahlid, "wahlkreisId": wahlkreis_id, "parteiId": parteiid}
+                    ).fetchone()
+
+                    if stimmen_result is None:
+                        stimmen_sum = 0
+                    else:
+                        stimmen_sum = stimmen_result[0]
+
+                    auslaenderanteil_response.wahlkreise.append(
+                        AuslaenderanteilWahlkreiseInner(
+                            wahlkreis_id=wahlkreis_id,
+                            auslaenderanteil=auslaenderanteil_value,
+                            stimmen=stimmen_sum
+                        )
+                    )
+
+            return auslaenderanteil_response
 
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"An unexpected error occurred: {str(e)}"
+            )
 
 
     async def get_income(
@@ -351,4 +361,65 @@ class BaseWahlkreisApi:
             parteiid: StrictInt,
             self
     ) -> Einkommen:
-        ...
+        try:
+            # Use the context manager for the database session
+            with db_session() as db:
+                # Query to fetch foreigner share for the specified election
+                einkommen_query = text('''
+                    SELECT wahlkreis_id, einkommen 
+                    FROM strukturdaten 
+                    WHERE wahl_id = :wahlId;
+                ''')
+
+                einkommen_results = db.execute(
+                    einkommen_query,
+                    {"wahlId": wahlid}
+                ).fetchall()
+
+                if not einkommen_results:
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"No foreigner share data found for Wahl ID: {wahlid}"
+                    )
+
+                # Initialize the response object
+                einkommen_response = Einkommen(wahlkreise=[])
+
+                # Iterate through results and fetch associated votes for each wahlkreis
+                for result in einkommen_results:
+                    wahlkreis_id, einkommen_value = result
+
+                    # Fetch the vote sum for the specified party, election, and wahlkreis
+                    stimmen_query = text('''
+                        SELECT stimmen_sum 
+                        FROM zweitstimmen_wahlkreis_partei 
+                        WHERE wahlen_id = :wahlId 
+                          AND wahlkreise_id = :wahlkreisId 
+                          AND parteien_id = :parteiId;
+                    ''')
+
+                    stimmen_result = db.execute(
+                        stimmen_query,
+                        {"wahlId": wahlid, "wahlkreisId": wahlkreis_id, "parteiId": parteiid}
+                    ).fetchone()
+
+                    if stimmen_result is None:
+                        stimmen_sum = 0
+                    else:
+                        stimmen_sum = stimmen_result[0]
+
+                    einkommen_response.wahlkreise.append(
+                        EinkommenWahlkreiseInner(
+                            wahlkreis_id=wahlkreis_id,
+                            einkommen=einkommen_value,
+                            stimmen=stimmen_sum
+                        )
+                    )
+
+            return einkommen_response
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"An unexpected error occurred: {str(e)}"
+            )
