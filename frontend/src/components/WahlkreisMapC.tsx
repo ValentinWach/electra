@@ -80,7 +80,7 @@ export default function WahlkreisMapC() {
         <ChartTileC dropDownContent={mapDD} dropDownFunction={setStimmenType} doubleSize={true}
                     header={"Wahlkreiskarte"}>
             <MapContainer center={center} zoomControl={true} doubleClickZoom={true} scrollWheelZoom={false} zoom={6.5}
-                          style={{height: '100vh', width: '100%'}}>
+                          style={{height: '90vh', width: '100%', zIndex: '10'}}>
                 {typedGeoData && winningParties && (
                     <GeoJSON data={typedGeoData} style={getStyle} onEachFeature={onEachFeature}/>
                 )}
