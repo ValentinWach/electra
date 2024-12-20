@@ -270,6 +270,124 @@ paths:
                 $ref: '#/components/schemas/Einkommen'
 
 
+  /results/{wahlid}/ueberhang/{parteiid}:
+    get:
+      operationId: getUeberhang
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+        - $ref: '#/components/parameters/parteiid'
+      tags:
+        - Global
+      responses:
+        '200':
+          description: Returning the ueberhang per selected party
+          content:
+            application/json:
+              schema:
+                properties:
+                  bundeslaender:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - bundesland
+                        - ueberhang
+                      properties:
+                        bundesland:
+                          $ref: '#/components/schemas/Bundesland'
+                        ueberhang:
+                          type: integer
+                          title: ueberhang
+
+  /elect/{wahlid}/direktkandidaten/{wahlkreisid}:
+    get:
+      operationId: getDirektkandidaten
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+        - $ref: '#/components/parameters/wahlkreisid'
+      tags:
+        - Wahlkreis
+      responses:
+        '200':
+          description: Returning the direktkandidaten per wahlkreis
+          content:
+            application/json:
+              schema:
+                properties:
+                  kandidaten:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Abgeordneter'
+                    title: kandidaten
+
+
+  /elect/{wahlid}/parteien/{wahlkreisid}:
+    get:
+      operationId: getCompetingParties
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+        - $ref: '#/components/parameters/wahlkreisid'
+      tags:
+        - Wahlkreis
+      responses:
+        '200':
+          description: Returning the competing parties per wahlkreis
+          content:
+            application/json:
+              schema:
+                parteien:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - partei
+                      - topfive
+                    properties:
+                      partei:
+                        $ref: '#/components/schemas/Partei'
+                      topfive:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Abgeordneter'
+                title: parteien
+
+  /elect/{wahlid}/authenticate/{wahlkreisid}:
+    post:
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+        - $ref: '#/components/parameters/wahlkreisid'
+      summary: Authenticate with token
+      tags:
+        - Wahlkreis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: Authentication token
+                ausweisnummer:
+                  type: number
+                  description: Ausweisnummer
+              required:
+                - token
+                - ausweisnummer
+      responses:
+        '200':
+          description: User successfully authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionToken:
+                    type: string
+                    description: returns a session token
+        '401':
+          description: Invalid authentication token
 
 components:
   parameters:
