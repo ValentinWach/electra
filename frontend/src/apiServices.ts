@@ -87,6 +87,18 @@ export async function fetchWinningPartiesWahlkreis(wahlid: number, wahlkreisid: 
     }
 }
 
+export async function fetchWinningPartiesWahlkreise(wahlid: number) {
+    try {
+        const wahlkreisApi = new WahlkreisApi();
+        const winningParties = await wahlkreisApi.getWinningPartiesWahlkreise({wahlid});
+        console.log('Fetched Winning Parties:', winningParties);
+        return winningParties;
+    } catch (error) {
+        console.error('Error fetching Winning Parties:', error);
+        throw error;
+    }
+}
+
 export async function fetchWahlkreisOverview(wahlid: number, wahlkreisid: number) {
     try {
         const wahlkreisApi = new WahlkreisApi();

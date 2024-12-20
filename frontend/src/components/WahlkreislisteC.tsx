@@ -31,8 +31,6 @@ export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisD
                 {id: 1, label: 'Wahlkreisnummer', searchable: true},
                 {id: 2, label: 'Wahlkreisname', searchable: true},
                 {id: 3, label: 'Bundesland', searchable: true},
-                {id: 4, label: 'Abgeordneter', searchable: true},
-                {id: 5, label: 'Stärkste Partei', searchable: true}
             ],
             wahlkreise?.map((wahlkreis) => ({
                 key: wahlkreis.id,
@@ -40,8 +38,6 @@ export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisD
                     {column_id: 1, value: wahlkreis.id.toString()},
                     {column_id: 2, value: wahlkreis.name},
                     {column_id: 3, value: "Bundesland_Platzhalter"},
-                    {column_id: 4, value: "Abgeordneter_Platzhalter"},
-                    {column_id: 5, value: "Stärkste Partei_Platzhalter"}
                 ]
             })) ?? []
         );

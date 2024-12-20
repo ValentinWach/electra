@@ -1,14 +1,32 @@
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { ChevronDownIcon } from '@heroicons/react/20/solid';
-import type {DropdownType} from "../models/Chart-Data.ts";
+import {Menu, MenuButton, MenuItem, MenuItems} from '@headlessui/react';
+import {ChevronDownIcon} from '@heroicons/react/20/solid';
+import type {DropdownType} from "../models/ChartData.ts";
+import {useEffect, useState} from "react";
 
-export default function DropdownC({dropdownContent, dropDownFunction} : {dropdownContent : DropdownType, dropDownFunction: (id: number) => void}) {
+export default function DropdownC({dropdownContent, dropDownFunction}: {
+    dropdownContent: DropdownType,
+    dropDownFunction: (id: number) => void
+}) {
+    const defaultLabel = dropdownContent.label ?? (dropdownContent.items.find(i => i.id === dropdownContent.defaultChosen)?.label ?? "No label defined")
+    const [currentLabel, setCurrentLabel] = useState<string>(defaultLabel)
+
+    useEffect(() => {
+            setCurrentLabel(defaultLabel)
+        } , []
+    )
+
+    function updateLabel(label: string) {
+        if(!dropdownContent.label)
+            setCurrentLabel(label)
+    }
+
     return (
         <Menu as="div" className="w-52 relative inline-block text-left">
             <div>
-                <MenuButton className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                    {dropdownContent.label}
-                    <ChevronDownIcon aria-hidden="true" className="-mr-1 size-5 text-gray-400" />
+                <MenuButton
+                    className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                    {currentLabel}
+                    <ChevronDownIcon aria-hidden="true" className="-mr-1 size-5 text-gray-400"/>
                 </MenuButton>
             </div>
 
@@ -20,7 +38,7 @@ export default function DropdownC({dropdownContent, dropDownFunction} : {dropdow
                     {dropdownContent.items.map((item) => (
                         <MenuItem key={item.id}>
                             <button
-                                onClick={() => dropDownFunction(item.id)}
+                                onClick={() => { dropDownFunction(item.id); updateLabel(item.label); }}
                                 className="block w-full px-4 py-2 text-left text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
                             >
                                 {item.label}

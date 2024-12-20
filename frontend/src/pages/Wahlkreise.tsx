@@ -15,6 +15,7 @@ import {getPartyColor} from "../utils/utils.tsx";
 import ChartTileC from "../components/ChartTileC.tsx";
 import DoughnutChart from "../components/DoughnutC.tsx";
 import {ChartData} from "chart.js";
+import WahlkreisMapC from "../components/WahlkreisMapC.tsx";
 
 export default function Wahlkreise() {
 
@@ -47,7 +48,7 @@ export default function Wahlkreise() {
         }
         getOverview()
     }, [selectedElection, selectedWahlkreis]);
-    const nichtWaehler = Math.round((100 - overview?.wahlbeteiligung)*10)/10;
+    const nichtWaehler = Math.round((100 - overview?.wahlbeteiligung) * 10) / 10;
     let wahlbeteiligungData: ChartData = {
         labels: [`Wähler: ${overview?.wahlbeteiligung}%`, `Nichtwähler: ${nichtWaehler}%`],
         datasets: [{
@@ -80,43 +81,47 @@ export default function Wahlkreise() {
                         </button>
                     </div>
                     :
-                    <WahlkreislisteC showWahlkreisDetails={showWahlkreisDetails}/>
+                    <>
+                        <WahlkreislisteC showWahlkreisDetails={showWahlkreisDetails}/>
+                        <WahlkreisMapC></WahlkreisMapC>
+                    </>
             }
             {
                 selectedWahlkreis ?
                     <>
-                    <WinningPartiesC fetchWinningParties={wrapFetchWinningPartiesWahlkreis}/>
-                    <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis} showAbsoluteVotes={true}/>
-                    <ChartTileC header={"Direktkandidat"}>
-                        <table className="table">
-                            <thead>
-                            <tr>
-                                <th scope="col">Name</th>
-                                <th scope="col">Vorname</th>
-                                <th scope="col">Geburtsjahr</th>
-                                <th scope="col">Beruf</th>
-                                <th scope="col">Partei</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr key={overview?.direktkandidat?.id}>
-                                <td>{overview?.direktkandidat?.name}</td>
-                                <td>{overview?.direktkandidat?.firstname}</td>
-                                <td>{overview?.direktkandidat?.yearOfBirth}</td>
-                                <td>{overview?.direktkandidat?.profession}</td>
-                                <td style={{color: getPartyColor(overview?.direktkandidat.party.shortname)}}>
-                                    {overview?.direktkandidat.party.shortname}
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </ChartTileC>
-                    <ChartTileC header={"Wahlbeteiligung"}>
-                        <DoughnutChart data={wahlbeteiligungData} fullCircle={true}></DoughnutChart>
-                    </ChartTileC>
-                </>
-                :
-                null
+                        <WinningPartiesC fetchWinningParties={wrapFetchWinningPartiesWahlkreis}/>
+                        <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis}
+                                             showAbsoluteVotes={true}/>
+                        <ChartTileC header={"Direktkandidat"}>
+                            <table className="table">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Vorname</th>
+                                    <th scope="col">Geburtsjahr</th>
+                                    <th scope="col">Beruf</th>
+                                    <th scope="col">Partei</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr key={overview?.direktkandidat?.id}>
+                                    <td>{overview?.direktkandidat?.name}</td>
+                                    <td>{overview?.direktkandidat?.firstname}</td>
+                                    <td>{overview?.direktkandidat?.yearOfBirth}</td>
+                                    <td>{overview?.direktkandidat?.profession}</td>
+                                    <td style={{color: getPartyColor(overview?.direktkandidat.party.shortname)}}>
+                                        {overview?.direktkandidat.party.shortname}
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </ChartTileC>
+                        <ChartTileC header={"Wahlbeteiligung"}>
+                            <DoughnutChart data={wahlbeteiligungData} fullCircle={true}></DoughnutChart>
+                        </ChartTileC>
+                    </>
+                    :
+                    null
             }
         </div>
     )

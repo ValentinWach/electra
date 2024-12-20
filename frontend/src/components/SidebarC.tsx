@@ -7,7 +7,7 @@ import {
 } from '@heroicons/react/24/outline'
 import {Link, useLocation} from 'react-router-dom';
 import DropdownC from "./DropdownC.tsx";
-import type {DropdownType} from "../models/Chart-Data.ts";
+import type {DropdownType} from "../models/ChartData.ts";
 import { useElection } from '../context/ElectionContext.tsx';
 
 const navigation = [

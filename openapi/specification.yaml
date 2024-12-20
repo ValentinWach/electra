@@ -330,6 +330,8 @@ components:
         name:
           type: string
           title: Name
+        bundesland:
+          $ref: "#/components/schemas/Bundesland"
 
     Bundesland:
       type: object
