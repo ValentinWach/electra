@@ -29,7 +29,7 @@ from openapi_server.models.abgeordneter import Abgeordneter
 from openapi_server.models.closest_winners import ClosestWinners
 from openapi_server.models.seat_distribution import SeatDistribution
 from openapi_server.models.stimmanteil import Stimmanteil
-
+from openapi_server.models.ueberhang import Ueberhang
 
 router = APIRouter()
 
@@ -53,17 +53,18 @@ async def get_abgeordnete(
 
 
 @router.get(
-    "/results/{wahlid}/closestwinners",
+    "/results/{wahlid}/{parteiid}/closestwinners",
     responses={
-        200: {"model": List[ClosestWinners], "description": "Returning the closest winners of the election"},
+        200: {"model": ClosestWinners, "description": "Returning the closest winners of the selected party"},
     },
     tags=["Global"],
     response_model_by_alias=True,
 )
 async def get_closest_winners(
     wahlid: StrictInt = Path(..., description=""),
-self=None) -> List[ClosestWinners]:
-    return await BaseGlobalApi.get_closest_winners(wahlid, self)
+    parteiid: StrictInt = Path(..., description=""),
+self=None) -> ClosestWinners:
+    return await BaseGlobalApi.get_closest_winners(wahlid, parteiid, self)
 
 
 @router.get(
@@ -92,3 +93,19 @@ async def get_stimmanteil(
     wahlid: StrictInt = Path(..., description=""),
 ) -> List[Stimmanteil]:
     return await BaseGlobalApi.get_stimmanteil(wahlid, self=None)
+
+@router.get(
+    "/results/{wahlid}/ueberhang/{parteiid}",
+    responses={
+        200: {"model": Ueberhang, "description": "Returning the ueberhang per selected party"},
+    },
+    tags=["Global"],
+    response_model_by_alias=True,
+)
+async def get_ueberhang(
+    wahlid: StrictInt = Path(..., description=""),
+    parteiid: StrictInt = Path(..., description=""),
+) -> Ueberhang:
+    if not BaseGlobalApi.subclasses:
+        raise HTTPException(status_code=500, detail="Not implemented")
+    return await BaseGlobalApi.subclasses[0]().get_ueberhang(wahlid, parteiid)

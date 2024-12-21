@@ -20,7 +20,7 @@ import json
 
 
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictInt
 from typing import Any, ClassVar, Dict, List
 from openapi_server.models.bundesland import Bundesland
 try:
@@ -28,14 +28,13 @@ try:
 except ImportError:
     from typing_extensions import Self
 
-class Wahlkreis(BaseModel):
+class UeberhangBundesland(BaseModel):
     """
-    Wahlkreis
+    UeberhangBundesland
     """ # noqa: E501
-    id: StrictInt
-    name: StrictStr
     bundesland: Bundesland
-    __properties: ClassVar[List[str]] = ["id", "name", "bundesland"]
+    ueberhang: StrictInt
+    __properties: ClassVar[List[str]] = ["bundesland", "ueberhang"]
 
     model_config = {
         "populate_by_name": True,
@@ -55,7 +54,7 @@ class Wahlkreis(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of Wahlkreis from a JSON string"""
+        """Create an instance of UeberhangBundesland from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -81,7 +80,7 @@ class Wahlkreis(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of Wahlkreis from a dict"""
+        """Create an instance of UeberhangBundesland from a dict"""
         if obj is None:
             return None
 
@@ -89,9 +88,8 @@ class Wahlkreis(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "name": obj.get("name"),
-            "bundesland": Bundesland.from_dict(obj.get("bundesland")) if obj.get("bundesland") is not None else None
+            "bundesland": Bundesland.from_dict(obj.get("bundesland")) if obj.get("bundesland") is not None else None,
+            "ueberhang": obj.get("ueberhang")
         })
         return _obj
 

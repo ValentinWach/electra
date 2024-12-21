@@ -20,22 +20,20 @@ import json
 
 
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List
-from openapi_server.models.bundesland import Bundesland
+from pydantic import BaseModel, ConfigDict
+from typing import Any, ClassVar, Dict, List, Optional
+from openapi_server.models.ueberhang_bundesland import UeberhangBundesland
 try:
     from typing import Self
 except ImportError:
     from typing_extensions import Self
 
-class Wahlkreis(BaseModel):
+class Ueberhang(BaseModel):
     """
-    Wahlkreis
+    Ueberhang
     """ # noqa: E501
-    id: StrictInt
-    name: StrictStr
-    bundesland: Bundesland
-    __properties: ClassVar[List[str]] = ["id", "name", "bundesland"]
+    bundeslaender: Optional[List[UeberhangBundesland]] = None
+    __properties: ClassVar[List[str]] = ["bundeslaender"]
 
     model_config = {
         "populate_by_name": True,
@@ -55,7 +53,7 @@ class Wahlkreis(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of Wahlkreis from a JSON string"""
+        """Create an instance of Ueberhang from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -74,14 +72,18 @@ class Wahlkreis(BaseModel):
             },
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of bundesland
-        if self.bundesland:
-            _dict['bundesland'] = self.bundesland.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in bundeslaender (list)
+        _items = []
+        if self.bundeslaender:
+            for _item in self.bundeslaender:
+                if _item:
+                    _items.append(_item.to_dict())
+            _dict['bundeslaender'] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of Wahlkreis from a dict"""
+        """Create an instance of Ueberhang from a dict"""
         if obj is None:
             return None
 
@@ -89,9 +91,7 @@ class Wahlkreis(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "name": obj.get("name"),
-            "bundesland": Bundesland.from_dict(obj.get("bundesland")) if obj.get("bundesland") is not None else None
+            "bundeslaender": [UeberhangBundesland.from_dict(_item) for _item in obj.get("bundeslaender")] if obj.get("bundeslaender") is not None else None
         })
         return _obj
 

@@ -1,4 +1,5 @@
 # coding: utf-8
+from cgitb import text
 from http.client import HTTPException
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 
@@ -12,6 +13,8 @@ from openapi_server.models.wahlkreis import Wahlkreis
 from openapi_server.database.models import Partei as ParteiModel
 from openapi_server.models.partei import Partei
 from openapi_server.database.models import Wahlkreis as WahlkreisModel
+from sqlalchemy import text
+
 
 
 def to_dict(instance):
@@ -72,16 +75,44 @@ class BaseGeneralApi:
     ) -> List[Wahlkreis]:
         try:
             with db_session() as db:
-                wahlkreise = db.query(WahlkreisModel).all()
+                wahlkreis_query = text('''
+                            SELECT * 
+                            FROM wahlkreise;
+                            ''')
+                # Execute the query with parameterized input, avoiding direct string interpolation
+                wahlkreis_results = db.execute(wahlkreis_query).fetchall()
 
-            if not wahlkreise:
-                raise HTTPException(status_code=404, detail="No wahlkreise found")
+            if not wahlkreis_results:
+                raise HTTPException(status_code=404, detail="No winners found")
 
-            wahlkreis_dicts = [to_dict(wahlkreis) for wahlkreis in wahlkreise]
+            # Return the WinningParties object with the filled lists
+            wahlkreise = []
+            for result in wahlkreis_results:
+                id, name, bundesland_id = result
 
-            wahlkreis_list = [Wahlkreis.model_validate(wahlkreis) for wahlkreis in wahlkreis_dicts]  # Use model_validate()
+                # Fetch the Partei details from the database or cache
+                bundesland = db.execute(
+                    text('SELECT id, name FROM bundeslaender WHERE id = :bundesland_id'),
+                    {"bundesland_id": bundesland_id}
+                ).fetchone()
 
-            return wahlkreis_list
+                if not bundesland:
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"Bundesland with id {bundesland_id} not found"
+                    )
+
+                # Map the result to the schema
+                wahlkreise.append(
+                    Wahlkreis(
+                        id=id,
+                        name=name,
+                        bundesland=Bundesland(id=bundesland.id, name=bundesland.name),
+
+                    )
+                )
+
+            return wahlkreise
 
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))

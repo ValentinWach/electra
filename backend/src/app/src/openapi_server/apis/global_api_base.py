@@ -12,6 +12,7 @@ from openapi_server.models.seat_distribution import SeatDistribution
 from openapi_server.models.seat_distribution_distribution_inner import SeatDistributionDistributionInner
 from openapi_server.models.partei import Partei
 from openapi_server.models.stimmanteil import Stimmanteil
+from openapi_server.models.ueberhang import Ueberhang
 from openapi_server.models.wahl import Wahl
 from openapi_server.database.models import Wahl as WahlModel
 from openapi_server.database.connection import Session as db_session
@@ -58,7 +59,6 @@ class BaseGlobalApi:
                                        ''')
                     party_results = db.execute(party_query, {"partyid": row[1]}).fetchall()
 
-                    # If candidate exists, populate closest_winner with the candidate information
                     if abgeordneter_results:
                         abgeordnete.append(
                             Abgeordneter(
@@ -79,72 +79,58 @@ class BaseGlobalApi:
 
     async def get_closest_winners(
         wahlId: StrictInt,
+        parteiId: StrictInt,
         self
-    ) -> List[ClosestWinners]:
+    ) -> ClosestWinners:
         try:
             # Query the database for elections
             with db_session() as db:
-
-                closest_winners = []
-
-                bundestag_parties_query = text('''
-                    SELECT bp.parteien_id
-                    FROM bundestag_parties bp
-                    WHERE bp.wahlen_id = :wahlid
+                # Query for party details
+                party_query = text('''
+                    SELECT id, name, "shortName"
+                    FROM parteien
+                    WHERE id = :partyid
                 ''')
+                party_results = db.execute(party_query, {"partyid": parteiId}).fetchall()
 
-                bundestag_parties_results = db.execute(bundestag_parties_query, {"wahlid": wahlId}).fetchall()
-                for row in bundestag_parties_results:
-                    party_id = row[0]
+                # Query for closest winners
+                closest_for_party_query = text('''
+                    SELECT wks.partei_id, wks.wahlkreis_id, wks.kandidat_id, result_status
+                    FROM wahlkreis_knappste_sieger wks
+                    WHERE wks.wahl_id = :wahlid and wks.partei_id = :partyid
+                ''')
+                closest_for_party_results = db.execute(closest_for_party_query,
+                                                       {"wahlid": wahlId, "partyid": parteiId}).fetchall()
 
-                    # Query for party details
-                    party_query = text('''
-                        SELECT id, name, "shortName"
-                        FROM parteien
-                        WHERE id = :partyid
+                # Create the ClosestWinners instance for the current party
+                closest_winner = ClosestWinners(
+                    party=Partei(id=party_results[0][0], name=party_results[0][1], shortname=party_results[0][2]),
+                    closest_type=closest_for_party_results[0][3],  # 'result_status' from closest query
+                    closest_winners=[]  # Initialize an empty list for the closest winners
+                )
+
+                # Process each closest winner entry
+                for row in closest_for_party_results:
+                    abgeordneter_query = text('''
+                        SELECT k.id, k.name, k.firstname, k."yearOfBirth", k.profession
+                        FROM kandidaten k
+                        WHERE k.id = :kandidaten_id
                     ''')
-                    party_results = db.execute(party_query, {"partyid": party_id}).fetchall()
+                    abgeordneter_results = db.execute(abgeordneter_query, {"kandidaten_id": row[2]}).fetchall()
 
-                    # Query for closest winners
-                    closest_for_party_query = text('''
-                        SELECT wks.partei_id, wks.wahlkreis_id, wks.kandidat_id, result_status
-                        FROM wahlkreis_knappste_sieger wks
-                        WHERE wks.wahl_id = :wahlid and wks.partei_id = :partyid
-                    ''')
-                    closest_for_party_results = db.execute(closest_for_party_query,
-                                                           {"wahlid": wahlId, "partyid": party_id}).fetchall()
-
-                    # Create the ClosestWinners instance for the current party
-                    closest_winner = ClosestWinners(
-                        party=Partei(id=party_results[0][0], name=party_results[0][1], shortname=party_results[0][2]),
-                        closest_type=closest_for_party_results[0][3],  # 'result_status' from closest query
-                        closest_winners=[]  # Initialize an empty list for the closest winners
-                    )
-
-                    # Process each closest winner entry
-                    for row in closest_for_party_results:
-                        abgeordneter_query = text('''
-                            SELECT k.id, k.name, k.firstname, k."yearOfBirth", k.profession
-                            FROM kandidaten k
-                            WHERE k.id = :kandidaten_id
-                        ''')
-                        abgeordneter_results = db.execute(abgeordneter_query, {"kandidaten_id": row[2]}).fetchall()
-
-                        if abgeordneter_results:
-                            closest_winner.closest_winners.append(
-                                Abgeordneter(
-                                    id=abgeordneter_results[0][0],
-                                    name=abgeordneter_results[0][1],
-                                    firstname=abgeordneter_results[0][2],
-                                    year_of_birth=abgeordneter_results[0][3],
-                                    profession=abgeordneter_results[0][4],
-                                    party=Partei(id=party_id, name=party_results[0][1], shortname=party_results[0][2])
-                                )
+                    if abgeordneter_results:
+                        closest_winner.closest_winners.append(
+                            Abgeordneter(
+                                id=abgeordneter_results[0][0],
+                                name=abgeordneter_results[0][1],
+                                firstname=abgeordneter_results[0][2],
+                                year_of_birth=abgeordneter_results[0][3],
+                                profession=abgeordneter_results[0][4],
+                                party=Partei(id=parteiId, name=party_results[0][1], shortname=party_results[0][2])
                             )
+                        )
 
-                    closest_winners.append(closest_winner)
-
-            return closest_winners  # Return the list of closest winners
+            return closest_winner
 
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
@@ -250,3 +236,11 @@ class BaseGlobalApi:
 
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+    async def get_ueberhang(
+        self,
+        wahlid: StrictInt,
+        parteiid: StrictInt,
+    ) -> Ueberhang:
+        ...
+
