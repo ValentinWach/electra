@@ -49,9 +49,7 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
 async def get_abgeordnete(
     wahlid: StrictInt = Path(..., description=""),
 ) -> List[Abgeordneter]:
-    if not BaseGlobalApi.subclasses:
-        raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseGlobalApi.subclasses[0]().get_abgeordnete(wahlid)
+    return await BaseGlobalApi.get_abgeordnete(wahlid, self=None)
 
 
 @router.get(

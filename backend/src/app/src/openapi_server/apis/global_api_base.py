@@ -23,11 +23,58 @@ class BaseGlobalApi:
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         BaseGlobalApi.subclasses = BaseGlobalApi.subclasses + (cls,)
+
     async def get_abgeordnete(
-        self,
         wahlid: StrictInt,
+        self
     ) -> List[Abgeordneter]:
-        ...
+        try:
+            # Query the database for elections
+            with db_session() as db:
+
+                abgeordnete = []
+
+                abgeordnete_query = text('''
+                    SELECT kandidat_id, partei_id
+                    FROM abgeordnete a
+                    WHERE a.wahl_id = :wahlid
+                ''')
+
+                abgeordnete_results = db.execute(abgeordnete_query, {"wahlid": wahlid}).fetchall()
+
+                for row in abgeordnete_results:
+                    # Query for the candidate (abgeordneter) details
+                    abgeordneter_query = text('''
+                                SELECT k.id, k.name, k.firstname, k."yearOfBirth", k.profession
+                                FROM kandidaten k
+                                WHERE k.id = :kandidaten_id
+                            ''')
+                    abgeordneter_results = db.execute(abgeordneter_query, {"kandidaten_id": row[0]}).fetchall()
+
+                    party_query = text('''
+                                           SELECT id, name, "shortName"
+                                           FROM parteien
+                                           WHERE id = :partyid
+                                       ''')
+                    party_results = db.execute(party_query, {"partyid": row[1]}).fetchall()
+
+                    # If candidate exists, populate closest_winner with the candidate information
+                    if abgeordneter_results:
+                        abgeordnete.append(
+                            Abgeordneter(
+                                id=abgeordneter_results[0][0],
+                                name=abgeordneter_results[0][1],
+                                firstname=abgeordneter_results[0][2],
+                                year_of_birth=abgeordneter_results[0][3],
+                                profession=abgeordneter_results[0][4],
+                                party=Partei(id=party_results[0][0], name=party_results[0][1], shortname=party_results[0][2])
+                            )
+                        )
+
+            return abgeordnete
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
     async def get_closest_winners(
@@ -76,7 +123,6 @@ class BaseGlobalApi:
 
                     # Process each closest winner entry
                     for row in closest_for_party_results:
-                        # Query for the candidate (abgeordneter) details
                         abgeordneter_query = text('''
                             SELECT k.id, k.name, k.firstname, k."yearOfBirth", k.profession
                             FROM kandidaten k
@@ -84,7 +130,6 @@ class BaseGlobalApi:
                         ''')
                         abgeordneter_results = db.execute(abgeordneter_query, {"kandidaten_id": row[2]}).fetchall()
 
-                        # If candidate exists, populate closest_winner with the candidate information
                         if abgeordneter_results:
                             closest_winner.closest_winners.append(
                                 Abgeordneter(
@@ -97,7 +142,6 @@ class BaseGlobalApi:
                                 )
                             )
 
-                    # Append the populated ClosestWinners instance to the list
                     closest_winners.append(closest_winner)
 
             return closest_winners  # Return the list of closest winners

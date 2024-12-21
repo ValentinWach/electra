@@ -1,0 +1,11 @@
+Execute in psql:
+
+DO $$
+BEGIN
+    EXECUTE (
+        SELECT string_agg(format('GRANT SELECT ON TABLE %I.%I TO admin;', schemaname, tablename), ' ')
+        FROM pg_tables
+        WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
+    );
+END;
+$$;
