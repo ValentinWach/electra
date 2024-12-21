@@ -447,6 +447,7 @@ components:
       required:
         - id
         - name
+        - bundesland
       properties:
         id:
           type: integer
