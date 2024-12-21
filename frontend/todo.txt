@@ -1,18 +1,24 @@
-Übersicht:
- - Balkendiagramme nach Anteil ZS pro Partei
+Features - Unbeding:
+- Deutschlandkarte: Label wahlkreis! Prozentanteil?
+- Parteien: 10 knappste Sieger
+- Parteien: Ueberhang pro Bundesland
+- Berechnung ohne Aggregat auswählbar
+- Extra analysen
 
-Bundesländer:
-    - Karte mit Sieger pro Bundesland
-    - Über Karte oder Dropdown Bundesland auswählen
-        - Detailansicht: Strukturdaten, Wahlbet., Balkendiagramm ZS inkl. letzte Wahl, Abgeordnetenliste
+Design - Unbeding:
+- Lade-Animationen
+- (Bedingte) Responsiveness
+- Header
 
-Wahlkreise:
-    - Karte mit Sieger pro Wahlkreis
-    - Balkendiagramme nach Anteil ZS pro Partei
-    - Über Karte oder Dropdown Wahlkreis auswählen
-        - Detailansicht: Strukturdaten, Wahlbet., Balkendiagramm ZS inkl. letzte Wahl, Direkt-Sieger, Überhangsmandate
+Refactoring-Unbedingt
+- Vernünfite Default-Werte
+- Nicht immer direkt alle APIs abfragen
+- Dropdown labels nach neuem Schema
+- "DefaultSortColumn" und direction vernünftig in gridEinbauen
+- Null-Handling optimieren
+- Alle übrigen Warnungen beseitigen
+- Default-Sortierungsrichtung wird nicht angezeigt
 
-Parteien:
-    - List von Parteien inkl. Wahlerfolg
-    - Detailansicht
-        - Liste mit 10 knappsten Siegern
+
+Features - Optional:
+- Pfad in Detailansichten anpassen

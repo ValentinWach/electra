@@ -34,10 +34,16 @@ export default function PaginationC({numOfPages, switchPage, selectedPageProp}: 
             <span
                 className="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:cursor-pointer"
                 onClick={() => {
-                    if (selectedPage < 5 || selectedPage > numOfPages - 4) {
+                    if (selectedPage < 5) {
                         switchPage(5);
                         setSelectedPage(5);
-                    } else {
+
+                    }
+                    else if(selectedPage > numOfPages - 4) {
+                        switchPage(numOfPages - 4);
+                        setSelectedPage(numOfPages - 4);
+                    }
+                    else { //Ellipsis in the middle
                         switchPage(i === 3 ? 3 : numOfPages - 2);
                         setSelectedPage(i === 3 ? 3 : numOfPages - 2);
                     }

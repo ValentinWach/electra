@@ -50,6 +50,6 @@ export default function AbgeordneteC({fetchAbgeordnete}: {
     }, [abgeordnete]);
 
     return (
-        <GridC gridData={abgeordneteGridData} header={"Abgeordnete"} usePagination={true} pageSize={5} />
+        <GridC gridData={abgeordneteGridData} header={"Abgeordnete"} usePagination={true} pageSize={15} />
     )
 }

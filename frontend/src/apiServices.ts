@@ -1,5 +1,5 @@
 import {GeneralApi} from "./api/apis/GeneralApi";
-import {GetSitzverteilungRequest, GlobalApi} from "./api/apis/GlobalApi";
+import {GlobalApi} from "./api/apis/GlobalApi";
 import {WahlkreisApi} from "./api/apis/WahlkreisApi";
 import {SeatDistribution, Wahl} from "./api";
 

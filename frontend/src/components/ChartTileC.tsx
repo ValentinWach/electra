@@ -1,6 +1,6 @@
 import {ReactNode} from "react";
 import DropdownC from "./DropdownC.tsx";
-import {DropdownType} from "../models/ChartData.ts";
+import {DropdownType} from "../models/DropDownData.ts";
 
 interface CharttileProps {
     children?: ReactNode;

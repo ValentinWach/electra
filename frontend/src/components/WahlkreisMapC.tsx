@@ -10,7 +10,7 @@ import {WinningParties} from "../api";
 import {useElection} from "../context/ElectionContext.tsx";
 import {getPartyColor} from "../utils/utils.tsx";
 import ChartTileC from "./ChartTileC.tsx";
-import {DropdownType} from "../models/ChartData.ts";
+import {DropdownType} from "../models/DropDownData.ts";
 
 export default function WahlkreisMapC() {
     let mapDD: DropdownType = {

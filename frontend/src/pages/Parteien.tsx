@@ -2,10 +2,9 @@ import {useEffect, useState} from "react";
 import {fetchClosestWinners, fetchParteien} from "../apiServices.ts";
 import {ClosestWinners, Partei} from "../api";
 import {useElection} from "../context/ElectionContext.tsx";
-import ChartTileC from "../components/ChartTileC.tsx";
-import {getPartyColor} from "../utils/utils.tsx";
 import ClosestWinnersC from "../components/ClosestWinnersC.tsx";
 import GridC from "../components/GridC.tsx";
+import BackBreadcrumbsC from "../components/BackBreadcrumbsC.tsx";
 
 export default function Parteien() {
 
@@ -39,10 +38,9 @@ export default function Parteien() {
             {
                 selectedPartei ?
                     <div className="w-chart-lg max-lg:w-char flex justify-start">
-                        <button
-                            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-                            onClick={() => setSelectedPartei(null)}> zurück
-                        </button>
+                        <BackBreadcrumbsC breadcrumbData={{
+                            items: ["Parteien", selectedPartei.name ? (`${selectedPartei.name} (${selectedPartei.shortname})`) :
+                            selectedPartei.shortname]}} backFunction={() => setSelectedPartei(null)} />
                     </div>
                     :
                     <GridC

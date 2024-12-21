@@ -1,6 +1,6 @@
 import {Menu, MenuButton, MenuItem, MenuItems} from '@headlessui/react';
 import {ChevronDownIcon} from '@heroicons/react/20/solid';
-import type {DropdownType} from "../models/ChartData.ts";
+import type {DropdownType} from "../models/DropDownData.ts";
 import {useEffect, useState} from "react";
 
 export default function DropdownC({dropdownContent, dropDownFunction}: {

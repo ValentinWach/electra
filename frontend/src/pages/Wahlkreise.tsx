@@ -16,6 +16,7 @@ import ChartTileC from "../components/ChartTileC.tsx";
 import DoughnutChart from "../components/DoughnutC.tsx";
 import {ChartData} from "chart.js";
 import WahlkreisMapC from "../components/WahlkreisMapC.tsx";
+import BackBreadcrumbsC from "../components/BackBreadcrumbsC.tsx";
 
 export default function Wahlkreise() {
 
@@ -75,10 +76,7 @@ export default function Wahlkreise() {
             {
                 selectedWahlkreis ?
                     <div className="w-chart-lg max-lg:w-char flex justify-start">
-                        <button
-                            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-                            onClick={() => setSelectedWahlkreis(null)}> zurück
-                        </button>
+                        <BackBreadcrumbsC breadcrumbData={{items : ["Wahlkreise", `Nr. ${selectedWahlkreis.id}: ${selectedWahlkreis.name}`]}} backFunction={() => (setSelectedWahlkreis(null))} />
                     </div>
                     :
                     <>

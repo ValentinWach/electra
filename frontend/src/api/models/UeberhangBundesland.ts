@@ -24,69 +24,60 @@ import {
 /**
  * 
  * @export
- * @interface Wahlkreis
+ * @interface UeberhangBundesland
  */
-export interface Wahlkreis {
-    /**
-     * 
-     * @type {number}
-     * @memberof Wahlkreis
-     */
-    id: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Wahlkreis
-     */
-    name: string;
+export interface UeberhangBundesland {
     /**
      * 
      * @type {Bundesland}
-     * @memberof Wahlkreis
+     * @memberof UeberhangBundesland
      */
     bundesland: Bundesland;
+    /**
+     * 
+     * @type {number}
+     * @memberof UeberhangBundesland
+     */
+    ueberhang: number;
 }
 
 /**
- * Check if a given object implements the Wahlkreis interface.
+ * Check if a given object implements the UeberhangBundesland interface.
  */
-export function instanceOfWahlkreis(value: object): value is Wahlkreis {
-    if (!('id' in value) || value['id'] === undefined) return false;
-    if (!('name' in value) || value['name'] === undefined) return false;
+export function instanceOfUeberhangBundesland(value: object): value is UeberhangBundesland {
     if (!('bundesland' in value) || value['bundesland'] === undefined) return false;
+    if (!('ueberhang' in value) || value['ueberhang'] === undefined) return false;
     return true;
 }
 
-export function WahlkreisFromJSON(json: any): Wahlkreis {
-    return WahlkreisFromJSONTyped(json, false);
+export function UeberhangBundeslandFromJSON(json: any): UeberhangBundesland {
+    return UeberhangBundeslandFromJSONTyped(json, false);
 }
 
-export function WahlkreisFromJSONTyped(json: any, ignoreDiscriminator: boolean): Wahlkreis {
+export function UeberhangBundeslandFromJSONTyped(json: any, ignoreDiscriminator: boolean): UeberhangBundesland {
     if (json == null) {
         return json;
     }
     return {
         
-        'id': json['id'],
-        'name': json['name'],
         'bundesland': BundeslandFromJSON(json['bundesland']),
+        'ueberhang': json['ueberhang'],
     };
 }
 
-export function WahlkreisToJSON(json: any): Wahlkreis {
-    return WahlkreisToJSONTyped(json, false);
+export function UeberhangBundeslandToJSON(json: any): UeberhangBundesland {
+    return UeberhangBundeslandToJSONTyped(json, false);
 }
 
-export function WahlkreisToJSONTyped(value?: Wahlkreis | null, ignoreDiscriminator: boolean = false): any {
+export function UeberhangBundeslandToJSONTyped(value?: UeberhangBundesland | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'id': value['id'],
-        'name': value['name'],
         'bundesland': BundeslandToJSON(value['bundesland']),
+        'ueberhang': value['ueberhang'],
     };
 }
 

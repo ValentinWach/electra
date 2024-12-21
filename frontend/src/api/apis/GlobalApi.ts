@@ -19,6 +19,7 @@ import type {
   ClosestWinners,
   SeatDistribution,
   Stimmanteil,
+  Ueberhang,
 } from '../models/index';
 import {
     AbgeordneterFromJSON,
@@ -29,6 +30,8 @@ import {
     SeatDistributionToJSON,
     StimmanteilFromJSON,
     StimmanteilToJSON,
+    UeberhangFromJSON,
+    UeberhangToJSON,
 } from '../models/index';
 
 export interface GetAbgeordneteRequest {
@@ -46,6 +49,11 @@ export interface GetSitzverteilungRequest {
 
 export interface GetStimmanteilRequest {
     wahlid: number;
+}
+
+export interface GetUeberhangRequest {
+    wahlid: number;
+    parteiid: number;
 }
 
 /**
@@ -181,6 +189,44 @@ export class GlobalApi extends runtime.BaseAPI {
      */
     async getStimmanteil(requestParameters: GetStimmanteilRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Stimmanteil>> {
         const response = await this.getStimmanteilRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getUeberhangRaw(requestParameters: GetUeberhangRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Ueberhang>> {
+        if (requestParameters['wahlid'] == null) {
+            throw new runtime.RequiredError(
+                'wahlid',
+                'Required parameter "wahlid" was null or undefined when calling getUeberhang().'
+            );
+        }
+
+        if (requestParameters['parteiid'] == null) {
+            throw new runtime.RequiredError(
+                'parteiid',
+                'Required parameter "parteiid" was null or undefined when calling getUeberhang().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/results/{wahlid}/ueberhang/{parteiid}`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))).replace(`{${"parteiid"}}`, encodeURIComponent(String(requestParameters['parteiid']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => UeberhangFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getUeberhang(requestParameters: GetUeberhangRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Ueberhang> {
+        const response = await this.getUeberhangRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

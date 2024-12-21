@@ -5,7 +5,7 @@ import {ChartData} from "chart.js";
 import {useElection} from "../context/ElectionContext.tsx";
 import {getPartyColor} from "../utils/utils.tsx";
 import BarchartC from "./BarchartC.tsx";
-import type {DropdownType} from "../models/Chart-Data.ts";
+import type {DropdownType} from "../models/DropDownData.ts";
 
 export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVotes}: {
     fetchStimmanteile: (wahlId: number) => Promise<Stimmanteil[]>, showAbsoluteVotes?: boolean | null
