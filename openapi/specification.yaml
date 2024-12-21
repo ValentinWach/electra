@@ -284,6 +284,7 @@ paths:
           content:
             application/json:
               schema:
+                title: ueberhang
                 properties:
                   bundeslaender:
                     type: array
@@ -292,6 +293,7 @@ paths:
                       required:
                         - bundesland
                         - ueberhang
+                      title: ueberhang-bundesland
                       properties:
                         bundesland:
                           $ref: '#/components/schemas/Bundesland'
@@ -306,13 +308,14 @@ paths:
         - $ref: '#/components/parameters/wahlid'
         - $ref: '#/components/parameters/wahlkreisid'
       tags:
-        - Wahlkreis
+        - Elect
       responses:
         '200':
           description: Returning the direktkandidaten per wahlkreis
           content:
             application/json:
               schema:
+                title: direktkandidaten
                 properties:
                   kandidaten:
                     type: array
@@ -328,28 +331,29 @@ paths:
         - $ref: '#/components/parameters/wahlid'
         - $ref: '#/components/parameters/wahlkreisid'
       tags:
-        - Wahlkreis
+        - Elect
       responses:
         '200':
           description: Returning the competing parties per wahlkreis
           content:
             application/json:
               schema:
-                parteien:
-                  type: array
-                  items:
-                    type: object
-                    required:
-                      - partei
-                      - topfive
-                    properties:
-                      partei:
-                        $ref: '#/components/schemas/Partei'
-                      topfive:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Abgeordneter'
-                title: parteien
+                title: partei-wahlzettel
+                properties:
+                  parteien:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - partei
+                        - topfive
+                      properties:
+                        partei:
+                          $ref: '#/components/schemas/Partei'
+                        topfive:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/Abgeordneter'
 
   /elect/{wahlid}/authenticate/{wahlkreisid}:
     post:
@@ -358,12 +362,13 @@ paths:
         - $ref: '#/components/parameters/wahlkreisid'
       summary: Authenticate with token
       tags:
-        - Wahlkreis
+        - Elect
       requestBody:
         required: true
         content:
           application/json:
             schema:
+              title: authentication-details
               type: object
               properties:
                 token:
@@ -381,6 +386,7 @@ paths:
           content:
             application/json:
               schema:
+                title: sessionToken
                 type: object
                 properties:
                   sessionToken:
