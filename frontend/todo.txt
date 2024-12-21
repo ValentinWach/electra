@@ -9,6 +9,7 @@ Design - Unbeding:
 - Lade-Animationen
 - (Bedingte) Responsiveness
 - Header
+- Parteifarben, imb. unbekannte Parteien persisietern
 
 Refactoring-Unbedingt
 - Vernünfite Default-Werte
@@ -22,3 +23,10 @@ Refactoring-Unbedingt
 
 Features - Optional:
 - Pfad in Detailansichten anpassen
+
+Design-Optional:
+- Tabellen & Charts sind verbunden
+
+Refactoring-Optional
+- Bessere Komponentenstruktur
+- Alle Tabellen in eigene Komponenten auslagen/zumindest nicht auf page-ebene verwenden

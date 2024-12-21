@@ -134,3 +134,15 @@ export async function fetchClosestWinners(wahlid: number, parteiid: number) {
         throw error;
     }
 }
+
+export async function fetchUeberhangProBundesland(wahlid: number, parteiid: number) {
+    try {
+        const globalApi = new GlobalApi();
+        const ueberhang = await globalApi.getUeberhang({wahlid, parteiid});
+        console.log('Fetched Ueberhang:', ueberhang);
+        return ueberhang;
+    } catch (error) {
+        console.error('Error fetching Ueberhang:', error);
+        throw error;
+    }
+}

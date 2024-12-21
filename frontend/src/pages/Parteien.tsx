@@ -1,10 +1,11 @@
 import {useEffect, useState} from "react";
-import {fetchClosestWinners, fetchParteien} from "../apiServices.ts";
-import {ClosestWinners, Partei} from "../api";
+import {fetchClosestWinners, fetchParteien, fetchUeberhangProBundesland} from "../apiServices.ts";
+import {ClosestWinners, Partei, Ueberhang} from "../api";
 import {useElection} from "../context/ElectionContext.tsx";
 import ClosestWinnersC from "../components/ClosestWinnersC.tsx";
 import GridC from "../components/GridC.tsx";
 import BackBreadcrumbsC from "../components/BackBreadcrumbsC.tsx";
+import UeberhangC from "../components/UeberhangC.tsx";
 
 export default function Parteien() {
 
@@ -29,8 +30,11 @@ export default function Parteien() {
     }
 
     async function fetchClosestWinnersWrapper(wahlId: number): Promise<ClosestWinners> {
-        console.log("fetchClosestWinnersWrapper", wahlId, selectedPartei?.id);
         return fetchClosestWinners(wahlId, selectedPartei?.id ?? 0);
+    }
+
+    async function fetchUeberhangWrapper(wahlId: number): Promise<Ueberhang> {
+        return fetchUeberhangProBundesland(wahlId, selectedPartei?.id ?? 0);
     }
 
     return (
@@ -40,7 +44,8 @@ export default function Parteien() {
                     <div className="w-chart-lg max-lg:w-char flex justify-start">
                         <BackBreadcrumbsC breadcrumbData={{
                             items: ["Parteien", selectedPartei.name ? (`${selectedPartei.name} (${selectedPartei.shortname})`) :
-                            selectedPartei.shortname]}} backFunction={() => setSelectedPartei(null)} />
+                                selectedPartei.shortname]
+                        }} backFunction={() => setSelectedPartei(null)}/>
                     </div>
                     :
                     <GridC
@@ -65,7 +70,10 @@ export default function Parteien() {
             }
             {
                 selectedPartei ?
-                    <ClosestWinnersC fetchClostestWinners={fetchClosestWinnersWrapper}/>
+                    <>
+                        <ClosestWinnersC fetchClostestWinners={fetchClosestWinnersWrapper}/>
+                        <UeberhangC fetchUeberhang={fetchUeberhangWrapper}></UeberhangC>
+                    </>
                     :
                     null
             }

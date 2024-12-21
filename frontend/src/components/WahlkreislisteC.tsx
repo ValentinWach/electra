@@ -37,7 +37,7 @@ export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisD
                 values: [
                     {column_id: 1, value: wahlkreis.id.toString()},
                     {column_id: 2, value: wahlkreis.name},
-                    {column_id: 3, value: "wahlkreis.bundesland.name"},
+                    {column_id: 3, value: wahlkreis.bundesland.name},
                 ]
             })) ?? []
         );
