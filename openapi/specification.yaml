@@ -67,7 +67,7 @@ paths:
                   type: object
                   $ref: '#/components/schemas/Wahlkreis'
 
-  /parteien:
+  /parteien/{wahlid}:
     get:
       operationId: getParteien
       parameters:
