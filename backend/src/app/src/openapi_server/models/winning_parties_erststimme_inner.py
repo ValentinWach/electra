@@ -32,11 +32,10 @@ class WinningPartiesErststimmeInner(BaseModel):
     """
     WinningPartiesErststimmeInner
     """ # noqa: E501
-    party_name: Optional[StrictStr] = None
     party: Partei
     region_id: StrictInt
     region_name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["party_name", "party", "region_id", "region_name"]
+    __properties: ClassVar[List[str]] = ["party", "region_id", "region_name"]
 
     model_config = {
         "populate_by_name": True,
@@ -90,7 +89,6 @@ class WinningPartiesErststimmeInner(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "party_name": obj.get("party_name"),
             "party": Partei.from_dict(obj.get("party")) if obj.get("party") is not None else None,
             "region_id": obj.get("region_id"),
             "region_name": obj.get("region_name")

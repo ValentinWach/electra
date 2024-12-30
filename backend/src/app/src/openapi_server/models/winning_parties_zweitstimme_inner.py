@@ -20,7 +20,7 @@ import json
 
 
 
-from pydantic import BaseModel, ConfigDict, StrictInt
+from pydantic import BaseModel, ConfigDict, StrictInt,  StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from openapi_server.models.partei import Partei
 try:
@@ -34,7 +34,7 @@ class WinningPartiesZweitstimmeInner(BaseModel):
     """ # noqa: E501
     party: Partei
     region_id: StrictInt
-    region_name: Optional[StrictInt] = None
+    region_name: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["party", "region_id", "region_name"]
 
     model_config = {

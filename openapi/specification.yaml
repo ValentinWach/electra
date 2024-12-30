@@ -584,6 +584,7 @@ components:
             required:
               - party
               - region_id
+              - region_name
             properties:
               party:
                 $ref: '#/components/schemas/Partei'

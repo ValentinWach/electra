@@ -185,10 +185,10 @@ class BaseWahlkreisApi:
             # Query the database for elections
             with db_session() as db:
                 erstimmen_winner_query = text('''
-                                SELECT parteien."shortName", parteien.id, parteien.name AS erstimmen_winner FROM wahlkreise JOIN wahlkreis_winners ON wahlkreise.id = wahlkreis_winners.wahlkreis_id JOIN parteien ON wahlkreis_winners.partei_id = parteien.id WHERE wahlkreis_winners.wahl_id = :wahlId AND wahlkreis_winners.wahlkreis_id = :wahlkreisId;
+                                SELECT parteien."shortName", parteien.id, parteien.name AS erstimmen_winner, wahlkreise.name FROM wahlkreise JOIN wahlkreis_winners ON wahlkreise.id = wahlkreis_winners.wahlkreis_id JOIN parteien ON wahlkreis_winners.partei_id = parteien.id WHERE wahlkreis_winners.wahl_id = :wahlId AND wahlkreis_winners.wahlkreis_id = :wahlkreisId;
                             ''')
                 zweitstimmen_winner_query = text('''
-                                SELECT parteien."shortName", parteien.id, parteien.name AS zweitstimmen_winner FROM wahlkreise JOIN zweitstimmen_wahlkreis_partei ON wahlkreise.id = zweitstimmen_wahlkreis_partei.wahlkreise_id JOIN parteien ON parteien.id = zweitstimmen_wahlkreis_partei.parteien_id WHERE zweitstimmen_wahlkreis_partei.wahlen_id = :wahlId AND wahlkreise.id = :wahlkreisId AND zweitstimmen_wahlkreis_partei.stimmen_sum = (SELECT MAX(z2.stimmen_sum) FROM zweitstimmen_wahlkreis_partei z2 WHERE z2.wahlkreise_id = wahlkreise.id AND z2.wahlen_id = :wahlId);
+                                SELECT parteien."shortName", parteien.id, parteien.name AS zweitstimmen_winner, wahlkreise.name FROM wahlkreise JOIN zweitstimmen_wahlkreis_partei ON wahlkreise.id = zweitstimmen_wahlkreis_partei.wahlkreise_id JOIN parteien ON parteien.id = zweitstimmen_wahlkreis_partei.parteien_id WHERE zweitstimmen_wahlkreis_partei.wahlen_id = :wahlId AND wahlkreise.id = :wahlkreisId AND zweitstimmen_wahlkreis_partei.stimmen_sum = (SELECT MAX(z2.stimmen_sum) FROM zweitstimmen_wahlkreis_partei z2 WHERE z2.wahlkreise_id = wahlkreise.id AND z2.wahlen_id = :wahlId);
                             ''')
                 # Execute the query with parameterized input, avoiding direct string interpolation
                 erstimmen_winner_results = db.execute(
@@ -206,6 +206,7 @@ class BaseWahlkreisApi:
                 WinningPartiesErststimmeInner(
                     party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
                     region_id=wahlkreisId,
+                    region_name=row[3]
                 ) for row in erstimmen_winner_results
             ]
 
@@ -213,6 +214,7 @@ class BaseWahlkreisApi:
                 WinningPartiesZweitstimmeInner(
                     party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
                     region_id=wahlkreisId,
+                    region_name=row[3]
                 ) for row in zweitstimmen_winner_results
             ]
 
@@ -233,10 +235,10 @@ class BaseWahlkreisApi:
             # Query the database for elections
             with db_session() as db:
                 erstimmen_winner_query = text('''
-                                SELECT parteien."shortName", parteien.id, parteien.name AS erstimmen_winner, wahlkreise.id FROM wahlkreise JOIN wahlkreis_winners ON wahlkreise.id = wahlkreis_winners.wahlkreis_id JOIN parteien ON wahlkreis_winners.partei_id = parteien.id WHERE wahlkreis_winners.wahl_id = :wahlId;
+                                SELECT parteien."shortName", parteien.id, parteien.name AS erstimmen_winner, wahlkreise.id, wahlkreise.name FROM wahlkreise JOIN wahlkreis_winners ON wahlkreise.id = wahlkreis_winners.wahlkreis_id JOIN parteien ON wahlkreis_winners.partei_id = parteien.id WHERE wahlkreis_winners.wahl_id = :wahlId;
                             ''')
                 zweitstimmen_winner_query = text('''
-                                SELECT parteien."shortName", parteien.id, parteien.name AS zweitstimmen_winner, wahlkreise.id FROM wahlkreise JOIN zweitstimmen_wahlkreis_partei ON wahlkreise.id = zweitstimmen_wahlkreis_partei.wahlkreise_id JOIN parteien ON parteien.id = zweitstimmen_wahlkreis_partei.parteien_id WHERE zweitstimmen_wahlkreis_partei.wahlen_id = :wahlId AND zweitstimmen_wahlkreis_partei.stimmen_sum = (SELECT MAX(z2.stimmen_sum) FROM zweitstimmen_wahlkreis_partei z2 WHERE z2.wahlkreise_id = wahlkreise.id AND z2.wahlen_id = :wahlId);
+                                SELECT parteien."shortName", parteien.id, parteien.name AS zweitstimmen_winner, wahlkreise.id, wahlkreise.name FROM wahlkreise JOIN zweitstimmen_wahlkreis_partei ON wahlkreise.id = zweitstimmen_wahlkreis_partei.wahlkreise_id JOIN parteien ON parteien.id = zweitstimmen_wahlkreis_partei.parteien_id WHERE zweitstimmen_wahlkreis_partei.wahlen_id = :wahlId AND zweitstimmen_wahlkreis_partei.stimmen_sum = (SELECT MAX(z2.stimmen_sum) FROM zweitstimmen_wahlkreis_partei z2 WHERE z2.wahlkreise_id = wahlkreise.id AND z2.wahlen_id = :wahlId);
                             ''')
                 # Execute the query with parameterized input, avoiding direct string interpolation
                 erstimmen_winner_results = db.execute(
@@ -254,6 +256,7 @@ class BaseWahlkreisApi:
                 WinningPartiesErststimmeInner(
                     party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
                     region_id=row[3],
+                    region_name=row[4]
                 ) for row in erstimmen_winner_results
             ]
 
@@ -261,6 +264,7 @@ class BaseWahlkreisApi:
                 WinningPartiesZweitstimmeInner(
                     party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
                     region_id=row[3],
+                    region_name=row[4]
                 ) for row in zweitstimmen_winner_results
             ]
 
