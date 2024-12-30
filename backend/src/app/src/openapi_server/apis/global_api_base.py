@@ -7,12 +7,17 @@ from pydantic import StrictInt
 from typing import List
 from sqlalchemy import text
 from openapi_server.models.abgeordneter import Abgeordneter
+from openapi_server.models.closest_winner import ClosestWinner
 from openapi_server.models.closest_winners import ClosestWinners
 from openapi_server.models.seat_distribution import SeatDistribution
 from openapi_server.models.seat_distribution_distribution_inner import SeatDistributionDistributionInner
 from openapi_server.models.partei import Partei
 from openapi_server.models.stimmanteil import Stimmanteil
 from openapi_server.models.ueberhang import Ueberhang
+from openapi_server.models.ueberhang_bundesland import UeberhangBundesland
+from openapi_server.models.wahlkreis import Wahlkreis
+from openapi_server.models.bundesland import Bundesland
+
 from openapi_server.models.wahl import Wahl
 from openapi_server.database.models import Wahl as WahlModel
 from openapi_server.database.connection import Session as db_session
@@ -36,40 +41,25 @@ class BaseGlobalApi:
                 abgeordnete = []
 
                 abgeordnete_query = text('''
-                    SELECT kandidat_id, partei_id
-                    FROM abgeordnete a
+                    SELECT p.id, p.name, p."shortName", k.id, k.name, k.firstname, k."yearOfBirth", k.profession
+                    FROM abgeordnete a JOIN parteien p ON a.partei_id = p.id JOIN kandidaten k ON a.kandidat_id = k.id
                     WHERE a.wahl_id = :wahlid
                 ''')
 
                 abgeordnete_results = db.execute(abgeordnete_query, {"wahlid": wahlid}).fetchall()
 
                 for row in abgeordnete_results:
-                    # Query for the candidate (abgeordneter) details
-                    abgeordneter_query = text('''
-                                SELECT k.id, k.name, k.firstname, k."yearOfBirth", k.profession
-                                FROM kandidaten k
-                                WHERE k.id = :kandidaten_id
-                            ''')
-                    abgeordneter_results = db.execute(abgeordneter_query, {"kandidaten_id": row[0]}).fetchall()
 
-                    party_query = text('''
-                                           SELECT id, name, "shortName"
-                                           FROM parteien
-                                           WHERE id = :partyid
-                                       ''')
-                    party_results = db.execute(party_query, {"partyid": row[1]}).fetchall()
-
-                    if abgeordneter_results:
-                        abgeordnete.append(
-                            Abgeordneter(
-                                id=abgeordneter_results[0][0],
-                                name=abgeordneter_results[0][1],
-                                firstname=abgeordneter_results[0][2],
-                                year_of_birth=abgeordneter_results[0][3],
-                                profession=abgeordneter_results[0][4],
-                                party=Partei(id=party_results[0][0], name=party_results[0][1], shortname=party_results[0][2])
-                            )
+                    abgeordnete.append(
+                        Abgeordneter(
+                            id=row[3],
+                            name=row[4],
+                            firstname=row[5],
+                            year_of_birth=row[6],
+                            profession=row[7],
+                            party=Partei(id=int(row[0]), name=row[1], shortname=row[2])
                         )
+                    )
 
             return abgeordnete
 
@@ -85,18 +75,10 @@ class BaseGlobalApi:
         try:
             # Query the database for elections
             with db_session() as db:
-                # Query for party details
-                party_query = text('''
-                    SELECT id, name, "shortName"
-                    FROM parteien
-                    WHERE id = :partyid
-                ''')
-                party_results = db.execute(party_query, {"partyid": parteiId}).fetchall()
-
                 # Query for closest winners
                 closest_for_party_query = text('''
-                    SELECT wks.partei_id, wks.wahlkreis_id, wks.kandidat_id, result_status
-                    FROM wahlkreis_knappste_sieger wks
+                    SELECT p.id, p.name, p."shortName", wk.id, wk.name, bl.id AS bundesland_id, bl.name AS bundesland_name, result_status, k.id, k.name, k.firstname, k."yearOfBirth", k.profession
+                    FROM wahlkreis_knappste_sieger wks JOIN parteien p ON wks.partei_id = p.id JOIN kandidaten k ON wks.kandidat_id = k.id JOIN wahlkreise wk ON wks.wahlkreis_id = wk.id JOIN bundeslaender bl ON wk.bundesland_id = bl.id
                     WHERE wks.wahl_id = :wahlid and wks.partei_id = :partyid
                 ''')
                 closest_for_party_results = db.execute(closest_for_party_query,
@@ -104,31 +86,33 @@ class BaseGlobalApi:
 
                 # Create the ClosestWinners instance for the current party
                 closest_winner = ClosestWinners(
-                    party=Partei(id=party_results[0][0], name=party_results[0][1], shortname=party_results[0][2]),
-                    closest_type=closest_for_party_results[0][3],  # 'result_status' from closest query
-                    closest_winners=[]  # Initialize an empty list for the closest winners
+                    party=Partei(id=closest_for_party_results[0][0], name=closest_for_party_results[0][1], shortname=closest_for_party_results[0][2]),
+                    closest_type=closest_for_party_results[0][7],
+                    closest_winners=[]
                 )
 
-                # Process each closest winner entry
                 for row in closest_for_party_results:
-                    abgeordneter_query = text('''
-                        SELECT k.id, k.name, k.firstname, k."yearOfBirth", k.profession
-                        FROM kandidaten k
-                        WHERE k.id = :kandidaten_id
-                    ''')
-                    abgeordneter_results = db.execute(abgeordneter_query, {"kandidaten_id": row[2]}).fetchall()
 
-                    if abgeordneter_results:
-                        closest_winner.closest_winners.append(
-                            Abgeordneter(
-                                id=abgeordneter_results[0][0],
-                                name=abgeordneter_results[0][1],
-                                firstname=abgeordneter_results[0][2],
-                                year_of_birth=abgeordneter_results[0][3],
-                                profession=abgeordneter_results[0][4],
-                                party=Partei(id=parteiId, name=party_results[0][1], shortname=party_results[0][2])
+                    closest_winner.closest_winners.append(
+                        ClosestWinner(
+                            abgeordneter=Abgeordneter(
+                                id=row[8],
+                                name=row[9],
+                                firstname=row[10],
+                                year_of_birth=row[11],
+                                profession=row[12],
+                                party=Partei(id=closest_for_party_results[0][0], name=closest_for_party_results[0][1], shortname=closest_for_party_results[0][2])
+                            ),
+                            wahlkreis=Wahlkreis(
+                                id=row[3],
+                                name=row[4],
+                                bundesland=Bundesland(
+                                    id=row[5],
+                                    name=row[6]
+                                )
                             )
                         )
+                    )
 
             return closest_winner
 
@@ -185,7 +169,7 @@ class BaseGlobalApi:
             with db_session() as db:
                 stimmanteil_query = text('''
                             SELECT
-                                parteien_id,
+                                p.id, p.name, p."shortName",
                                 stimmen_sum,
                                 ROUND(
                                     (stimmen_sum * 100.0) /
@@ -195,7 +179,7 @@ class BaseGlobalApi:
                                     2
                                 ) AS prozentualer_anteil
                             FROM
-                                zweitstimmen_partei z
+                                zweitstimmen_partei z JOIN parteien p on z.parteien_id = p.id
                             WHERE wahlen_id = :wahlId;
                             ''')
                 # Execute the query with parameterized input, avoiding direct string interpolation
@@ -209,24 +193,11 @@ class BaseGlobalApi:
             # Return the WinningParties object with the filled lists
             stimmanteile = []
             for result in stimmanteil_results:
-                partei_id, stimmenanzahl, prozentualer_anteil = result
+                id, name, short_name, stimmenanzahl, prozentualer_anteil = result
 
-                # Fetch the Partei details from the database or cache
-                partei = db.execute(
-                    text('SELECT id, name, "shortName" FROM parteien WHERE id = :partei_id'),
-                    {"partei_id": partei_id}
-                ).fetchone()
-
-                if not partei:
-                    raise HTTPException(
-                        status_code=404,
-                        detail=f"Partei with id {partei_id} not found"
-                    )
-
-                # Map the result to the schema
                 stimmanteile.append(
                     Stimmanteil(
-                        party=Partei(id=partei.id, name=partei.name, shortname=partei.shortName),
+                        party=Partei(id=id, name=name, shortname=short_name),
                         share=prozentualer_anteil,
                         absolute=int(stimmenanzahl)
                     )
@@ -238,9 +209,42 @@ class BaseGlobalApi:
             raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
     async def get_ueberhang(
-        self,
         wahlid: StrictInt,
         parteiid: StrictInt,
+        self,
     ) -> Ueberhang:
-        ...
+        try:
+            with db_session() as db:
+                ueberhang_query = text('''
+                            SELECT b.*, sk.drohender_ueberhang 
+                            FROM uv_mindestsitzanspruch_bundestag sk 
+                            JOIN bundeslaender b ON b.id = sk.bundesland_id 
+                            WHERE wahl_id = :wahlId AND partei_id = :parteiId
+                            ''')
+                ueberhang_results = db.execute(ueberhang_query,
+                    {"wahlId": wahlid, "parteiId": parteiid}
+                ).fetchall()
+
+                if not ueberhang_results:
+                    raise HTTPException(status_code=404, detail="No winners found")
+
+                ueberhang = Ueberhang(bundeslaender=[])
+                for result in ueberhang_results:
+                    id, name, drohender_ueberhang = result
+
+                    ueberhang.bundeslaender.append(
+                        UeberhangBundesland(
+                            bundesland=Bundesland(
+                                id=id,
+                                name=name
+                            ),
+                            ueberhang=drohender_ueberhang
+                        )
+                    )
+
+            return ueberhang
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
 

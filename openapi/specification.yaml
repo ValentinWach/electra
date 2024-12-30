@@ -284,7 +284,7 @@ paths:
           content:
             application/json:
               schema:
-                title: ueberhangAber
+                title: ueberhang
                 properties:
                   bundeslaender:
                     type: array

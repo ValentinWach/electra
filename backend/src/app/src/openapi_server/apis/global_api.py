@@ -106,6 +106,4 @@ async def get_ueberhang(
     wahlid: StrictInt = Path(..., description=""),
     parteiid: StrictInt = Path(..., description=""),
 ) -> Ueberhang:
-    if not BaseGlobalApi.subclasses:
-        raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseGlobalApi.subclasses[0]().get_ueberhang(wahlid, parteiid)
+    return await BaseGlobalApi.get_ueberhang(wahlid, parteiid, self=None)

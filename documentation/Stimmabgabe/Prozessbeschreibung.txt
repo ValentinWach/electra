@@ -1,0 +1,17 @@
+Prozessbeschreibung Stimmabgabe:
+
+Organisatorisch:
+
+Vor Beginn der Wahl wird den Wählenden postalsch ein einmaliger Token zugesendet.
+Bei Betreten des Wahllokals muss die Identitöt des Wählenden nicht mehr manuell durch Wahlhelfer bestätigt werden.
+Stattdessen kann sich der Wählende direkt an ein elektroisches Terminal setzen und muss hier seinen Token und seine Ausweisnummer eingeben.
+Anschließend kann er Stimmen elektronisch abgeben.
+
+Technisch:
+
+Vor der Wahl werden die benötigten Token für alle Wahlberechigten automatisch generiert und mit den jeweiligen Ausweisnummern konkateniert und gehashed.
+Um eine Rückverfolgung zu verhindern, wird ausschließlich dieser Hashwert gespeichert.
+Wenn der Wählende im Wahllokal seinen Token und seine Ausweisnummer eingibt, werden diese ebenfalls gehashed und mit den gespeicherten Hashwerten verglichen.
+Falls ein Match gefunden wird, kann der Wählende seine Stimme abgeben.
+Das ausschließlich Stimmen vom Wahllokal aus abgegeben werden können, wird durch auf den Terminals hinterlegte Zertifikate sichergestellt.
+

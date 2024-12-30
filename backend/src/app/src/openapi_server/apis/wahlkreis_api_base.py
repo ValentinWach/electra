@@ -122,7 +122,7 @@ class BaseWahlkreisApi:
                 if generatefromaggregate:
                     stimmanteil_query = text('''
                                 SELECT
-                                    parteien_id,
+                                    p.id, p.name, p."shortName",
                                     stimmen_sum,
                                     ROUND(
                                         (stimmen_sum * 100.0) /
@@ -132,21 +132,21 @@ class BaseWahlkreisApi:
                                         2
                                     ) AS prozentualer_anteil
                                 FROM
-                                    zweitstimmen_wahlkreis_partei z
+                                    zweitstimmen_wahlkreis_partei z JOIN parteien p ON z.parteien_id = p.id   
                                 WHERE wahlen_id = :wahlId and wahlkreise_id = :wahlkreisId;
                                 ''')
                 else:
                     stimmanteil_query = text('''
                                             SELECT
-                                                partei_id,
+                                                p.id, p.name, p."shortName",
                                                 COUNT(*) AS stimmenanzahl,
                                                 ROUND((COUNT(*) * 100.0) / SUM(COUNT(*)) OVER(), 2) AS prozentualer_anteil
                                             FROM
-                                                zweitstimmen
+                                                zweitstimmen z JOIN parteien p ON z.partei_id = p.id   
                                             WHERE
                                                 wahl_id = :wahlId and wahlkreis_id = :wahlkreisId
                                             GROUP BY
-                                                partei_id;
+                                                p.id, p.name, p."shortName";
                                                 ''')
 
                 # Execute the query with parameterized input, avoiding direct string interpolation
@@ -156,28 +156,16 @@ class BaseWahlkreisApi:
 
             if not stimmanteil_results:
                 raise HTTPException(status_code=404, detail="No stimmanteil found")
+            print(stimmanteil_results)
 
             # Return the WinningParties object with the filled lists
             stimmanteile = []
             for result in stimmanteil_results:
-                partei_id, stimmenanzahl, prozentualer_anteil = result
+                partei_id, partei_name, partei_short_name, stimmenanzahl, prozentualer_anteil = result
 
-                # Fetch the Partei details from the database or cache
-                partei = db.execute(
-                    text('SELECT id, name, "shortName" FROM parteien WHERE id = :partei_id'),
-                    {"partei_id": partei_id}
-                ).fetchone()
-
-                if not partei:
-                    raise HTTPException(
-                        status_code=404,
-                        detail=f"Partei with id {partei_id} not found"
-                    )
-
-                # Map the result to the schema
                 stimmanteile.append(
                     Stimmanteil(
-                        party=Partei(id=partei.id, name=partei.name, shortname=partei.shortName),
+                        party=Partei(id=partei_id, name=partei_name, shortname=partei_short_name),
                         share=prozentualer_anteil,
                         absolute=int(stimmenanzahl)
                     )
@@ -295,14 +283,18 @@ class BaseWahlkreisApi:
             with db_session() as db:
                 # Query to fetch foreigner share for the specified election
                 auslaenderanteil_query = text('''
-                    SELECT wahlkreis_id, auslaenderanteil 
-                    FROM strukturdaten 
-                    WHERE wahl_id = :wahlId;
+                    SELECT s.wahlkreis_id, s.auslaenderanteil, zwp.stimmen_sum
+                    FROM strukturdaten s
+                    LEFT JOIN zweitstimmen_wahlkreis_partei zwp
+                        ON s.wahlkreis_id = zwp.wahlkreise_id
+                        AND s.wahl_id = zwp.wahlen_id
+                        AND zwp.parteien_id = :parteiId
+                    WHERE s.wahl_id = :wahlId;
                 ''')
 
                 auslaenderanteil_results = db.execute(
                     auslaenderanteil_query,
-                    {"wahlId": wahlid}
+                    {"wahlId": wahlid, "parteiId": parteiid}
                 ).fetchall()
 
                 if not auslaenderanteil_results:
@@ -314,30 +306,13 @@ class BaseWahlkreisApi:
                 # Initialize the response object
                 auslaenderanteil_response = Auslaenderanteil(wahlkreise=[])
 
-                # Iterate through results and fetch associated votes for each wahlkreis
                 for result in auslaenderanteil_results:
-                    wahlkreis_id, auslaenderanteil_value = result
-                    print(wahlkreis_id)
-
-
-                    # Fetch the vote sum for the specified party, election, and wahlkreis
-                    stimmen_query = text('''
-                        SELECT stimmen_sum 
-                        FROM zweitstimmen_wahlkreis_partei 
-                        WHERE wahlen_id = :wahlId 
-                          AND wahlkreise_id = :wahlkreisId 
-                          AND parteien_id = :parteiId;
-                    ''')
-
-                    stimmen_result = db.execute(
-                        stimmen_query,
-                        {"wahlId": wahlid, "wahlkreisId": wahlkreis_id, "parteiId": parteiid}
-                    ).fetchone()
+                    wahlkreis_id, auslaenderanteil_value, stimmen_result = result
 
                     if stimmen_result is None:
                         stimmen_sum = 0
                     else:
-                        stimmen_sum = stimmen_result[0]
+                        stimmen_sum = stimmen_result
 
                     auslaenderanteil_response.wahlkreise.append(
                         AuslaenderanteilWahlkreiseInner(
@@ -366,14 +341,18 @@ class BaseWahlkreisApi:
             with db_session() as db:
                 # Query to fetch foreigner share for the specified election
                 einkommen_query = text('''
-                    SELECT wahlkreis_id, einkommen 
-                    FROM strukturdaten 
-                    WHERE wahl_id = :wahlId;
+                    SELECT wahlkreis_id, einkommen, zwp.stimmen_sum
+                    FROM strukturdaten s
+                    LEFT JOIN zweitstimmen_wahlkreis_partei zwp
+                        ON s.wahlkreis_id = zwp.wahlkreise_id
+                        AND s.wahl_id = zwp.wahlen_id
+                        AND zwp.parteien_id = :parteiId
+                    WHERE s.wahl_id = :wahlId;
                 ''')
 
                 einkommen_results = db.execute(
                     einkommen_query,
-                    {"wahlId": wahlid}
+                    {"wahlId": wahlid, "parteiId": parteiid}
                 ).fetchall()
 
                 if not einkommen_results:
@@ -387,26 +366,12 @@ class BaseWahlkreisApi:
 
                 # Iterate through results and fetch associated votes for each wahlkreis
                 for result in einkommen_results:
-                    wahlkreis_id, einkommen_value = result
-
-                    # Fetch the vote sum for the specified party, election, and wahlkreis
-                    stimmen_query = text('''
-                        SELECT stimmen_sum 
-                        FROM zweitstimmen_wahlkreis_partei 
-                        WHERE wahlen_id = :wahlId 
-                          AND wahlkreise_id = :wahlkreisId 
-                          AND parteien_id = :parteiId;
-                    ''')
-
-                    stimmen_result = db.execute(
-                        stimmen_query,
-                        {"wahlId": wahlid, "wahlkreisId": wahlkreis_id, "parteiId": parteiid}
-                    ).fetchone()
+                    wahlkreis_id, einkommen_value, stimmen_result = result
 
                     if stimmen_result is None:
                         stimmen_sum = 0
                     else:
-                        stimmen_sum = stimmen_result[0]
+                        stimmen_sum = stimmen_result
 
                     einkommen_response.wahlkreise.append(
                         EinkommenWahlkreiseInner(

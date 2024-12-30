@@ -20,30 +20,22 @@ import json
 
 
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List, Optional
-from openapi_server.models.closest_winner import ClosestWinner
-from openapi_server.models.partei import Partei
+from pydantic import BaseModel, ConfigDict
+from typing import Any, ClassVar, Dict, List
+from openapi_server.models.abgeordneter import Abgeordneter
+from openapi_server.models.wahlkreis import Wahlkreis
 try:
     from typing import Self
 except ImportError:
     from typing_extensions import Self
 
-class ClosestWinners(BaseModel):
+class ClosestWinner(BaseModel):
     """
-    ClosestWinners
+    ClosestWinner
     """ # noqa: E501
-    party: Partei
-    closest_type: StrictStr
-    closest_winners: Optional[List[ClosestWinner]] = Field(default=None, alias="ClosestWinners")
-    __properties: ClassVar[List[str]] = ["party", "closest_type", "ClosestWinners"]
-
-    @field_validator('closest_type')
-    def closest_type_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in ('Winner', 'Loser',):
-            raise ValueError("must be one of enum values ('Winner', 'Loser')")
-        return value
+    abgeordneter: Abgeordneter
+    wahlkreis: Wahlkreis
+    __properties: ClassVar[List[str]] = ["abgeordneter", "wahlkreis"]
 
     model_config = {
         "populate_by_name": True,
@@ -63,7 +55,7 @@ class ClosestWinners(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of ClosestWinners from a JSON string"""
+        """Create an instance of ClosestWinner from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -82,21 +74,17 @@ class ClosestWinners(BaseModel):
             },
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of party
-        if self.party:
-            _dict['party'] = self.party.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of each item in closest_winners (list)
-        _items = []
-        if self.closest_winners:
-            for _item in self.closest_winners:
-                if _item:
-                    _items.append(_item.to_dict())
-            _dict['ClosestWinners'] = _items
+        # override the default output from pydantic by calling `to_dict()` of abgeordneter
+        if self.abgeordneter:
+            _dict['abgeordneter'] = self.abgeordneter.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of wahlkreis
+        if self.wahlkreis:
+            _dict['wahlkreis'] = self.wahlkreis.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of ClosestWinners from a dict"""
+        """Create an instance of ClosestWinner from a dict"""
         if obj is None:
             return None
 
@@ -104,9 +92,8 @@ class ClosestWinners(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "party": Partei.from_dict(obj.get("party")) if obj.get("party") is not None else None,
-            "closest_type": obj.get("closest_type"),
-            "ClosestWinners": [ClosestWinner.from_dict(_item) for _item in obj.get("ClosestWinners")] if obj.get("ClosestWinners") is not None else None
+            "abgeordneter": Abgeordneter.from_dict(obj.get("abgeordneter")) if obj.get("abgeordneter") is not None else None,
+            "wahlkreis": Wahlkreis.from_dict(obj.get("wahlkreis")) if obj.get("wahlkreis") is not None else None
         })
         return _obj
 

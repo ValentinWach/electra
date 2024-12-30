@@ -76,8 +76,8 @@ class BaseGeneralApi:
         try:
             with db_session() as db:
                 wahlkreis_query = text('''
-                            SELECT * 
-                            FROM wahlkreise;
+                            SELECT w.id, w.name, b.*
+                            FROM wahlkreise w JOIN bundeslaender b ON b.id = bundesland_id;
                             ''')
                 # Execute the query with parameterized input, avoiding direct string interpolation
                 wahlkreis_results = db.execute(wahlkreis_query).fetchall()
@@ -88,26 +88,13 @@ class BaseGeneralApi:
             # Return the WinningParties object with the filled lists
             wahlkreise = []
             for result in wahlkreis_results:
-                id, name, bundesland_id = result
+                id, name, bundesland_id, bundesland_name = result
 
-                # Fetch the Partei details from the database or cache
-                bundesland = db.execute(
-                    text('SELECT id, name FROM bundeslaender WHERE id = :bundesland_id'),
-                    {"bundesland_id": bundesland_id}
-                ).fetchone()
-
-                if not bundesland:
-                    raise HTTPException(
-                        status_code=404,
-                        detail=f"Bundesland with id {bundesland_id} not found"
-                    )
-
-                # Map the result to the schema
                 wahlkreise.append(
                     Wahlkreis(
                         id=id,
                         name=name,
-                        bundesland=Bundesland(id=bundesland.id, name=bundesland.name),
+                        bundesland=Bundesland(id=bundesland_id, name=bundesland_name),
 
                     )
                 )
