@@ -14,6 +14,7 @@ from openapi_server.database.models import Partei as ParteiModel
 from openapi_server.models.partei import Partei
 from openapi_server.database.models import Wahlkreis as WahlkreisModel
 from sqlalchemy import text
+from pydantic import StrictInt
 
 
 
@@ -105,21 +106,30 @@ class BaseGeneralApi:
             raise HTTPException(status_code=500, detail=str(e))
 
     async def get_parteien(
+            wahlId: StrictInt,
             self
     ) -> List[Partei]:
         try:
             with db_session() as db:
-                parteien = db.query(ParteiModel).all()
+                parteien_query = text('''
+                    SELECT DISTINCT p.id, p.name, p."shortName" from parteien p JOIN listenkandidaturen l ON p.id = l.partei_id WHERE wahl_id = :wahlid
+                    UNION
+                    SELECT DISTINCT p.id, p.name, p."shortName" from parteien p JOIN wahlkreiskandidaturen w ON p.id = w.partei_id WHERE wahl_id = :wahlid;
+                ''')
+                parteien_results = db.execute(parteien_query,
+                                                       {"wahlid": wahlId}).fetchall()
 
-            if not parteien:
-                raise HTTPException(status_code=404, detail="No wahlkreise found")
+                parteien = []
+                for row in parteien_results:
+                    parteien.append(
+                        Partei(
+                            id=row[0],
+                            name=row[1],
+                            shortname=row[2]
+                        )
+                    )
 
-            partei_dicts = [to_dict(partei) for partei in parteien]
-
-            partei_list = [Partei.model_validate({**partei, "shortname": partei.pop("shortName")}) for partei in
-                           partei_dicts]
-
-            return partei_list
+            return parteien
 
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))

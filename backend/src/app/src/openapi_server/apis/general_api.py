@@ -21,6 +21,7 @@ from fastapi import (  # noqa: F401
     status,
 )
 
+from pydantic import StrictInt
 from openapi_server.models.extra_models import TokenModel  # noqa: F401
 from typing import List
 from openapi_server.models.bundesland import Bundesland
@@ -84,7 +85,7 @@ self=None) -> List[Wahlkreis]:
 
 
 @router.get(
-    "/parteien",
+    "/parteien/{wahlid}",
     responses={
         200: {"model": List[Partei], "description": "Returning all parties"},
     },
@@ -92,8 +93,9 @@ self=None) -> List[Wahlkreis]:
     response_model_by_alias=True,
 )
 async def get_parteien(
+        wahlid: StrictInt = Path(..., description=""),
 self=None) -> List[Partei]:
-    return await BaseGeneralApi.get_parteien(self)
+    return await BaseGeneralApi.get_parteien(wahlid, self)
 
 
 
