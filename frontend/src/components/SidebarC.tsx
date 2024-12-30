@@ -36,11 +36,10 @@ export default function Example() {
     };
 
     const Wahl: DropdownType = {
-        label: selectedElection ? selectedElection.date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }) : 'Select Election',
         items: elections.map(election => ({
             label: election.date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }),
             id: election.id
-        }))
+        })),
     };
 
     return (

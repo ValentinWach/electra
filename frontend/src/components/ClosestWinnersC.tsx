@@ -25,7 +25,7 @@ export default function ClosestWinnersC({fetchClostestWinners}: {
     }, [selectedElection]);
 
     return (
-        <ChartTileC header={closestWinners?.closestType === "Winner" ? "Knappste Sieger" : "Knappste Verlierer"}>
+        <ChartTileC doubleSize={true} header={closestWinners?.closestType === "Winner" ? "Knappste Sieger" : "Knappste Verlierer"}>
             <table className="table">
                 <thead>
                 <tr>
@@ -41,7 +41,7 @@ export default function ClosestWinnersC({fetchClostestWinners}: {
                     <tr key={winner.abgeordneter.id}>
                         <td>{winner.abgeordneter.name}</td>
                         <td>{winner.abgeordneter.firstname}</td>
-                        <td>{winner.abgeordneter.profession}</td>
+                        <td title={winner.abgeordneter.profession}>{winner.abgeordneter.profession}</td>
                         <td>{winner.abgeordneter.yearOfBirth}</td>
                         <td>{winner.wahlkreis.name}</td>
                     </tr>

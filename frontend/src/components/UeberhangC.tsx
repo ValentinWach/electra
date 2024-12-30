@@ -15,8 +15,8 @@ export default function UeberhangC({fetchUeberhang}: {
     useEffect(() => {
         const getUeberhang = async () => {
             try {
-                const data = await fetchUeberhang(selectedElection?.id ?? 0);
-                const dataSorted = {...data, bundeslaender: data.bundeslaender?.sort((a, b) => a.ueberhang - b.ueberhang)};
+                const data = await fetchUeberhang(selectedElection?.id ?? 0)
+                const dataSorted = {...data, bundeslaender: data.bundeslaender?.filter(b => b.ueberhang > 0).sort((a, b) => a.ueberhang - b.ueberhang)};
                 setUeberhang(dataSorted);
             } catch (error) {
                 console.error('Error fetching Ueberhaenge:', error);
@@ -26,23 +26,25 @@ export default function UeberhangC({fetchUeberhang}: {
     }, [selectedElection]);
 
     return (
-        <ChartTileC header="Überhang pro Bundesland">
-            <table className="table">
-                <thead>
-                <tr>
-                    <th scope="col">Bundesland</th>
-                    <th scope="col">#Überhangsmandate</th>
-                </tr>
-                </thead>
-                <tbody>
-                {ueberhang?.bundeslaender?.map((bundeslandData) => (
-                    <tr key={bundeslandData.bundesland.id}>
-                        <td>{bundeslandData.bundesland.name}</td>
-                        <td>{bundeslandData.ueberhang}</td>
+        ueberhang?.bundeslaender?.length != null && ueberhang?.bundeslaender?.length > 0  && (
+            <ChartTileC header="Überhänge">
+                <table className="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Bundesland</th>
+                        <th scope="col">#Überhangsmandate</th>
                     </tr>
-                ))}
-                </tbody>
-            </table>
-        </ChartTileC>
+                    </thead>
+                    <tbody>
+                    {ueberhang?.bundeslaender?.map((bundeslandData) => (
+                        <tr key={bundeslandData.bundesland.id}>
+                            <td>{bundeslandData.bundesland.name}</td>
+                            <td>{bundeslandData.ueberhang}</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </ChartTileC>
+        )
     )
 }

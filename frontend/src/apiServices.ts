@@ -63,10 +63,10 @@ export async function fetchStimmanteile(wahlid: number) {
     }
 }
 
-export async function fetchStimmanteileWahlkreis(wahlid: number, wahlkreisid: number) {
+export async function fetchStimmanteileWahlkreis(wahlid: number, wahlkreisid: number, generatefromaggregate: boolean = true) {
     try {
         const wahlkreisApi = new WahlkreisApi();
-        const stimmanteile = await wahlkreisApi.getStimmanteilWahlkreis({wahlid, wahlkreisid});
+        const stimmanteile = await wahlkreisApi.getStimmanteilWahlkreis({wahlid, wahlkreisid, generatefromaggregate: generatefromaggregate});
         console.log('Fetched Stimmanteile:', stimmanteile);
         return stimmanteile;
     } catch (error) {
@@ -99,11 +99,12 @@ export async function fetchWinningPartiesWahlkreise(wahlid: number) {
     }
 }
 
-export async function fetchWahlkreisOverview(wahlid: number, wahlkreisid: number) {
+export async function fetchWahlkreisOverview(wahlid: number, wahlkreisid: number, generateFromAggregate: boolean = true) {
     try {
         const wahlkreisApi = new WahlkreisApi();
-        const wahlkreisOverview = await wahlkreisApi.getOverviewWahlkreis({wahlid, wahlkreisid});
+        const wahlkreisOverview = await wahlkreisApi.getOverviewWahlkreis({wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate});
         console.log('Fetched Wahlkreis Overview:', wahlkreisOverview);
+        console.log('Used aggregate: ', generateFromAggregate);
         return wahlkreisOverview;
     } catch (error) {
         console.error('Error fetching Wahlkreis Overview:', error);

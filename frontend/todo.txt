@@ -1,32 +1,37 @@
 Features - Unbeding:
-- Deutschlandkarte: Label wahlkreis! Prozentanteil?
-- Parteien: 10 knappste Sieger
-- Parteien: Ueberhang pro Bundesland
-- Berechnung ohne Aggregat auswählbar
 - Extra analysen
+- "Sonstiges" & anklickbar/Toggle
 
 Design - Unbeding:
 - Lade-Animationen
 - (Bedingte) Responsiveness
 - Header
-- Parteifarben, imb. unbekannte Parteien persisietern
+- Parteifarben, imb. unbekannte Parteien persisietern, z.B. schwarz; überdenken ob Tabelle bunt sein muss
+- Grid: Spaltenbreite automatisch anpassen
 
 Refactoring-Unbedingt
-- Vernünfite Default-Werte
+- !!!Vernünfite Default-Werte bzw. REQUIRED attributes!
+- Label für Dropdowns? Nicht der input werte sondern allgemein
+- Schriftfarben in Tabellen überdenken
 - Nicht immer direkt alle APIs abfragen
 - Dropdown labels nach neuem Schema
 - "DefaultSortColumn" und direction vernünftig in gridEinbauen
 - Null-Handling optimieren
 - Alle übrigen Warnungen beseitigen
 - Default-Sortierungsrichtung wird nicht angezeigt
+- Bessere Komponentenstruktur
+- CSS in eigenen Ordner
 
 
 Features - Optional:
-- Pfad in Detailansichten anpassen
+- Pfad in Detailansichten anpassen & hochscrollen beim Klick
+- Prozentanteil in den winning Parties (auf der Karte) anzeigen?
+- Hässliches Quadrat beim Klick auf Karte entfernen (vorsicht, schon Zeit versenkt)
+- Default Order Column ins Grid
+- Überall Grid statt table verwenden
 
 Design-Optional:
-- Tabellen & Charts sind verbunden
+- Hovering Tabelle & Chart verbinden
 
 Refactoring-Optional
-- Bessere Komponentenstruktur
 - Alle Tabellen in eigene Komponenten auslagen/zumindest nicht auf page-ebene verwenden

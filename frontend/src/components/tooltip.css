@@ -1,0 +1,23 @@
+.tooltip {
+    z-index: 1;
+    padding: 0.20rem 1rem;
+    border-radius: 5px;
+    background: #29343d;
+    opacity: 0;
+    color: #cedfe9;
+    border-color: #29343d;
+    font-size: 0.875rem;
+    transition: opacity 100ms;
+    text-align: center;
+}
+
+.tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%; /* Position the arrow at the bottom of the tooltip */
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 8px;
+    border-style: solid;
+    border-color: #29343d transparent transparent transparent;
+}

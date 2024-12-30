@@ -79,7 +79,7 @@ export class GeneralApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/parteien`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))),
+            path: `/parteien/{wahlid}`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))),
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,

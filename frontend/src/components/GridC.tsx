@@ -11,7 +11,7 @@ export default function GridC({gridData, header, usePagination, pageSize, onRowC
     header: string,
     usePagination: boolean,
     pageSize?: number,
-    onRowClick?: (id: number) => void
+    onRowClick?: (id: number) => void,
 }) {
 
     const [filteredGridData, setFilteredGridData] = useState<GridData>({
@@ -113,9 +113,11 @@ export default function GridC({gridData, header, usePagination, pageSize, onRowC
                             <div onClick={() => handleSort(column.id)}>
                                 {column.label} {sortConfig.columnId === column.id ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
                             </div>
-                            <InputC placeholder={column.label + " filtern"}
-                                    onInputFunction={(filter_val) => setFilters(column.id, filter_val)}
-                                    hidden={!column.searchable} id={column.id.toString()} name={column.label}/>
+                            {gridData.columns.some(col => col.searchable) && (
+                                <InputC placeholder={column.label + " filtern"}
+                                        onInputFunction={(filter_val) => setFilters(column.id, filter_val)}
+                                        hidden={!column.searchable} id={column.id.toString()} name={column.label}/>
+                            )}
                         </th>
                     ))}
                 </tr>

@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {fetchClosestWinners, fetchParteien, fetchUeberhangProBundesland} from "../apiServices.ts";
+import {fetchClosestWinners, fetchParteien, fetchSitzveteilung, fetchUeberhangProBundesland} from "../apiServices.ts";
 import {ClosestWinners, Partei, Ueberhang} from "../api";
 import {useElection} from "../context/ElectionContext.tsx";
 import ClosestWinnersC from "../components/ClosestWinnersC.tsx";
@@ -10,23 +10,36 @@ import UeberhangC from "../components/UeberhangC.tsx";
 export default function Parteien() {
 
     const {selectedElection} = useElection();
-    const [parteien, setParteien] = useState<Partei[]>();
+    const [alleParteien, setAlleParteien] = useState<Partei[]>();
+    const [eingezogeneParteien, setEingezogeneParteien] = useState<Partei[]>();
     const [selectedPartei, setSelectedPartei] = useState<Partei | null>(null);
 
     useEffect(() => {
-        const getParteien = async () => {
+        const getAlleParteien = async () => {
             try {
                 const data = await fetchParteien(selectedElection?.id ?? 0);
-                setParteien(data);
+                setAlleParteien(data);
             } catch (error) {
                 console.error('Error fetching Parteien:', error);
             }
         };
-        getParteien();
+        getAlleParteien();
+    }, [selectedElection]);
+
+    useEffect(() => {
+        const getEingezogeneParteien = async () => {
+            try {
+                const data = await fetchSitzveteilung(selectedElection?.id ?? 0);
+                setEingezogeneParteien(data.distribution.map(d => d.party));
+            } catch (error) {
+                console.error('Error fetching Parteien:', error);
+            }
+        };
+        getEingezogeneParteien();
     }, [selectedElection]);
 
     const showParteiDetails = (id: number) => {
-        setSelectedPartei(parteien?.find(partei => partei.id === id) ?? null);
+        setSelectedPartei(alleParteien?.find(partei => partei.id === id) ?? null);
     }
 
     async function fetchClosestWinnersWrapper(wahlId: number): Promise<ClosestWinners> {
@@ -41,32 +54,53 @@ export default function Parteien() {
         <div className={"flex flex-col items-center"}>
             {
                 selectedPartei ?
-                    <div className="w-chart-lg max-lg:w-char flex justify-start">
+                    <div className="w-chart-xl max-lg:w-char flex justify-start">
                         <BackBreadcrumbsC breadcrumbData={{
                             items: ["Parteien", selectedPartei.name ? (`${selectedPartei.name} (${selectedPartei.shortname})`) :
                                 selectedPartei.shortname]
                         }} backFunction={() => setSelectedPartei(null)}/>
                     </div>
                     :
-                    <GridC
-                        gridData={{
-                            columns: [
-                                {id: 1, label: 'Name', searchable: true},
-                                {id: 2, label: 'Kurzname', searchable: true}
-                            ],
-                            rows: parteien?.map(partei => ({
-                                key: partei.id,
-                                values: [
-                                    {column_id: 1, value: partei.name},
-                                    {column_id: 2, value: partei.shortname}
-                                ]
-                            })) ?? []
-                        }}
-                        header={"Parteien"}
-                        usePagination={true}
-                        pageSize={10}
-                        onRowClick={(id) => showParteiDetails(id)}
-                    />
+                    <>
+                        <GridC
+                            gridData={{
+                                columns: [
+                                    {id: 1, label: 'Name', searchable: false},
+                                    {id: 2, label: 'Kurzname', searchable: false}
+                                ],
+                                rows: eingezogeneParteien?.map(partei => ({
+                                    key: partei.id,
+                                    values: [
+                                        {column_id: 1, value: partei.name},
+                                        {column_id: 2, value: partei.shortname}
+                                    ]
+                                })) ?? []
+                            }}
+                            header={"Bundestagsparteien"}
+                            usePagination={false}
+                            onRowClick={(id) => showParteiDetails(id)}
+                            pageSize={10}
+                        />
+                        <GridC
+                            gridData={{
+                                columns: [
+                                    {id: 1, label: 'Name', searchable: true},
+                                    {id: 2, label: 'Kurzname', searchable: true}
+                                ],
+                                rows: alleParteien?.map(partei => ({
+                                    key: partei.id,
+                                    values: [
+                                        {column_id: 1, value: partei.name},
+                                        {column_id: 2, value: partei.shortname}
+                                    ]
+                                })) ?? []
+                            }}
+                            header={"Angetretene Parteien"}
+                            usePagination={true}
+                            pageSize={10}
+                        />
+                    </>
+
             }
             {
                 selectedPartei ?

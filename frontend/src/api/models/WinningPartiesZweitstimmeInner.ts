@@ -44,7 +44,7 @@ export interface WinningPartiesZweitstimmeInner {
      * @type {number}
      * @memberof WinningPartiesZweitstimmeInner
      */
-    regionName?: number;
+    regionName: number;
 }
 
 /**
@@ -53,6 +53,7 @@ export interface WinningPartiesZweitstimmeInner {
 export function instanceOfWinningPartiesZweitstimmeInner(value: object): value is WinningPartiesZweitstimmeInner {
     if (!('party' in value) || value['party'] === undefined) return false;
     if (!('regionId' in value) || value['regionId'] === undefined) return false;
+    if (!('regionName' in value) || value['regionName'] === undefined) return false;
     return true;
 }
 
@@ -68,7 +69,7 @@ export function WinningPartiesZweitstimmeInnerFromJSONTyped(json: any, ignoreDis
         
         'party': ParteiFromJSON(json['party']),
         'regionId': json['region_id'],
-        'regionName': json['region_name'] == null ? undefined : json['region_name'],
+        'regionName': json['region_name'],
     };
 }
 

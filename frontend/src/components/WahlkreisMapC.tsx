@@ -11,8 +11,9 @@ import {useElection} from "../context/ElectionContext.tsx";
 import {getPartyColor} from "../utils/utils.tsx";
 import ChartTileC from "./ChartTileC.tsx";
 import {DropdownType} from "../models/DropDownData.ts";
+import './tooltip.css';
 
-export default function WahlkreisMapC() {
+export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number) => void} ) {
     let mapDD: DropdownType = {
         label: undefined,
         defaultChosen: 2,
@@ -67,12 +68,21 @@ export default function WahlkreisMapC() {
 
     //Tooltips
     const onEachFeature = (feature: Feature, layer: L.Layer) => {
-        console.log(feature.properties)
-        console.log(winningParties)
-        const winningParty = winningParties?.zweitstimme.find(w => w.regionId === feature.properties?.WKR_NR)?.party
-        layer.bindTooltip(winningParty?.shortname ?? "Leider ist ein Fehler aufgetreten", {
+        const winningParty = winningParties?.zweitstimme.find(w => w.regionId === feature.properties?.WKR_NR);
+        const party = winningParty?.party;
+        const regionId = winningParty?.regionId;
+        const regionName = winningParty?.regionName;
+        layer.bindTooltip(`WK ${regionId ?? "(unknown region id)"}: ${regionName ?? "(unknown region name)"}: <br> ${party?.shortname ?? "unknown party name"}`, {
             permanent: false,
-            direction: 'top'
+            direction: 'top',
+            className: 'tooltip',
+        });
+        layer.on('click', (e) => {
+            L.DomEvent.stopPropagation(e);
+            L.DomEvent.preventDefault(e as any);
+            if (regionId) {
+                openDetails(regionId);
+            }
         });
     };
 

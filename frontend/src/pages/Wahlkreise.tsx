@@ -5,22 +5,24 @@ import {
     fetchWinningPartiesWahlkreis,
     fetchWahlkreisOverview
 } from "../apiServices.ts";
-import {OverviewWahlkreis, Stimmanteil, Wahlkreis} from "../api";
+import {OverviewWahlkreis, Stimmanteil, Wahlkreis, WinningParties} from "../api";
 import {useElection} from "../context/ElectionContext.tsx";
 import WahlkreislisteC from "../components/WahlkreislisteC.tsx";
 import ZweitstimmenanteilC from "../components/ZweitstimmenanteilC.tsx";
 import WinningPartiesC from "../components/WinningPartiesC.tsx";
-import type {WinningParties} from "../api.ts";
 import {getPartyColor} from "../utils/utils.tsx";
 import ChartTileC from "../components/ChartTileC.tsx";
 import DoughnutChart from "../components/DoughnutC.tsx";
 import {ChartData} from "chart.js";
 import WahlkreisMapC from "../components/WahlkreisMapC.tsx";
 import BackBreadcrumbsC from "../components/BackBreadcrumbsC.tsx";
+import ToggleSwitchC from "../components/ToggleSwitchC.tsx";
+import {useCalcOnAggregate} from "../context/CalcOnAggregateContext.tsx";
 
 export default function Wahlkreise() {
 
     const {selectedElection} = useElection();
+    const { calcOnAggregate, setCalcOnAggregate } = useCalcOnAggregate()
     const [wahlkreise, setWahlkreise] = useState<Wahlkreis[]>();
     const [selectedWahlkreis, setSelectedWahlkreis] = useState<Wahlkreis | null>(null);
     const [overview, setOverview] = useState<OverviewWahlkreis>();
@@ -41,14 +43,15 @@ export default function Wahlkreise() {
     useEffect(() => {
         const getOverview = async () => {
             try {
-                const data = await fetchWahlkreisOverview(selectedElection?.id ?? 0, selectedWahlkreis?.id ?? 0);
+                const data = await fetchWahlkreisOverview(selectedElection?.id ?? 0, selectedWahlkreis?.id ?? 0, calcOnAggregate);
                 setOverview(data);
             } catch (error) {
                 console.error('Error fetching Wahlkreis Overview:', error);
             }
         }
         getOverview()
-    }, [selectedElection, selectedWahlkreis]);
+    }, [selectedElection, selectedWahlkreis, calcOnAggregate]);
+
     const nichtWaehler = Math.round((100 - overview?.wahlbeteiligung) * 10) / 10;
     let wahlbeteiligungData: ChartData = {
         labels: [`Wähler: ${overview?.wahlbeteiligung}%`, `Nichtwähler: ${nichtWaehler}%`],
@@ -64,30 +67,35 @@ export default function Wahlkreise() {
     }
 
     async function wrapFetchStimmanteileWahlkreis(wahlId: number): Promise<Stimmanteil[]> {
-        return fetchStimmanteileWahlkreis(wahlId, selectedWahlkreis?.id ?? 0);
+        return fetchStimmanteileWahlkreis(wahlId, selectedWahlkreis?.id ?? 0, calcOnAggregate);
     }
 
     async function wrapFetchWinningPartiesWahlkreis(wahlId: number): Promise<WinningParties> {
-        return fetchWinningPartiesWahlkreis(wahlId, selectedWahlkreis?.id ?? 0);
+        return fetchWinningPartiesWahlkreis(wahlId, selectedWahlkreis?.id ?? 0); //TODO: useEinzelstimmen
     }
 
     return (
         <div className={"flex flex-col items-center"}>
             {
                 selectedWahlkreis ?
-                    <div className="w-chart-lg max-lg:w-char flex justify-start">
-                        <BackBreadcrumbsC breadcrumbData={{items : ["Wahlkreise", `Nr. ${selectedWahlkreis.id}: ${selectedWahlkreis.name}`]}} backFunction={() => (setSelectedWahlkreis(null))} />
+                    <div className="w-chart-lg max-lg:w-char flex flex-row justify-between gap-5">
+                        <BackBreadcrumbsC
+                            breadcrumbData={{items: ["Wahlkreise", `Nr. ${selectedWahlkreis.id}: ${selectedWahlkreis.name}`]}}
+                            backFunction={() => (setSelectedWahlkreis(null))}/>
                     </div>
                     :
                     <>
                         <WahlkreislisteC showWahlkreisDetails={showWahlkreisDetails}/>
-                        <WahlkreisMapC></WahlkreisMapC>
+                        <WahlkreisMapC openDetails={showWahlkreisDetails}></WahlkreisMapC>
                     </>
             }
             {
                 selectedWahlkreis ?
                     <>
                         <WinningPartiesC fetchWinningParties={wrapFetchWinningPartiesWahlkreis}/>
+                        <div className="w-chart-lg max-lg:w-char flex flex-row justify-between -mb-5">
+                            <ToggleSwitchC defaultEnabled={!calcOnAggregate} setEnabledPar={(calcOnEinzelstimmen: boolean) => setCalcOnAggregate(!calcOnEinzelstimmen)} label={"Ab hier auf Einzelstimmen berechnen"}/>
+                        </div>
                         <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis}
                                              showAbsoluteVotes={true}/>
                         <ChartTileC header={"Direktkandidat"}>

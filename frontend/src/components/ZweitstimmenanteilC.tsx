@@ -26,15 +26,15 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
             }
         };
         getStimmanteile();
-    }, [selectedElection]); //Use for every chart; always depends on the selected election
+    }, [selectedElection, fetchStimmanteile]); //Use for every chart; always depends on the selected election
 
     const compareWahlDD: DropdownType = {
-        label: "Ergebnis Vergleichen",
         items: [{label: "Nicht vergleichen", id: -1},
             ...elections.filter(e => e.id != selectedElection?.id).map(election => ({
                 label: election.date.toLocaleDateString('de-DE', {month: 'long', year: 'numeric'}),
                 id: election.id
-            }))]
+            }))],
+        defaultChosen: -1
     };
 
     async function compareStimmanteile(wahlId: number) {
