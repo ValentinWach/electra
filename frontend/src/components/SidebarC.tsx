@@ -4,6 +4,7 @@ import {
     HomeIcon,
     UsersIcon,
     UserGroupIcon,
+    PresentationChartLineIcon
 } from '@heroicons/react/24/outline'
 import {Link, useLocation} from 'react-router-dom';
 import DropdownC from "./DropdownC.tsx";
@@ -16,7 +17,7 @@ const navigation = [
     {name: 'Wahlkreise', href: '/wahlkreise', icon: ChartPieIcon, current: false},
     {name: 'Abgeordnete', href: '/Abgeordnete', icon: UsersIcon, current: false},
     {name: 'Parteien', href: '/Parteien', icon: UserGroupIcon, current: false},
-    //{name: 'Landeslisten', href: '#', icon: DocumentDuplicateIcon, current: false},
+    {name: 'Analysen', href: '/Analysen', icon: PresentationChartLineIcon, current: false},
 ]
 const teams = [
     {id: 1, name: 'Heroicons', href: '#', initial: 'H', current: false},

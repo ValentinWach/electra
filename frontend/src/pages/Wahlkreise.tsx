@@ -12,7 +12,7 @@ import ZweitstimmenanteilC from "../components/ZweitstimmenanteilC.tsx";
 import WinningPartiesC from "../components/WinningPartiesC.tsx";
 import {getPartyColor} from "../utils/utils.tsx";
 import ChartTileC from "../components/ChartTileC.tsx";
-import DoughnutChart from "../components/DoughnutC.tsx";
+import DoughnutChart from "../components/DoughnutChartC.tsx";
 import {ChartData} from "chart.js";
 import WahlkreisMapC from "../components/WahlkreisMapC.tsx";
 import BackBreadcrumbsC from "../components/BackBreadcrumbsC.tsx";

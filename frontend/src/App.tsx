@@ -6,6 +6,7 @@ import Abgeordnete from "./pages/Abgeordnete.tsx";
 import Parteien from "./pages/Parteien.tsx";
 import {ElectionProvider} from "./context/ElectionContext.tsx";
 import {CalcOnAggregateProvider} from "./context/CalcOnAggregateContext.tsx";
+import Analysen from "./pages/Analysen.tsx";
 
 function App() {
     return (
@@ -28,6 +29,7 @@ function App() {
                                     <Route path="/wahlkreise" element={<Wahlkreise/>}/>
                                     <Route path="/abgeordnete" element={<Abgeordnete/>}/>
                                     <Route path="/parteien" element={<Parteien/>}/>
+                                    <Route path="/analysen" element={<Analysen/>}/>
                                 </Routes>
                             </main>
                         </div>

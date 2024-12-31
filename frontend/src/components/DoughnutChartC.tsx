@@ -1,4 +1,4 @@
-import {ChartData} from '../models/ChartData.ts';
+import {ChartDataNum} from '../models/ChartData.ts';
 import { Doughnut } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -9,9 +9,9 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function DoughnutChart(props: { data?: ChartData, fullCircle?: Boolean }) { //TODO: When use "props" and when {name}{type} syntax?
+export default function DoughnutChart(props: { data?: ChartDataNum, fullCircle?: Boolean }) { //TODO: When use "props" and when {name}{type} syntax?
     const fullCircle = props.fullCircle ?? false;
-    const defaultData: ChartData = {
+    const defaultData: ChartDataNum = {
         labels: ['Filled', 'Empty'],
         datasets: [{data: [66, 34], backgroundColor: ['#ff6384', '#e0e0e0'], borderWidth: 0,},],
     };

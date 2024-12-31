@@ -147,3 +147,27 @@ export async function fetchUeberhangProBundesland(wahlid: number, parteiid: numb
         throw error;
     }
 }
+
+export async function fetchForeignerShareAnalysis(wahlid: number, parteiid: number) {
+    try {
+        const wahlkreisApi = new WahlkreisApi();
+        const foreigners = await wahlkreisApi.getForeigners({wahlid, parteiid});
+        console.log('Fetched Foreigner analysis:', foreigners);
+        return foreigners;
+    } catch (error) {
+        console.error('Error fetching Foreigner analysis:', error);
+        throw error;
+    }
+}
+
+export async function fetchIncomeAnalysis(wahlid: number, parteiid: number) {
+    try {
+        const wahlkreisApi = new WahlkreisApi();
+        const income = await wahlkreisApi.getIncome({wahlid, parteiid});
+        console.log('Fetched Income analysis:', income);
+        return income;
+    } catch (error) {
+        console.error('Error fetching Income analysis:', error);
+        throw error;
+    }
+}

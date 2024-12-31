@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {fetchSitzveteilung} from '../apiServices';
 import {SeatDistribution} from "../api";
 import ChartTileC from "./ChartTileC.tsx";
-import DoughnutChart from "./DoughnutC.tsx";
+import DoughnutChart from "./DoughnutChartC.tsx";
 import {ChartData} from "chart.js";
 import {useElection} from "../context/ElectionContext.tsx";
 import {getPartyColor} from "../utils/utils.tsx";
