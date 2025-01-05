@@ -45,10 +45,8 @@ export default function Wahlkreise() {
         const getOverview = async () => {
             try {
                 setLoading(true);
-                setLoading(true);
                 const data = await fetchWahlkreisOverview(selectedElection?.id ?? 0, selectedWahlkreis?.id ?? 0, calcOnAggregate);
                 setOverview(data);
-                setLoading(false);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching Wahlkreis Overview:', error);
@@ -82,15 +80,6 @@ export default function Wahlkreise() {
         const data = await fetchWinningPartiesWahlkreis(wahlId, selectedWahlkreis?.id ?? 0);
         return data;
     }, [selectedWahlkreis?.id]);
-    const wrapFetchStimmanteileWahlkreis = useCallback(async (wahlId: number) => {
-        const data = await fetchStimmanteileWahlkreis(wahlId, selectedWahlkreis?.id ?? 0, calcOnAggregate);
-        return data;
-    }, [selectedWahlkreis?.id, calcOnAggregate]);
-
-    const wrapFetchWinningPartiesWahlkreis = useCallback(async (wahlId: number) => {
-        const data = await fetchWinningPartiesWahlkreis(wahlId, selectedWahlkreis?.id ?? 0);
-        return data;
-    }, [selectedWahlkreis?.id]);
 
     return (
         <div className={"flex flex-col items-center"}>
@@ -112,7 +101,6 @@ export default function Wahlkreise() {
                     <>
                         <WinningPartiesC fetchWinningParties={wrapFetchWinningPartiesWahlkreis}/>
                         <div className="w-chart-lg max-lg:w-char flex flex-col justify-start gap-5 -mb-5">
-                            <ToggleSwitchC defaultEnabled={!calcOnAggregate} setEnabledInputFunct={(calcOnEinzelstimmen: boolean) => setCalcOnAggregate(!calcOnEinzelstimmen)} label={"Ab hier auf Einzelstimmen berechnen"}/>
                             <ToggleSwitchC defaultEnabled={!calcOnAggregate} setEnabledInputFunct={(calcOnEinzelstimmen: boolean) => setCalcOnAggregate(!calcOnEinzelstimmen)} label={"Ab hier auf Einzelstimmen berechnen"}/>
                         </div>
                         {loading ? <div className="flex items-center justify-center min-h-[400px]">Loading...</div> :
