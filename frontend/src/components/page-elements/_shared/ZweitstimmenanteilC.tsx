@@ -1,11 +1,11 @@
 import {useEffect, useState} from 'react';
-import {Stimmanteil, Wahl} from "../api";
-import ChartTileC from "./ChartTileC.tsx";
+import {Stimmanteil, Wahl} from "../../../api/index.ts";
+import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
 import {ChartData} from "chart.js";
-import {useElection} from "../context/ElectionContext.tsx";
-import {getPartyColor} from "../utils/utils.tsx";
-import BarchartC from "./BarchartC.tsx";
-import type {DropdownType} from "../models/DropDownData.ts";
+import {useElection} from "../../../context/ElectionContext.tsx";
+import {getPartyColor} from "../../../utils/utils.tsx";
+import BarchartC from "../../chart-components/BarchartC.tsx";
+import type {DropdownType} from "../../../models/DropDownData.ts";
 
 export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVotes}: {
     fetchStimmanteile: (wahlId: number) => Promise<Stimmanteil[]>, showAbsoluteVotes?: boolean | null
@@ -83,7 +83,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
 
     return (
         <div className={"flex-grow"}>
-            <ChartTileC dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={"Zweitstimmenanteile"}>
+            <ContentTileC dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={"Zweitstimmenanteile"}>
                 {comparedElection ?
                     <BarchartC data={comparedData}></BarchartC>
                     :
@@ -113,7 +113,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
                     :
                     null
                 }
-            </ChartTileC>
+            </ContentTileC>
         </div>
     )
 }

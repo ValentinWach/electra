@@ -1,17 +1,17 @@
 import {MapContainer, GeoJSON} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {LatLngExpression} from 'leaflet';
-import geoData from '../assets/Wahl.json';
+import geoData from '../../../assets/Wahl.json';
 import {GeoJsonObject, Feature} from 'geojson';
 import L from 'leaflet';
 import {useEffect, useState} from "react";
-import {fetchWinningPartiesWahlkreise} from "../apiServices.ts";
-import {WinningParties} from "../api";
-import {useElection} from "../context/ElectionContext.tsx";
-import {getPartyColor} from "../utils/utils.tsx";
-import ChartTileC from "./ChartTileC.tsx";
-import {DropdownType} from "../models/DropDownData.ts";
-import './tooltip.css';
+import {fetchWinningPartiesWahlkreise} from "../../../apiServices.ts";
+import {WinningParties} from "../../../api/index.ts";
+import {useElection} from "../../../context/ElectionContext.tsx";
+import {getPartyColor} from "../../../utils/utils.tsx";
+import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
+import {DropdownType} from "../../../models/DropDownData.ts";
+import './WahlkreisMapC.css';
 
 export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number) => void} ) {
     let mapDD: DropdownType = {
@@ -87,7 +87,7 @@ export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number)
     };
 
     return (
-        <ChartTileC dropDownContent={mapDD} dropDownFunction={setStimmenType} doubleSize={true}
+        <ContentTileC dropDownContent={mapDD} dropDownFunction={setStimmenType} doubleSize={true}
                     header={"Wahlkreiskarte"}>
             <MapContainer center={center} zoomControl={true} doubleClickZoom={true} scrollWheelZoom={false} zoom={6.5}
                           style={{height: '90vh', width: '100%', zIndex: '10'}}>
@@ -95,6 +95,6 @@ export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number)
                     <GeoJSON data={typedGeoData} style={getStyle} onEachFeature={onEachFeature}/>
                 )}
             </MapContainer>
-        </ChartTileC>
+        </ContentTileC>
     );
 }

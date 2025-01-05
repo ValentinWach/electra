@@ -1,9 +1,9 @@
 import {useEffect, useState} from "react";
-import {Abgeordneter} from "../api";
-import {useElection} from "../context/ElectionContext.tsx";
+import {Abgeordneter} from "../../../api/index.ts";
+import {useElection} from "../../../context/ElectionContext.tsx";
 import './table.css';
-import GridC from "./GridC.tsx";
-import {GridData} from "../models/GridData.ts";
+import GridC from "../../UI-element-components/GridC.tsx";
+import {GridData} from "../../../models/GridData.ts";
 
 
 export default function AbgeordneteC({fetchAbgeordnete}: {

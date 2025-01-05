@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
-import {ClosestWinners} from "../api";
-import {useElection} from "../context/ElectionContext.tsx";
-import ChartTileC from "./ChartTileC.tsx";
+import {ClosestWinners} from "../../../api/index.ts";
+import {useElection} from "../../../context/ElectionContext.tsx";
+import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
 import './table.css';
 
 
@@ -25,7 +25,7 @@ export default function ClosestWinnersC({fetchClostestWinners}: {
     }, [selectedElection]);
 
     return (
-        <ChartTileC doubleSize={true} header={closestWinners?.closestType === "Winner" ? "Knappste Sieger" : "Knappste Verlierer"}>
+        <ContentTileC doubleSize={true} header={closestWinners?.closestType === "Winner" ? "Knappste Sieger" : "Knappste Verlierer"}>
             <table className="table">
                 <thead>
                 <tr>
@@ -48,6 +48,6 @@ export default function ClosestWinnersC({fetchClostestWinners}: {
                 ))}
                 </tbody>
             </table>
-        </ChartTileC>
+        </ContentTileC>
     )
 }

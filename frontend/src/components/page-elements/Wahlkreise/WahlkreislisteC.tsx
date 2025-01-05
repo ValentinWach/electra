@@ -1,10 +1,9 @@
 import {useEffect, useState} from "react";
-import {fetchWahlkreise} from "../apiServices.ts";
-import {Wahlkreis} from "../api";
-import {useElection} from "../context/ElectionContext.tsx";
-import './table.css';
-import {GridData} from "../models/GridData.ts";
-import GridC from "./GridC.tsx";
+import {fetchWahlkreise} from "../../../apiServices.ts";
+import {Wahlkreis} from "../../../api/index.ts";
+import {useElection} from "../../../context/ElectionContext.tsx";
+import {GridData} from "../../../models/GridData.ts";
+import GridC from "../../UI-element-components/GridC.tsx";
 
 
 export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisDetails: (id: number) => void }) {

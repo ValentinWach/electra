@@ -1,7 +1,7 @@
-import ChartTileC from "./ChartTileC.tsx";
-import type {WinningParties} from "../api";
-import {getPartyColor} from "../utils/utils.tsx";
-import {useElection} from "../context/ElectionContext.tsx";
+import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
+import type {WinningParties} from "../../../api/index.ts";
+import {getPartyColor} from "../../../utils/utils.tsx";
+import {useElection} from "../../../context/ElectionContext.tsx";
 import {useEffect, useState} from "react";
 import './table.css';
 
@@ -24,7 +24,7 @@ export default function WinningPartiesC({fetchWinningParties}: {
     }, [selectedElection]);
 
     return (
-        <ChartTileC header={"Siegerparteien"}>
+        <ContentTileC header={"Siegerparteien"}>
             {winningParties && (
                 <table className="table">
                     <thead className="bg-gray-50">
@@ -67,6 +67,6 @@ export default function WinningPartiesC({fetchWinningParties}: {
                     </tbody>
                 </table>
             )}
-        </ChartTileC>
+        </ContentTileC>
     );
 }

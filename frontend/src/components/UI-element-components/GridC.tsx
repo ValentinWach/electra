@@ -1,7 +1,7 @@
 
-import ChartTileC from "./ChartTileC.tsx";
-import './table.css';
-import {GridData} from "../models/GridData.ts";
+import ContentTileC from "./ContentTileC.tsx";
+import './GridC.css';
+import {GridData} from "../../models/GridData.ts";
 import InputC from "./InputC.tsx";
 import {useEffect, useState} from "react";
 import PaginationC from "./PaginationC.tsx";
@@ -104,7 +104,7 @@ export default function GridC({gridData, header, usePagination, pageSize, onRowC
 
 
     return (
-        <ChartTileC header={header} doubleSize={true}>
+        <ContentTileC header={header} doubleSize={true}>
             <table className="table">
                 <thead>
                 <tr>
@@ -138,6 +138,6 @@ export default function GridC({gridData, header, usePagination, pageSize, onRowC
                     setCurrentPage(p)
                 }}/>
             }
-        </ChartTileC>
+        </ContentTileC>
     );
 }

@@ -1,4 +1,4 @@
-import {ChartDataNum} from '../models/ChartData.ts';
+import {ChartDataNum} from '../../models/ChartData.ts';
 import { Doughnut } from 'react-chartjs-2';
 import {
     Chart as ChartJS,

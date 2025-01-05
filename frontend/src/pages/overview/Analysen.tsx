@@ -1,4 +1,4 @@
-import AnalysenC from "../components/AnalysenC.tsx";
+import AnalysenC from "../../components/page-elements/Analysen/AnalysenC.tsx";
 
 export default function Analysen() {
 

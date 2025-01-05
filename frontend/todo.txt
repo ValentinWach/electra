@@ -21,6 +21,7 @@ Refactoring-Unbedingt
 - Default-Sortierungsrichtung wird nicht angezeigt
 - Bessere Komponentenstruktur
 - CSS in eigenen Ordner
+- Sepearate Analysis to subcomponents
 
 
 Features - Optional:

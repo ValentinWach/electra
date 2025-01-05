@@ -7,7 +7,7 @@ import {
     PresentationChartLineIcon
 } from '@heroicons/react/24/outline'
 import {Link, useLocation} from 'react-router-dom';
-import DropdownC from "./DropdownC.tsx";
+import DropdownC from "./UI-element-components/DropdownC.tsx";
 import type {DropdownType} from "../models/DropDownData.ts";
 import { useElection } from '../context/ElectionContext.tsx';
 

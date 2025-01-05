@@ -1,12 +1,12 @@
 import {ReactNode} from "react";
 import DropdownC from "./DropdownC.tsx";
-import {DropdownType} from "../models/DropDownData.ts";
+import {DropdownType} from "../../models/DropDownData.ts";
 
 interface CharttileProps {
     children?: ReactNode;
 }
 
-export default function ChartTileC({children, header, doubleSize, dropDownContent, dropDownFunction}: CharttileProps & {header: string, doubleSize?: Boolean, dropDownContent?: DropdownType, dropDownFunction?: (id: number) => void} & {}) {
+export default function ContentTileC({children, header, doubleSize, dropDownContent, dropDownFunction}: CharttileProps & {header: string, doubleSize?: Boolean, dropDownContent?: DropdownType, dropDownFunction?: (id: number) => void} & {}) {
     doubleSize = doubleSize ?? false;
     return (
         <div

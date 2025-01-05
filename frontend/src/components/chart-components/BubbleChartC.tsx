@@ -1,4 +1,4 @@
-import {ChartDataNum, ChartDataXYR} from '../models/ChartData.ts';
+import {ChartDataNum, ChartDataXYR} from '../../models/ChartData.ts';
 import { Bubble } from 'react-chartjs-2';
 import {
     Chart as ChartJS,

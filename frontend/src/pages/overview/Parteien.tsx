@@ -1,11 +1,11 @@
 import {useEffect, useState} from "react";
-import {fetchClosestWinners, fetchParteien, fetchSitzveteilung, fetchUeberhangProBundesland} from "../apiServices.ts";
-import {ClosestWinners, Partei, Ueberhang} from "../api";
-import {useElection} from "../context/ElectionContext.tsx";
-import ClosestWinnersC from "../components/ClosestWinnersC.tsx";
-import GridC from "../components/GridC.tsx";
-import BackBreadcrumbsC from "../components/BackBreadcrumbsC.tsx";
-import UeberhangC from "../components/UeberhangC.tsx";
+import {fetchClosestWinners, fetchParteien, fetchSitzveteilung, fetchUeberhangProBundesland} from "../../apiServices.ts";
+import {ClosestWinners, Partei, Ueberhang} from "../../api/index.ts";
+import {useElection} from "../../context/ElectionContext.tsx";
+import ClosestWinnersC from "../../components/page-elements/Parteien/ClosestWinnersC.tsx";
+import GridC from "../../components/UI-element-components/GridC.tsx";
+import BackBreadcrumbsC from "../../components/UI-element-components/BackBreadcrumbsC.tsx";
+import UeberhangC from "../../components/page-elements/Parteien/UeberhangC.tsx";
 
 export default function Parteien() {
 

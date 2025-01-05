@@ -1,12 +1,12 @@
 import Sidebar from './components/SidebarC.tsx';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
-import Uebersicht from "./pages/Uebersicht.tsx";
-import Wahlkreise from "./pages/Wahlkreise.tsx";
-import Abgeordnete from "./pages/Abgeordnete.tsx";
-import Parteien from "./pages/Parteien.tsx";
+import Uebersicht from "./pages/overview/Uebersicht.tsx";
+import Wahlkreise from "./pages/overview/Wahlkreise.tsx";
+import Abgeordnete from "./pages/overview/Abgeordnete.tsx";
+import Parteien from "./pages/overview/Parteien.tsx";
 import {ElectionProvider} from "./context/ElectionContext.tsx";
 import {CalcOnAggregateProvider} from "./context/CalcOnAggregateContext.tsx";
-import Analysen from "./pages/Analysen.tsx";
+import Analysen from "./pages/overview/Analysen.tsx";
 
 function App() {
     return (

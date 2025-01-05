@@ -4,20 +4,20 @@ import {
     fetchWahlkreise,
     fetchWinningPartiesWahlkreis,
     fetchWahlkreisOverview
-} from "../apiServices.ts";
-import {OverviewWahlkreis, Stimmanteil, Wahlkreis, WinningParties} from "../api";
-import {useElection} from "../context/ElectionContext.tsx";
-import WahlkreislisteC from "../components/WahlkreislisteC.tsx";
-import ZweitstimmenanteilC from "../components/ZweitstimmenanteilC.tsx";
-import WinningPartiesC from "../components/WinningPartiesC.tsx";
-import {getPartyColor} from "../utils/utils.tsx";
-import ChartTileC from "../components/ChartTileC.tsx";
-import DoughnutChart from "../components/DoughnutChartC.tsx";
+} from "../../apiServices.ts";
+import {OverviewWahlkreis, Stimmanteil, Wahlkreis, WinningParties} from "../../api/index.ts";
+import {useElection} from "../../context/ElectionContext.tsx";
+import WahlkreislisteC from "../../components/page-elements/Wahlkreise/WahlkreislisteC.tsx";
+import ZweitstimmenanteilC from "../../components/page-elements/_shared/ZweitstimmenanteilC.tsx";
+import WinningPartiesC from "../../components/page-elements/Wahlkreise/WinningPartiesC.tsx";
+import {getPartyColor} from "../../utils/utils.tsx";
+import ContentTileC from "../../components/UI-element-components/ContentTileC.tsx";
+import DoughnutChart from "../../components/chart-components/DoughnutChartC.tsx";
 import {ChartData} from "chart.js";
-import WahlkreisMapC from "../components/WahlkreisMapC.tsx";
-import BackBreadcrumbsC from "../components/BackBreadcrumbsC.tsx";
-import ToggleSwitchC from "../components/ToggleSwitchC.tsx";
-import {useCalcOnAggregate} from "../context/CalcOnAggregateContext.tsx";
+import WahlkreisMapC from "../../components/page-elements/Wahlkreise/WahlkreisMapC.tsx";
+import BackBreadcrumbsC from "../../components/UI-element-components/BackBreadcrumbsC.tsx";
+import ToggleSwitchC from "../../components/UI-element-components/ToggleSwitchC.tsx";
+import {useCalcOnAggregate} from "../../context/CalcOnAggregateContext.tsx";
 
 export default function Wahlkreise() {
 
@@ -98,7 +98,7 @@ export default function Wahlkreise() {
                         </div>
                         <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis}
                                              showAbsoluteVotes={true}/>
-                        <ChartTileC header={"Direktkandidat"}>
+                        <ContentTileC header={"Direktkandidat"}>
                             <table className="table">
                                 <thead>
                                 <tr>
@@ -121,10 +121,10 @@ export default function Wahlkreise() {
                                 </tr>
                                 </tbody>
                             </table>
-                        </ChartTileC>
-                        <ChartTileC header={"Wahlbeteiligung"}>
+                        </ContentTileC>
+                        <ContentTileC header={"Wahlbeteiligung"}>
                             <DoughnutChart data={wahlbeteiligungData} fullCircle={true}></DoughnutChart>
-                        </ChartTileC>
+                        </ContentTileC>
                     </>
                     :
                     null

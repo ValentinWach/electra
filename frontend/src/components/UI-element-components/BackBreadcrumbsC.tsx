@@ -1,4 +1,4 @@
-import {BackBreadcrumbsData} from "../models/BackBreadcrumbsData.ts";
+import {BackBreadcrumbsData} from "../../models/BackBreadcrumbsData.ts";
 import {ArrowLeftIcon} from "@heroicons/react/24/outline";
 
 export default function BackBreadcrumbsC({breadcrumbData, backFunction}: {

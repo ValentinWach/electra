@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
-import {Ueberhang} from "../api";
-import {useElection} from "../context/ElectionContext.tsx";
-import ChartTileC from "./ChartTileC.tsx";
+import {Ueberhang} from "../../../api/index.ts";
+import {useElection} from "../../../context/ElectionContext.tsx";
+import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
 import './table.css';
 
 
@@ -27,7 +27,7 @@ export default function UeberhangC({fetchUeberhang}: {
 
     return (
         ueberhang?.bundeslaender?.length != null && ueberhang?.bundeslaender?.length > 0  && (
-            <ChartTileC header="Überhänge">
+            <ContentTileC header="Überhänge">
                 <table className="table">
                     <thead>
                     <tr>
@@ -44,7 +44,7 @@ export default function UeberhangC({fetchUeberhang}: {
                     ))}
                     </tbody>
                 </table>
-            </ChartTileC>
+            </ContentTileC>
         )
     )
 }
