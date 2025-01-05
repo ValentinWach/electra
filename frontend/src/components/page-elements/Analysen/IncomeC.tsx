@@ -1,21 +1,19 @@
 import BubbleChartC from '../../chart-components/BubbleChartC.tsx';
 import ChartTile from '../../UI-element-components/ContentTileC.tsx';
-import {DropdownType} from "../../../models/DropDownData.ts";
+import {DropdownData} from "../../../models/DropDownData.ts";
 import {Partei} from "../../../api/index.ts";
 import {useEffect, useState} from 'react';
 import {fetchIncomeAnalysis} from "../../../apiServices.ts";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {ChartDataXYR} from "../../../models/ChartData.ts";
 import {getPartyColor} from "../../../utils/utils.tsx";
-import { useBundestagsParteien } from '../../../hooks/useBundestagsParteien.ts';
 
-export default function IncomeC() {
+export default function IncomeC({parteien} : {parteien: Partei[]}) {
     const {selectedElection} = useElection();
     const [selectedParteiId, setSelectedParteiId] = useState<number | null>(null);
     const [incomeData, setIncomeData] = useState<ChartDataXYR>();
     const [xMin, setXMin] = useState<number | undefined>(undefined);
     const [xMax, setXMax] = useState<number | undefined>(undefined);
-    const parteien = useBundestagsParteien();
 
     useEffect(() => {
         if (parteien.length > 0) {
@@ -46,9 +44,9 @@ export default function IncomeC() {
         fetchIncomeData();
     }, [selectedParteiId, selectedElection, parteien]);
 
-    const dropdownData: DropdownType = {
+    const dropdownData: DropdownData = {
         label: undefined,
-        defaultChosen: parteien[0]?.id ?? 0,
+        defaultChosenId: parteien[0]?.id ?? 0,
         items: parteien.map((partei: Partei) => ({label: partei.shortname, id: partei.id})),
     }
 

@@ -1,6 +1,5 @@
 import {
     ChartPieIcon,
-    DocumentDuplicateIcon,
     HomeIcon,
     UsersIcon,
     UserGroupIcon,
@@ -8,7 +7,7 @@ import {
 } from '@heroicons/react/24/outline'
 import {Link, useLocation} from 'react-router-dom';
 import DropdownC from "./UI-element-components/DropdownC.tsx";
-import type {DropdownType} from "../models/DropDownData.ts";
+import type {DropdownData} from "../models/DropDownData.ts";
 import { useElection } from '../context/ElectionContext.tsx';
 
 const navigation = [
@@ -36,11 +35,13 @@ export default function Example() {
         setSelectedElection(elections.find(e => e.id === newElectionId) ?? elections[0]);
     };
 
-    const Wahl: DropdownType = {
+    const Wahl: DropdownData = {
         items: elections.map(election => ({
             label: election.date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }),
             id: election.id
         })),
+        defaultChosenId: elections[0]?.id ?? 0,
+        label: "Wahljahr"
     };
 
     return (
@@ -52,8 +53,8 @@ export default function Example() {
                     className="h-8 w-auto"
                 />
             </div>
-            <div className="flex h-16 shrink-0 items-center border-b-2 border-b-gray-200 pb-5">
-                <DropdownC dropdownContent={Wahl} dropDownFunction={handleElectionChange}></DropdownC>
+            <div className="flex h-16 shrink-0 items-center border-b-2 border-b-gray-200 pb-7">
+                <DropdownC dropdownData={Wahl} dropDownFunction={handleElectionChange}></DropdownC>
             </div>
             <nav className="flex flex-1 flex-col">
                 <ul role="list" className="flex flex-1 flex-col gap-y-7">
