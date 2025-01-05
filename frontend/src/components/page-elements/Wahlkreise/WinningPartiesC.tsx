@@ -1,72 +1,72 @@
-import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
 import type {WinningParties} from "../../../api/index.ts";
 import {getPartyColor} from "../../../utils/utils.tsx";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {useEffect, useState} from "react";
-import './table.css';
+import GridC from "../../UI-element-components/GridC.tsx";
+import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
+import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
 
 export default function WinningPartiesC({fetchWinningParties}: {
     fetchWinningParties: (wahlId: number) => Promise<WinningParties>
 }) {
     const {selectedElection} = useElection();
     const [winningParties, setWinningParties] = useState<WinningParties>()
+    const [loading, setLoading] = useState(true);
+    const showLoader = useMinLoadingTime(loading);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setLoading(true);
                 const winningParties = await fetchWinningParties(selectedElection?.id ?? 0);
                 setWinningParties(winningParties);
             } catch (error) {
                 console.error('Error fetching winning parties:', error);
+            } finally {
+                setLoading(false);
             }
         };
         fetchData();
     }, [selectedElection]);
 
     return (
-        <ContentTileC header={"Siegerparteien"}>
-            {winningParties && (
-                <table className="table">
-                    <thead className="bg-gray-50">
-                    <tr>
-                        <th scope="col">
-                        </th>
-                        <th scope="col">
-                            Kürzel
-                        </th>
-                        <th scope="col">
-                            Parteiname
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr key={winningParties.erststimme[0].party.id}>
-                        <td>
-                            Erstimmen
-                        </td>
-                        <td>
-                            {winningParties.erststimme[0].party.shortname}
-                        </td>
-                        <td
-                            style={{color: getPartyColor(winningParties.erststimme[0].party.shortname)}}>
-                            {winningParties.erststimme[0].party.name}
-                        </td>
-                    </tr>
-                    <tr key={winningParties.zweitstimme[0].party.id}>
-                        <td>
-                            Zweitstimmen
-                        </td>
-                        <td>
-                            {winningParties.zweitstimme[0].party.shortname}
-                        </td>
-                        <td
-                            style={{color: getPartyColor(winningParties.zweitstimme[0].party.shortname)}}>
-                            {winningParties.zweitstimme[0].party.name}
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            )}
-        </ContentTileC>
+        <GridC
+            gridData={{
+                columns: [
+                    {id: 1, label: 'Stimmenart', searchable: false},
+                    {id: 2, label: 'Kürzel', searchable: false},
+                    {id: 3, label: 'Parteiname', searchable: false}
+                ],
+                rows: winningParties ? [
+                    {
+                        key: winningParties.erststimme[0].party.id,
+                        values: [
+                            {column_id: 1, value: 'Erststimmen'},
+                            {column_id: 2, value: winningParties.erststimme[0].party.shortname},
+                            {
+                                column_id: 3, 
+                                value: winningParties.erststimme[0].party.name,
+                                style: {color: getPartyColor(winningParties.erststimme[0].party.shortname)}
+                            }
+                        ]
+                    },
+                    {
+                        key: winningParties.zweitstimme[0].party.id,
+                        values: [
+                            {column_id: 1, value: 'Zweitstimmen'},
+                            {column_id: 2, value: winningParties.zweitstimme[0].party.shortname},
+                            {
+                                column_id: 3,
+                                value: winningParties.zweitstimme[0].party.name,
+                                style: {color: getPartyColor(winningParties.zweitstimme[0].party.shortname)}
+                            }
+                        ]
+                    }
+                ] : []
+            }}
+            usePagination={false}
+            contentTileConfig={new ContentTileConfig("Siegerparteien", false)}
+            loading={showLoader}
+        />
     );
 }

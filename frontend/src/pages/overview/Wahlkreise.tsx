@@ -103,16 +103,12 @@ export default function Wahlkreise() {
                         <div className="w-chart-lg max-lg:w-char flex flex-col justify-start gap-5 -mb-5">
                             <ToggleSwitchC defaultEnabled={!calcOnAggregate} setEnabledInputFunct={(calcOnEinzelstimmen: boolean) => setCalcOnAggregate(!calcOnEinzelstimmen)} label={"Ab hier auf Einzelstimmen berechnen"}/>
                         </div>
-                        {loading ? <div className="flex items-center justify-center min-h-[400px]">Loading...</div> :
-                        <>
                             <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis}
                                                 showAbsoluteVotesDefault={true}/>
-                            <DirektkandidatC overview={overview} />
-                            <ContentTileC header={"Wahlbeteiligung"}>
+                            <DirektkandidatC overview={overview} loading={loading} />
+                            <ContentTileC header={"Wahlbeteiligung"} loading={loading}>
                                 <DoughnutChart data={wahlbeteiligungData} fullCircle={true}></DoughnutChart>
                             </ContentTileC>
-                        </>
-                        }
                     </>
                     :
                     null

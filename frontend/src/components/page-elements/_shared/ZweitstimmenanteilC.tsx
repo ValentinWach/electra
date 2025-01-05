@@ -9,6 +9,7 @@ import { useBundestagsParteien } from '../../../hooks/useBundestagsParteien.ts';
 import GridC from '../../UI-element-components/GridC.tsx';
 import CheckboxC from '../../UI-element-components/CheckboxC.tsx';
 import type { ChartDataNum } from '../../../models/ChartData';
+import { useMinLoadingTime } from '../../../hooks/useMinLoadingTime.ts';
 
 export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVotesDefault = false}: {
     fetchStimmanteile: (wahlId: number) => Promise<Stimmanteil[]>,
@@ -20,7 +21,9 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
     const [comparedElection, setComparedElection] = useState<Wahl | null>()
     const [summarizeOtherParties, setSummarizeOtherParties] = useState(true);
     const [showAbsoluteVotes, setShowAbsoluteVotes] = useState(showAbsoluteVotesDefault);
+    const [loading, setLoading] = useState(true);
     const { parteien: Bundestagsparteien } = useBundestagsParteien();
+    const showLoader = useMinLoadingTime(loading);
 
     const processStimmanteile = (data: Stimmanteil[] | undefined) => {
         if (!data) return [];
@@ -53,11 +56,14 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
         console.log('ZweitstimmenanteilC useEffect triggered');
         const getStimmanteile = async () => {
             try {
+                setLoading(true);
                 const data = await fetchStimmanteile(selectedElection?.id ?? 0);
                 setComparedElection(null);
                 setStimmanteil(data);
             } catch (error) {
                 console.error('Error fetching Sitzverteilung:', error);
+            } finally {
+                setLoading(false);
             }
         };
         getStimmanteile();
@@ -66,7 +72,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
     const compareWahlDD: DropdownData = {
         items: [{label: "Nicht vergleichen", id: -1},
             ...elections.filter(e => e.id != selectedElection?.id).map(election => ({
-                label: election.date.toLocaleDateString('de-DE', {month: 'long', year: 'numeric'}),
+                label: "vgl: " + election.date.toLocaleDateString('de-DE', {month: 'long', year: 'numeric'}),
                 id: election.id
             }))],
         defaultChosenId: -1,
@@ -126,7 +132,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
     
     return (
         <div className={"flex-grow"}>
-            <ContentTileC dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={"Zweitstimmenanteile"}>
+            <ContentTileC loading={showLoader} dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={"Zweitstimmenanteile"}>
                 {comparedElection ?
                     <BarchartC data={comparedData}></BarchartC>
                     :

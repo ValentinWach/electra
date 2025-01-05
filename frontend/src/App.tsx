@@ -7,16 +7,15 @@ import Parteien from "./pages/overview/Parteien.tsx";
 import {ElectionProvider, useElection} from "./context/ElectionContext.tsx";
 import {CalcOnAggregateProvider} from "./context/CalcOnAggregateContext.tsx";
 import Analysen from "./pages/overview/Analysen.tsx";
+import FullPageLoadingC from './components/UI-element-components/FullPageLoadingC.tsx';
+import { useMinLoadingTime } from './hooks/useMinLoadingTime';
 
 function AppContent() {
     const { isLoading } = useElection();
+    const showLoader = useMinLoadingTime(isLoading);
 
-    if (isLoading) {
-        return (
-            <div className="h-screen w-screen flex items-center justify-center bg-gray-50">
-                <div className="text-2xl font-semibold text-gray-700">Loading...</div>
-            </div>
-        );
+    if (showLoader) {
+        return <FullPageLoadingC />;
     }
 
     return (

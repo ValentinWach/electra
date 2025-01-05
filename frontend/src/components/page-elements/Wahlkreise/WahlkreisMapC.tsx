@@ -12,7 +12,7 @@ import {getPartyColor} from "../../../utils/utils.tsx";
 import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
 import {DropdownData} from "../../../models/DropDownData.ts";
 import './WahlkreisMapC.css';
-
+import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
 export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number) => void} ) {
     let mapDD: DropdownData = {
         label: undefined,
@@ -31,13 +31,19 @@ export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number)
     const {selectedElection} = useElection();
     const [winningParties, setWinningParties] = useState<WinningParties>()
     const [stimmenType, setStimmenType] = useState(mapDD.defaultChosenId);
+    const [loading, setLoading] = useState(true);
+    const showLoader = useMinLoadingTime(loading);
+
     useEffect(() => {
         const getWinningParties = async () => {
             try {
+                setLoading(true);
                 const data = await fetchWinningPartiesWahlkreise(selectedElection?.id ?? 0);
                 setWinningParties(data);
             } catch (error) {
                 console.error('Error fetching Wahlkreis Overview:', error);
+            } finally {
+                setLoading(false);
             }
         }
         getWinningParties()
@@ -87,7 +93,7 @@ export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number)
 
     return (
         <ContentTileC dropDownContent={mapDD} dropDownFunction={setStimmenType} doubleSize={true}
-                    header={"Wahlkreiskarte"}>
+                    header={"Wahlkreiskarte"} loading={showLoader}>
             <MapContainer center={center} zoomControl={true} doubleClickZoom={true} scrollWheelZoom={false} zoom={6.5}
                           style={{height: '90vh', width: '100%', zIndex: '10'}}>
                 {typedGeoData && winningParties && (

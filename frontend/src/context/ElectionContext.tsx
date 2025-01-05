@@ -4,7 +4,7 @@ import { Wahl } from '../api';
 
 interface ElectionContextType {
     elections: Wahl[];
-    selectedElection: Wahl | null;
+    selectedElection: Wahl;
     setSelectedElection: (election: Wahl) => void;
     isLoading: boolean;
 }
@@ -12,30 +12,49 @@ interface ElectionContextType {
 const ElectionContext = createContext<ElectionContextType | undefined>(undefined);
 
 export const ElectionProvider = ({ children }: { children: ReactNode }) => {
-    const [elections, setElections] = useState<Wahl[]>([]);
-    const [selectedElection, setSelectedElection] = useState<Wahl | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [state, setState] = useState<{
+        elections: Wahl[];
+        selectedElection: Wahl | null;
+        isLoading: boolean;
+    }>({
+        elections: [],
+        selectedElection: null,
+        isLoading: true
+    });
 
     useEffect(() => {
         const getElections = async () => {
             try {
-                setIsLoading(true);
                 const data = await fetchWahlen();
-                setElections(data);
                 if (data.length > 0) {
-                    setSelectedElection(data[0]);
+                    setState({
+                        elections: data,
+                        selectedElection: data[0],
+                        isLoading: false
+                    });
                 }
             } catch (error) {
                 console.error('Error fetching elections:', error);
-            } finally {
-                setIsLoading(false);
             }
         };
         getElections();
     }, []);
 
+    // Only render children when we have a valid selectedElection
+    if (state.selectedElection === null) {
+        return null;
+    }
+
     return (
-        <ElectionContext.Provider value={{ elections, selectedElection, setSelectedElection, isLoading }}>
+        <ElectionContext.Provider 
+            value={{
+                elections: state.elections,
+                selectedElection: state.selectedElection,
+                setSelectedElection: (election: Wahl) => 
+                    setState(prev => ({ ...prev, selectedElection: election })),
+                isLoading: state.isLoading
+            }}
+        >
             {children}
         </ElectionContext.Provider>
     );

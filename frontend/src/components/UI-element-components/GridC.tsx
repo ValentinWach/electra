@@ -5,7 +5,7 @@ import InputC from "./InputC.tsx";
 import {useEffect, useState} from "react";
 import PaginationC from "./PaginationC.tsx";
 
-export default function GridC({gridData, usePagination = true, pageSize = 10, contentTileConfig, defaultSortColumnId, defaultSortDirection = 'asc', onRowClick}: {
+export default function GridC({gridData, usePagination = true, pageSize = 10, contentTileConfig, defaultSortColumnId, defaultSortDirection = 'asc', onRowClick, loading = false }: {
     gridData: GridData,
     usePagination?: boolean,
     pageSize?: number,
@@ -13,6 +13,7 @@ export default function GridC({gridData, usePagination = true, pageSize = 10, co
     defaultSortColumnId?: number,
     defaultSortDirection?: 'asc' | 'desc',
     onRowClick?: (id: number) => void,
+    loading?: boolean,
 }) {
 
     const [filteredGridData, setFilteredGridData] = useState<GridData>({
@@ -139,7 +140,7 @@ export default function GridC({gridData, usePagination = true, pageSize = 10, co
     ) 
 
     return contentTileConfig ? (
-        <ContentTileC header={contentTileConfig.header} doubleSize={contentTileConfig.doubleSize}>
+        <ContentTileC header={contentTileConfig.header} doubleSize={contentTileConfig.doubleSize} loading={loading}>
             {tableContent}
         </ContentTileC>
     ) : tableContent;

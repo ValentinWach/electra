@@ -1,10 +1,9 @@
 import {useEffect, useState} from "react";
 import {Abgeordneter} from "../../../api/index.ts";
 import {useElection} from "../../../context/ElectionContext.tsx";
-import './table.css';
 import GridC from "../../UI-element-components/GridC.tsx";
 import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
-
+import { useMinLoadingTime } from '../../../hooks/useMinLoadingTime.ts';
 
 export default function AbgeordneteC({fetchAbgeordnete}: {
     fetchAbgeordnete: (id: number) => Promise<Abgeordneter[]>
@@ -13,14 +12,19 @@ export default function AbgeordneteC({fetchAbgeordnete}: {
     const {selectedElection} = useElection();
     const [abgeordnete, setAbgeordnete] = useState<Abgeordneter[]>();
     const [abgeordneteGridData, setAbgeordneteGridData] = useState<GridData>({columns: [], rows: []});
+    const [loading, setLoading] = useState(true);
+    const showLoader = useMinLoadingTime(loading);
 
     useEffect(() => {
         const getAbgeordnete = async () => {
             try {
+                setLoading(true);
                 const data = await fetchAbgeordnete(selectedElection?.id ?? 0);
                 setAbgeordnete(data);
             } catch (error) {
                 console.error('Error fetching Abgeordnete:', error);
+            } finally {
+                setLoading(false);
             }
         };
         getAbgeordnete();
@@ -50,6 +54,6 @@ export default function AbgeordneteC({fetchAbgeordnete}: {
     }, [abgeordnete]);
 
     return (
-        <GridC gridData={abgeordneteGridData} contentTileConfig={new ContentTileConfig("Abgeordnete")} defaultSortColumnId={1} defaultSortDirection="asc" pageSize={15} />
+        <GridC gridData={abgeordneteGridData} contentTileConfig={new ContentTileConfig("Abgeordnete")} defaultSortColumnId={1} defaultSortDirection="asc" pageSize={15} loading={showLoader} />
     )
 }

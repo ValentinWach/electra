@@ -5,20 +5,26 @@ import {useElection} from "../../../context/ElectionContext.tsx";
 import {GridData} from "../../../models/GridData.ts";
 import GridC from "../../UI-element-components/GridC.tsx";
 import {ContentTileConfig} from "../../../models/GridData.ts";
+import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
 
 export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisDetails: (id: number) => void }) {
 
     const {selectedElection} = useElection();
     const [wahlkreise, setWahlkreise] = useState<Wahlkreis[]>();
     const [wahlkreisGridData, setWahlkreisGridData] = useState<GridData>({columns: [], rows: []});
+    const [loading, setLoading] = useState(true);
+    const showLoader = useMinLoadingTime(loading);
 
     useEffect(() => {
         const getWahlkreise = async () => {
             try {
+                setLoading(true);
                 const data = await fetchWahlkreise();
                 setWahlkreise(data);
             } catch (error) {
                 console.error('Error fetching Wahlkreise:', error);
+            } finally {
+                setLoading(false);
             }
         };
         getWahlkreise();
@@ -43,6 +49,6 @@ export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisD
         setWahlkreisGridData(wahlkreisGridDataNew);
     }, [wahlkreise]);
     return (
-        <GridC gridData={wahlkreisGridData} contentTileConfig={new ContentTileConfig("Wahlkreise")} defaultSortColumnId={1} defaultSortDirection="asc" onRowClick={(id) => showWahlkreisDetails(id)} />
+        <GridC gridData={wahlkreisGridData} contentTileConfig={new ContentTileConfig("Wahlkreise")} defaultSortColumnId={1} defaultSortDirection="asc" onRowClick={(id) => showWahlkreisDetails(id)} loading={showLoader} />
     )
 }

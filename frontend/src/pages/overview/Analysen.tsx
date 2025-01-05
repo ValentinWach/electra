@@ -1,16 +1,24 @@
 import IncomeC from "../../components/page-elements/Analysen/IncomeC.tsx";
 import ForeignerShareC from "../../components/page-elements/Analysen/ForeignerShareC.tsx";
 import { useBundestagsParteien } from "../../hooks/useBundestagsParteien";
+import FullPageLoadingC from "../../components/UI-element-components/FullPageLoadingC.tsx";
+import { useEffect, useState } from "react";
 
 export default function Analysen() {
     const { parteien, isLoading } = useBundestagsParteien();
+    const [showLoader, setShowLoader] = useState(true);
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-xl font-semibold text-gray-700">Loading analysis data...</div>
-            </div>
-        );
+    useEffect(() => {
+        if (!isLoading) {
+            const timeout = setTimeout(() => {
+                setShowLoader(false);
+            }, 300);
+            return () => clearTimeout(timeout);
+        }
+    }, [isLoading]);
+
+    if (showLoader) {
+        return <FullPageLoadingC />;
     }
 
     return (

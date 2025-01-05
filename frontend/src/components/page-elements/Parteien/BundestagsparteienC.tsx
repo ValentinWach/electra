@@ -1,11 +1,14 @@
 import { useBundestagsParteien } from "../../../hooks/useBundestagsParteien"
 import GridC from "../../UI-element-components/GridC.tsx"
 import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
+import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
 
 export default function BundestagsparteienC({showParteiDetails}: {showParteiDetails: (rowId: number) => void}) {
-    const {parteien} = useBundestagsParteien()
+    const {parteien, isLoading} = useBundestagsParteien()
+    const showLoader = useMinLoadingTime(isLoading);
     return (
         <GridC
+        loading={showLoader}
         gridData={{
             columns: [
                 {id: 1, label: 'Name', searchable: false},

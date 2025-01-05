@@ -6,18 +6,24 @@ import DoughnutChart from "../../chart-components/DoughnutChartC.tsx";
 import {ChartData} from "chart.js";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {getPartyColor} from "../../../utils/utils.tsx";
+import { useMinLoadingTime } from '../../../hooks/useMinLoadingTime.ts';
 
 export default function SitzverteilungC() {
     const {selectedElection} = useElection();
     const [sitzverteilung, setSitzverteilung] = useState<SeatDistribution>();
+    const [loading, setLoading] = useState(true);
+    const showLoader = useMinLoadingTime(loading);
 
     useEffect(() => {
         const getSitzverteilung = async () => {
             try {
+                setLoading(true);
                 const data = await fetchSitzveteilung(selectedElection?.id ?? 0);
                 setSitzverteilung(data);
             } catch (error) {
                 console.error('Error fetching Sitzverteilung:', error);
+            } finally {
+                setLoading(false);
             }
         };
         getSitzverteilung();
@@ -35,7 +41,7 @@ export default function SitzverteilungC() {
 
     return (
         <div className={"flex-grow"}>
-            <ContentTileC header={"Sitzverteilung"}>
+            <ContentTileC loading={showLoader} header={"Sitzverteilung"}>
                 <DoughnutChart data={data}></DoughnutChart>
                 <table className="table">
                     <thead>

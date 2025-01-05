@@ -2,7 +2,11 @@ import {OverviewWahlkreis} from "../../../api";
 import GridC from "../../UI-element-components/GridC";
 import {getPartyColor} from "../../../utils/utils";
 import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
-export default function DirektkandidatC({overview}: {overview: OverviewWahlkreis | undefined}) {
+import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
+
+export default function DirektkandidatC({overview, loading = false}: {overview: OverviewWahlkreis | undefined, loading?: boolean}) {
+    const showLoader = useMinLoadingTime(loading);
+
     return (
         <GridC
             gridData={{
@@ -30,6 +34,7 @@ export default function DirektkandidatC({overview}: {overview: OverviewWahlkreis
             }}
             usePagination={false}
             contentTileConfig={new ContentTileConfig("Direktkandidat", false)}
+            loading={showLoader}
         />
     );
 }
