@@ -7,6 +7,7 @@ export interface GridColumn {
 export interface GridColumnValue {
     column_id: number;
     value: string;
+    style?: { [key: string]: string };
 }
 
 export interface GridRow {

@@ -1,4 +1,3 @@
-
 import ContentTileC from "./ContentTileC.tsx";
 import './GridC.css';
 import {GridData} from "../../models/GridData.ts";
@@ -6,10 +5,11 @@ import InputC from "./InputC.tsx";
 import {useEffect, useState} from "react";
 import PaginationC from "./PaginationC.tsx";
 
-export default function GridC({gridData, header, usePagination, pageSize, onRowClick}: {
+export default function GridC({gridData, header, usePagination, doubleSize = true, pageSize, onRowClick}: {
     gridData: GridData,
     header: string,
     usePagination: boolean,
+    doubleSize?: boolean,
     pageSize?: number,
     onRowClick?: (id: number) => void,
 }) {
@@ -104,7 +104,7 @@ export default function GridC({gridData, header, usePagination, pageSize, onRowC
 
 
     return (
-        <ContentTileC header={header} doubleSize={true}>
+        <ContentTileC header={header} doubleSize={doubleSize}>
             <table className="table">
                 <thead>
                 <tr>
@@ -126,7 +126,7 @@ export default function GridC({gridData, header, usePagination, pageSize, onRowC
                 {currentPageGridData.rows.map((row) => (
                     <tr key={row.key} className={`${onRowClick ? "hover:cursor-pointer" : ""}`} onClick={() => onRowClick && onRowClick(row.key)}>
                         {row.values.map((col, index) => (
-                            <td key={index}>{col.value}</td>
+                            <td key={index} style={col.style}>{col.value}</td>
                         ))}
                     </tr>
                 ))}

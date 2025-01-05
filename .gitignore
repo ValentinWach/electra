@@ -1,3 +1,5 @@
 /env/
 .idea
 /backend/src/app/src/openapi_server/database/connection.py
+__pycache__/
+*.pyc

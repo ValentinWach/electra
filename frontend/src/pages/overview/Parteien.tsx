@@ -6,12 +6,13 @@ import ClosestWinnersC from "../../components/page-elements/Parteien/ClosestWinn
 import GridC from "../../components/UI-element-components/GridC.tsx";
 import BackBreadcrumbsC from "../../components/UI-element-components/BackBreadcrumbsC.tsx";
 import UeberhangC from "../../components/page-elements/Parteien/UeberhangC.tsx";
+import BundestagsparteienC from "../../components/page-elements/Parteien/BundestagsparteienC.tsx";
+import AngetreteneParteienC from "../../components/page-elements/Parteien/AngetreteneParteienC.tsx";
 
 export default function Parteien() {
 
     const {selectedElection} = useElection();
     const [alleParteien, setAlleParteien] = useState<Partei[]>();
-    const [eingezogeneParteien, setEingezogeneParteien] = useState<Partei[]>();
     const [selectedPartei, setSelectedPartei] = useState<Partei | null>(null);
 
     useEffect(() => {
@@ -24,18 +25,6 @@ export default function Parteien() {
             }
         };
         getAlleParteien();
-    }, [selectedElection]);
-
-    useEffect(() => {
-        const getEingezogeneParteien = async () => {
-            try {
-                const data = await fetchSitzveteilung(selectedElection?.id ?? 0);
-                setEingezogeneParteien(data.distribution.map(d => d.party));
-            } catch (error) {
-                console.error('Error fetching Parteien:', error);
-            }
-        };
-        getEingezogeneParteien();
     }, [selectedElection]);
 
     const showParteiDetails = (id: number) => {
@@ -62,43 +51,8 @@ export default function Parteien() {
                     </div>
                     :
                     <>
-                        <GridC
-                            gridData={{
-                                columns: [
-                                    {id: 1, label: 'Name', searchable: false},
-                                    {id: 2, label: 'Kurzname', searchable: false}
-                                ],
-                                rows: eingezogeneParteien?.map(partei => ({
-                                    key: partei.id,
-                                    values: [
-                                        {column_id: 1, value: partei.name},
-                                        {column_id: 2, value: partei.shortname}
-                                    ]
-                                })) ?? []
-                            }}
-                            header={"Bundestagsparteien"}
-                            usePagination={false}
-                            onRowClick={(id) => showParteiDetails(id)}
-                            pageSize={10}
-                        />
-                        <GridC
-                            gridData={{
-                                columns: [
-                                    {id: 1, label: 'Name', searchable: true},
-                                    {id: 2, label: 'Kurzname', searchable: true}
-                                ],
-                                rows: alleParteien?.map(partei => ({
-                                    key: partei.id,
-                                    values: [
-                                        {column_id: 1, value: partei.name},
-                                        {column_id: 2, value: partei.shortname}
-                                    ]
-                                })) ?? []
-                            }}
-                            header={"Angetretene Parteien"}
-                            usePagination={true}
-                            pageSize={10}
-                        />
+                        <BundestagsparteienC showParteiDetails={showParteiDetails}/>
+                        <AngetreteneParteienC/>
                     </>
 
             }

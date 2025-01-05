@@ -10,7 +10,6 @@ import {useElection} from "../../context/ElectionContext.tsx";
 import WahlkreislisteC from "../../components/page-elements/Wahlkreise/WahlkreislisteC.tsx";
 import ZweitstimmenanteilC from "../../components/page-elements/_shared/ZweitstimmenanteilC.tsx";
 import WinningPartiesC from "../../components/page-elements/Wahlkreise/WinningPartiesC.tsx";
-import {getPartyColor} from "../../utils/utils.tsx";
 import ContentTileC from "../../components/UI-element-components/ContentTileC.tsx";
 import DoughnutChart from "../../components/chart-components/DoughnutChartC.tsx";
 import {ChartData} from "chart.js";
@@ -18,6 +17,7 @@ import WahlkreisMapC from "../../components/page-elements/Wahlkreise/WahlkreisMa
 import BackBreadcrumbsC from "../../components/UI-element-components/BackBreadcrumbsC.tsx";
 import ToggleSwitchC from "../../components/UI-element-components/ToggleSwitchC.tsx";
 import {useCalcOnAggregate} from "../../context/CalcOnAggregateContext.tsx";
+import DirektkandidatC from "../../components/page-elements/Wahlkreise/DirektkandidatC.tsx";
 
 export default function Wahlkreise() {
 
@@ -98,30 +98,7 @@ export default function Wahlkreise() {
                         </div>
                         <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis}
                                              showAbsoluteVotes={true}/>
-                        <ContentTileC header={"Direktkandidat"}>
-                            <table className="table">
-                                <thead>
-                                <tr>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Vorname</th>
-                                    <th scope="col">Geburtsjahr</th>
-                                    <th scope="col">Beruf</th>
-                                    <th scope="col">Partei</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr key={overview?.direktkandidat?.id}>
-                                    <td>{overview?.direktkandidat?.name}</td>
-                                    <td>{overview?.direktkandidat?.firstname}</td>
-                                    <td>{overview?.direktkandidat?.yearOfBirth}</td>
-                                    <td>{overview?.direktkandidat?.profession}</td>
-                                    <td style={{color: getPartyColor(overview?.direktkandidat.party.shortname)}}>
-                                        {overview?.direktkandidat.party.shortname}
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </ContentTileC>
+                        <DirektkandidatC overview={overview} />
                         <ContentTileC header={"Wahlbeteiligung"}>
                             <DoughnutChart data={wahlbeteiligungData} fullCircle={true}></DoughnutChart>
                         </ContentTileC>

@@ -7,17 +7,15 @@ import {fetchIncomeAnalysis} from "../../../apiServices.ts";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {ChartDataXYR} from "../../../models/ChartData.ts";
 import {getPartyColor} from "../../../utils/utils.tsx";
+import { useBundestagsParteien } from '../../../hooks/useBundestagsParteien.ts';
 
-interface IncomeProps {
-    parteien: Partei[];
-}
-
-export default function IncomeC({parteien}: IncomeProps) {
+export default function IncomeC() {
     const {selectedElection} = useElection();
     const [selectedParteiId, setSelectedParteiId] = useState<number | null>(null);
     const [incomeData, setIncomeData] = useState<ChartDataXYR>();
     const [xMin, setXMin] = useState<number | undefined>(undefined);
     const [xMax, setXMax] = useState<number | undefined>(undefined);
+    const parteien = useBundestagsParteien();
 
     useEffect(() => {
         if (parteien.length > 0) {

@@ -7,17 +7,15 @@ import {fetchForeignerShareAnalysis} from "../../../apiServices.ts";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {ChartDataXYR} from "../../../models/ChartData.ts";
 import {getPartyColor} from "../../../utils/utils.tsx";
+import { useBundestagsParteien } from '../../../hooks/useBundestagsParteien.ts';
 
-interface ForeignerShareProps {
-    parteien: Partei[];
-}
-
-export default function ForeignerShareC({parteien}: ForeignerShareProps) {
+export default function ForeignerShareC() {
     const {selectedElection} = useElection();
     const [selectedParteiId, setSelectedParteiId] = useState<number | null>(null);
     const [foreignersData, setForeignersData] = useState<ChartDataXYR>();
     const [xMin, setXMin] = useState<number | undefined>(undefined);
     const [xMax, setXMax] = useState<number | undefined>(undefined);
+    const parteien = useBundestagsParteien();
 
     useEffect(() => {
         if (parteien.length > 0) {
