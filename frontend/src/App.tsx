@@ -12,7 +12,7 @@ import { useMinLoadingTime } from './hooks/useMinLoadingTime';
 
 function AppContent() {
     const { isLoading } = useElection();
-    const showLoader = useMinLoadingTime(isLoading);
+    const showLoader = useMinLoadingTime(isLoading, 500);
 
     if (showLoader) {
         return <FullPageLoadingC />;

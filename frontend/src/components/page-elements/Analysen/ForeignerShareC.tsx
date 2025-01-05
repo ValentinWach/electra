@@ -24,6 +24,7 @@ export default function ForeignerShareC({parteien} : {parteien: Partei[]}) {
     useEffect(() => {
         async function fetchForeignersData() {
             try {
+                if (selectedParteiId === null) return;
                 const data = await fetchForeignerShareAnalysis(selectedElection?.id ?? 0, selectedParteiId ?? 0);
                 const foreignersData: ChartDataXYR = {
                     labels: data.wahlkreise.map(w => `WK ${w.wahlkreisId}: (TODO: Name)`),

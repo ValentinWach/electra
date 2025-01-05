@@ -14,8 +14,8 @@ ChartJS.register(ArcElement, Tooltip, Legend, LinearScale, CategoryScale, BarEle
 
 export default function BarchartC(props: { data?: ChartDataNum }) {
     const defaultData: ChartDataNum = {
-        labels: ['Filled', 'Empty'],
-        datasets: [{data: [66, 34], backgroundColor: ['#ff6384', '#e0e0e0'], borderWidth: 0,},],
+        labels: [],
+        datasets: [],
     };
     const data = props.data ?? defaultData;
     const options = {

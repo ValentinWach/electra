@@ -24,6 +24,8 @@ export default function IncomeC({parteien} : {parteien: Partei[]}) {
     useEffect(() => {
         async function fetchIncomeData() {
             try {
+                if (selectedParteiId === null) return;
+
                 const data = await fetchIncomeAnalysis(selectedElection?.id ?? 0, selectedParteiId ?? 0);
                 const incomeData: ChartDataXYR = {
                     labels: data.wahlkreise.map(w => `WK ${w.wahlkreisId}: (TODO: Name)`),

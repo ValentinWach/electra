@@ -12,8 +12,8 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 export default function DoughnutChart(props: { data?: ChartDataNum, fullCircle?: Boolean }) { //TODO: When use "props" and when {name}{type} syntax?
     const fullCircle = props.fullCircle ?? false;
     const defaultData: ChartDataNum = {
-        labels: ['Filled', 'Empty'],
-        datasets: [{data: [66, 34], backgroundColor: ['#ff6384', '#e0e0e0'], borderWidth: 0,},],
+        labels: [],
+        datasets: [],
     };
     const data = props.data ?? defaultData;
     const fullCircleOptions = {

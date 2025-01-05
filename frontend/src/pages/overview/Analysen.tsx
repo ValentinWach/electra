@@ -3,19 +3,10 @@ import ForeignerShareC from "../../components/page-elements/Analysen/ForeignerSh
 import { useBundestagsParteien } from "../../hooks/useBundestagsParteien";
 import FullPageLoadingC from "../../components/UI-element-components/FullPageLoadingC.tsx";
 import { useEffect, useState } from "react";
-
+import { useMinLoadingTime } from "../../hooks/useMinLoadingTime.ts";
 export default function Analysen() {
     const { parteien, isLoading } = useBundestagsParteien();
-    const [showLoader, setShowLoader] = useState(true);
-
-    useEffect(() => {
-        if (!isLoading) {
-            const timeout = setTimeout(() => {
-                setShowLoader(false);
-            }, 300);
-            return () => clearTimeout(timeout);
-        }
-    }, [isLoading]);
+    const showLoader = useMinLoadingTime(isLoading);
 
     if (showLoader) {
         return <FullPageLoadingC />;

@@ -14,13 +14,11 @@ ChartJS.register(ArcElement, Tooltip, Legend, LinearScale, CategoryScale, PointE
 
 export default function BubbleChartC(props: { data?: ChartDataXYR, xLabel?: string, yLabel?: string, xMin?: number, xMax?: number }) {
     const defaultData: ChartDataXYR = {
+        labels: [],
         datasets: [
             {
-                data: [
-                    { x: 20, y: 30, r: 5 },
-                    { x: 40, y: 10, r: 5 },
-                ] as { x: number; y: number; r: number }[],
-                backgroundColor: ['#ff6384', '#ffcd56'],
+                data: [],
+                backgroundColor: [],
             },
         ],
     };
