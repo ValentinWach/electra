@@ -1,7 +1,6 @@
 import {useEffect, useState} from 'react';
 import {Stimmanteil, Wahl} from "../../../api/index.ts";
 import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
-import {ChartData} from "chart.js";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {getPartyColor} from "../../../utils/utils.tsx";
 import BarchartC from "../../chart-components/BarchartC.tsx";
@@ -11,14 +10,16 @@ import GridC from '../../UI-element-components/GridC.tsx';
 import CheckboxC from '../../UI-element-components/CheckboxC.tsx';
 import type { ChartDataNum } from '../../../models/ChartData';
 
-export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVotes}: {
-    fetchStimmanteile: (wahlId: number) => Promise<Stimmanteil[]>, showAbsoluteVotes?: boolean | null
+export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVotesDefault = false}: {
+    fetchStimmanteile: (wahlId: number) => Promise<Stimmanteil[]>,
+    showAbsoluteVotesDefault?: boolean
 }) {
     const {elections, selectedElection} = useElection();
     const [stimmanteil, setStimmanteil] = useState<Stimmanteil[]>();
     const [comparedStimmanteil, setComparedStimmanteil] = useState<Stimmanteil[]>()
     const [comparedElection, setComparedElection] = useState<Wahl | null>()
     const [summarizeOtherParties, setSummarizeOtherParties] = useState(true);
+    const [showAbsoluteVotes, setShowAbsoluteVotes] = useState(showAbsoluteVotesDefault);
     const Bundestagsparteien = useBundestagsParteien();
 
     const processStimmanteile = (data: Stimmanteil[] | undefined) => {
@@ -130,8 +131,9 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
                     <BarchartC data={comparedData}></BarchartC>
                     :
                     <BarchartC data={mainData}></BarchartC>}
-                <div className={"flex flex-row justify-start w-full "}>
+                <div className={"flex flex-row justify-start w-full gap-5"}>
                     <CheckboxC setEnabledInputFunct={setSummarizeOtherParties} label={"Sonstige Zusammenfassen"} defaultChecked={true}/>
+                    <CheckboxC setEnabledInputFunct={setShowAbsoluteVotes} label={"Absolute Stimmen anzeigen"} defaultChecked={showAbsoluteVotesDefault}/>
                 </div>
                 {showAbsoluteVotes ?
                     <GridC
@@ -142,7 +144,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
                                 {id: 3, label: comparedElection ? "Differenz zum Vergleichszeitraum" : "Anzahl Zweitstimmen", searchable: false}
                             ],
                             rows: processStimmanteile(stimmanteil).map(partei => {
-                                const comparedValue = comparedStimmanteil?.find(p => p.party.id === partei.party.id)?.absolute ?? 0;
+                                const comparedValue = processStimmanteile(comparedStimmanteil).find(p => p.party.id === partei.party.id)?.absolute ?? 0;
                                 const comparedValueStr = !comparedElection ? 
                                     partei.absolute.toString() :
                                     `${comparedValue > 0 ? '+' : ''}${comparedValue}`;
@@ -157,7 +159,8 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
                                 };
                             })
                         }}
-                        
+                        defaultSortColumnId={3}
+                        defaultSortDirection={'desc'}
                     />
                     :
                     null

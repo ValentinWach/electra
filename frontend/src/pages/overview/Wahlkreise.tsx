@@ -97,7 +97,7 @@ export default function Wahlkreise() {
                             <ToggleSwitchC defaultEnabled={!calcOnAggregate} setEnabledPar={(calcOnEinzelstimmen: boolean) => setCalcOnAggregate(!calcOnEinzelstimmen)} label={"Ab hier auf Einzelstimmen berechnen"}/>
                         </div>
                         <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis}
-                                             showAbsoluteVotes={true}/>
+                                             showAbsoluteVotesDefault={true}/>
                         <DirektkandidatC overview={overview} />
                         <ContentTileC header={"Wahlbeteiligung"}>
                             <DoughnutChart data={wahlbeteiligungData} fullCircle={true}></DoughnutChart>
