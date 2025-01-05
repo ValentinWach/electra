@@ -52,11 +52,14 @@ export default function Wahlkreise() {
         getOverview()
     }, [selectedElection, selectedWahlkreis, calcOnAggregate]);
 
-    const nichtWaehler = Math.round((100 - overview?.wahlbeteiligung) * 10) / 10;
+    const Wahlbeteiligung = Math.round((overview?.wahlbeteiligung ?? 0) * 100) / 100;
+    const NichtWaehler = Math.round((100 - (overview?.wahlbeteiligung ?? 0)) * 100) / 100;
+    console.log(Wahlbeteiligung);
+    
     let wahlbeteiligungData: ChartData = {
-        labels: [`Wähler: ${overview?.wahlbeteiligung}%`, `Nichtwähler: ${nichtWaehler}%`],
+        labels: [`Wähler: ${Wahlbeteiligung}%`, `Nichtwähler: ${NichtWaehler}%`],
         datasets: [{
-            data: [overview?.wahlbeteiligung, nichtWaehler],
+            data: [Wahlbeteiligung, NichtWaehler],
             backgroundColor: ['#008000', '#d3d3d3'],
             borderWidth: 0,
         },],
@@ -71,7 +74,7 @@ export default function Wahlkreise() {
     }
 
     async function wrapFetchWinningPartiesWahlkreis(wahlId: number): Promise<WinningParties> {
-        return fetchWinningPartiesWahlkreis(wahlId, selectedWahlkreis?.id ?? 0); //TODO: useEinzelstimmen
+        return fetchWinningPartiesWahlkreis(wahlId, selectedWahlkreis?.id ?? 0);
     }
 
     return (
