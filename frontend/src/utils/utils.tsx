@@ -11,7 +11,6 @@ const partyColors: { [key: string]: string } = {
 
 export function getPartyColor(partyName: string): string {
     if (partyColors[partyName]) {
-        console.log(partyName)
         return partyColors[partyName];
     }
     // Generate a random color for unknown parties

@@ -8,6 +8,8 @@ import BarchartC from "../../chart-components/BarchartC.tsx";
 import type {DropdownType} from "../../../models/DropDownData.ts";
 import { useBundestagsParteien } from '../../../hooks/useBundestagsParteien.ts';
 import GridC from '../../UI-element-components/GridC.tsx';
+import CheckboxC from '../../UI-element-components/CheckboxC.tsx';
+import type { ChartDataNum } from '../../../models/ChartData';
 
 export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVotes}: {
     fetchStimmanteile: (wahlId: number) => Promise<Stimmanteil[]>, showAbsoluteVotes?: boolean | null
@@ -16,7 +18,35 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
     const [stimmanteil, setStimmanteil] = useState<Stimmanteil[]>();
     const [comparedStimmanteil, setComparedStimmanteil] = useState<Stimmanteil[]>()
     const [comparedElection, setComparedElection] = useState<Wahl | null>()
+    const [summarizeOtherParties, setSummarizeOtherParties] = useState(true);
     const Bundestagsparteien = useBundestagsParteien();
+
+    const processStimmanteile = (data: Stimmanteil[] | undefined) => {
+        if (!data) return [];
+        data = data.sort((a, b) => a.party.shortname.localeCompare(b.party.shortname));
+        if (!summarizeOtherParties) return data;
+
+        const bundestagsParties = data.filter(s => 
+            Bundestagsparteien.some(bp => bp.id === s.party.id)
+        );
+
+        const otherParties = data.filter(s => 
+            !Bundestagsparteien.some(bp => bp.id === s.party.id)
+        );
+
+        const sonstigeShare = otherParties.reduce((sum, party) => sum + party.share, 0);
+        const sonstigeAbsolute = otherParties.reduce((sum, party) => sum + party.absolute, 0);
+
+        return [...bundestagsParties, {
+            party: {
+                id: -1,
+                name: "Sonstige Parteien",
+                shortname: "Sonstige"
+            },
+            share: Math.round(sonstigeShare * 10) / 10,
+            absolute: sonstigeAbsolute
+        }];
+    };
 
     useEffect(() => {
         const getStimmanteile = async () => {
@@ -37,7 +67,8 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
                 label: election.date.toLocaleDateString('de-DE', {month: 'long', year: 'numeric'}),
                 id: election.id
             }))],
-        defaultChosen: -1
+        defaultChosen: -1,
+        label: "Vergleichen mit"
     };
 
     async function compareStimmanteile(wahlId: number) {
@@ -66,24 +97,32 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
         }
     }
 
-    let mainData: ChartData = {
-        labels: stimmanteil?.map((partei) => `${partei.party.shortname}: ${partei.share}%`),
+    let mainData: ChartDataNum = {
+        labels: processStimmanteile(stimmanteil).map((partei) => 
+            `${partei.party.shortname}: ${partei.share}%`
+        ),
         datasets: [{
-            data: stimmanteil?.map((partei) => partei.share),
-            backgroundColor: stimmanteil?.map((partei) => getPartyColor(partei.party.shortname)),
+            data: processStimmanteile(stimmanteil).map((partei) => partei.share),
+            backgroundColor: processStimmanteile(stimmanteil).map((partei) => 
+                partei.party.shortname === "Sonstige" ? "#808080" : getPartyColor(partei.party.shortname)
+            ),
             borderWidth: 0,
-        },],
+        }],
     };
 
-    let comparedData: ChartData = {
-        labels: comparedStimmanteil?.map((partei) => `${partei.party.shortname}: ${partei.share > 0 ? '+' : ''}${partei.share}%`),
+    let comparedData: ChartDataNum = {
+        labels: processStimmanteile(comparedStimmanteil).map((partei) => 
+            `${partei.party.shortname}: ${partei.share > 0 ? '+' : ''}${partei.share}%`
+        ),
         datasets: [{
-            data: comparedStimmanteil?.map((partei) => partei.share),
-            backgroundColor: comparedStimmanteil?.map((partei) => getPartyColor(partei.party.shortname)),
+            data: processStimmanteile(comparedStimmanteil).map((partei) => partei.share),
+            backgroundColor: processStimmanteile(comparedStimmanteil).map((partei) => 
+                partei.party.shortname === "Sonstige" ? "#808080" : getPartyColor(partei.party.shortname)
+            ),
             borderWidth: 0,
-        },],
+        }],
     };
-
+    
     return (
         <div className={"flex-grow"}>
             <ContentTileC dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={"Zweitstimmenanteile"}>
@@ -91,6 +130,9 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
                     <BarchartC data={comparedData}></BarchartC>
                     :
                     <BarchartC data={mainData}></BarchartC>}
+                <div className={"flex flex-row justify-start w-full "}>
+                    <CheckboxC setEnabledInputFunct={setSummarizeOtherParties} label={"Sonstige Zusammenfassen"} defaultChecked={true}/>
+                </div>
                 {showAbsoluteVotes ?
                     <GridC
                         gridData={{
@@ -99,17 +141,21 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
                                 {id: 2, label: 'Partei', searchable: true}, 
                                 {id: 3, label: comparedElection ? "Differenz zum Vergleichszeitraum" : "Anzahl Zweitstimmen", searchable: false}
                             ],
-                            rows: stimmanteil?.map(partei => ({
-                                key: partei.party.id,
-                                values: [
-                                    {column_id: 1, value: partei.party.shortname, style: {color: getPartyColor(partei.party.shortname)}},
-                                    {column_id: 2, value: partei.party.name},
-                                    {column_id: 3, value: !comparedElection ? 
-                                        partei.absolute.toString() :
-                                        `${comparedStimmanteil?.find(p => p.party.id === partei.party.id)?.absolute > 0 ? '+' : ''}${comparedStimmanteil?.find(p => p.party.id === partei.party.id)?.absolute}`
-                                    }
-                                ]
-                            })) ?? []
+                            rows: processStimmanteile(stimmanteil).map(partei => {
+                                const comparedValue = comparedStimmanteil?.find(p => p.party.id === partei.party.id)?.absolute ?? 0;
+                                const comparedValueStr = !comparedElection ? 
+                                    partei.absolute.toString() :
+                                    `${comparedValue > 0 ? '+' : ''}${comparedValue}`;
+                                    
+                                return {
+                                    key: partei.party.id,
+                                    values: [
+                                        {column_id: 1, value: partei.party.shortname || '', style: {color: getPartyColor(partei.party.shortname || '')}},
+                                        {column_id: 2, value: partei.party.name || ''},
+                                        {column_id: 3, value: comparedValueStr}
+                                    ]
+                                };
+                            })
                         }}
                         
                     />

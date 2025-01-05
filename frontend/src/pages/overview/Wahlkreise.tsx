@@ -93,7 +93,7 @@ export default function Wahlkreise() {
                 selectedWahlkreis ?
                     <>
                         <WinningPartiesC fetchWinningParties={wrapFetchWinningPartiesWahlkreis}/>
-                        <div className="w-chart-lg max-lg:w-char flex flex-row justify-between -mb-5">
+                        <div className="w-chart-lg max-lg:w-char flex flex-col justify-start gap-5 -mb-5">
                             <ToggleSwitchC defaultEnabled={!calcOnAggregate} setEnabledPar={(calcOnEinzelstimmen: boolean) => setCalcOnAggregate(!calcOnEinzelstimmen)} label={"Ab hier auf Einzelstimmen berechnen"}/>
                         </div>
                         <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis}
