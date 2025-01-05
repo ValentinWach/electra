@@ -1,5 +1,6 @@
 import { useBundestagsParteien } from "../../../hooks/useBundestagsParteien"
 import GridC from "../../UI-element-components/GridC.tsx"
+import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
 
 export default function BundestagsparteienC({showParteiDetails}: {showParteiDetails: (rowId: number) => void}) {
     const parteien = useBundestagsParteien()
@@ -18,11 +19,9 @@ export default function BundestagsparteienC({showParteiDetails}: {showParteiDeta
                 ]
             })) ?? []
         }}
-        header={"Bundestagsparteien"}
+        contentTileConfig={new ContentTileConfig("Bundestagsparteien")}
         usePagination={false}
-        doubleSize={true}
         onRowClick={(id) => showParteiDetails(id)}
-        pageSize={10}
     />
     )
 }

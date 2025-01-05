@@ -1,5 +1,4 @@
 Features - Unbeding:
-- Extra analysen
 - "Sonstiges" & anklickbar/Toggle
 
 Design - Unbeding:

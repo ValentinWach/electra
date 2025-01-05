@@ -3,7 +3,6 @@ import {fetchClosestWinners, fetchParteien, fetchSitzveteilung, fetchUeberhangPr
 import {ClosestWinners, Partei, Ueberhang} from "../../api/index.ts";
 import {useElection} from "../../context/ElectionContext.tsx";
 import ClosestWinnersC from "../../components/page-elements/Parteien/ClosestWinnersC.tsx";
-import GridC from "../../components/UI-element-components/GridC.tsx";
 import BackBreadcrumbsC from "../../components/UI-element-components/BackBreadcrumbsC.tsx";
 import UeberhangC from "../../components/page-elements/Parteien/UeberhangC.tsx";
 import BundestagsparteienC from "../../components/page-elements/Parteien/BundestagsparteienC.tsx";

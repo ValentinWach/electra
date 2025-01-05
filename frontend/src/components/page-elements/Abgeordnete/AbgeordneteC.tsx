@@ -3,7 +3,7 @@ import {Abgeordneter} from "../../../api/index.ts";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import './table.css';
 import GridC from "../../UI-element-components/GridC.tsx";
-import {GridData} from "../../../models/GridData.ts";
+import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
 
 
 export default function AbgeordneteC({fetchAbgeordnete}: {
@@ -50,6 +50,6 @@ export default function AbgeordneteC({fetchAbgeordnete}: {
     }, [abgeordnete]);
 
     return (
-        <GridC gridData={abgeordneteGridData} header={"Abgeordnete"} usePagination={true} pageSize={15} />
+        <GridC gridData={abgeordneteGridData} contentTileConfig={new ContentTileConfig("Abgeordnete")} pageSize={15} />
     )
 }

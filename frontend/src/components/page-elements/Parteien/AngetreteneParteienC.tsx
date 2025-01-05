@@ -3,7 +3,7 @@ import GridC from "../../UI-element-components/GridC.tsx"
 import { Partei } from "../../../api/index.ts";
 import { useElection } from "../../../context/ElectionContext.tsx";
 import { fetchParteien } from "../../../apiServices.ts";
-
+import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
 export default function AngetreteneParteienC() {
     const [alleParteien, setAlleParteien] = useState<Partei[]>();
     const {selectedElection} = useElection();
@@ -36,9 +36,7 @@ export default function AngetreteneParteienC() {
                 ]
             })) ?? []
         }}
-        header={"Angetretene Parteien"}
-        usePagination={true}
-        pageSize={10}
+        contentTileConfig={new ContentTileConfig("Angetretene Parteien")}
     />
     )
 }

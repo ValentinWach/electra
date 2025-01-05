@@ -6,6 +6,8 @@ import {useElection} from "../../../context/ElectionContext.tsx";
 import {getPartyColor} from "../../../utils/utils.tsx";
 import BarchartC from "../../chart-components/BarchartC.tsx";
 import type {DropdownType} from "../../../models/DropDownData.ts";
+import { useBundestagsParteien } from '../../../hooks/useBundestagsParteien.ts';
+import GridC from '../../UI-element-components/GridC.tsx';
 
 export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVotes}: {
     fetchStimmanteile: (wahlId: number) => Promise<Stimmanteil[]>, showAbsoluteVotes?: boolean | null
@@ -14,6 +16,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
     const [stimmanteil, setStimmanteil] = useState<Stimmanteil[]>();
     const [comparedStimmanteil, setComparedStimmanteil] = useState<Stimmanteil[]>()
     const [comparedElection, setComparedElection] = useState<Wahl | null>()
+    const Bundestagsparteien = useBundestagsParteien();
 
     useEffect(() => {
         const getStimmanteile = async () => {
@@ -89,27 +92,27 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
                     :
                     <BarchartC data={mainData}></BarchartC>}
                 {showAbsoluteVotes ?
-                    <table className="table mt-10">
-                        <thead>
-                        <tr>
-                            <th scope="col">Kürzel</th>
-                            <th scope="col">Partei</th>
-                            <th scope="col">{comparedElection ? "Differenz zum Vergleichszeitraum" : "Anzahl Zweitstimmen"}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {stimmanteil?.map((partei) => (
-                            <tr key={partei.party.id}>
-                                <td style={{color: getPartyColor(partei.party.shortname)}}>
-                                    {partei.party.shortname}
-                                </td>
-                                <td>{partei.party.name}</td>
-                                {!comparedElection && <td>{partei.absolute}</td> }
-                                {comparedElection && <td>{comparedStimmanteil?.find(p => p.party.id === partei.party.id)?.absolute > 0 ? '+' : ''}{comparedStimmanteil?.find(p => p.party.id === partei.party.id)?.absolute}</td>}
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                    <GridC
+                        gridData={{
+                            columns: [
+                                {id: 1, label: 'Kürzel', searchable: true},
+                                {id: 2, label: 'Partei', searchable: true}, 
+                                {id: 3, label: comparedElection ? "Differenz zum Vergleichszeitraum" : "Anzahl Zweitstimmen", searchable: false}
+                            ],
+                            rows: stimmanteil?.map(partei => ({
+                                key: partei.party.id,
+                                values: [
+                                    {column_id: 1, value: partei.party.shortname, style: {color: getPartyColor(partei.party.shortname)}},
+                                    {column_id: 2, value: partei.party.name},
+                                    {column_id: 3, value: !comparedElection ? 
+                                        partei.absolute.toString() :
+                                        `${comparedStimmanteil?.find(p => p.party.id === partei.party.id)?.absolute > 0 ? '+' : ''}${comparedStimmanteil?.find(p => p.party.id === partei.party.id)?.absolute}`
+                                    }
+                                ]
+                            })) ?? []
+                        }}
+                        
+                    />
                     :
                     null
                 }

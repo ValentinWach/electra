@@ -25,4 +25,14 @@ export class GridData {
     }
 }
 
+export class ContentTileConfig {
+    header: string;
+    doubleSize: boolean;
+
+    constructor(header: string, doubleSize?: boolean) {
+        this.header = header;
+        this.doubleSize = doubleSize ?? true;
+    }
+}
+
 

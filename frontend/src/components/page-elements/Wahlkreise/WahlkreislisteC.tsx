@@ -4,7 +4,7 @@ import {Wahlkreis} from "../../../api/index.ts";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {GridData} from "../../../models/GridData.ts";
 import GridC from "../../UI-element-components/GridC.tsx";
-
+import {ContentTileConfig} from "../../../models/GridData.ts";
 
 export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisDetails: (id: number) => void }) {
 
@@ -43,6 +43,6 @@ export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisD
         setWahlkreisGridData(wahlkreisGridDataNew);
     }, [wahlkreise]);
     return (
-        <GridC gridData={wahlkreisGridData} header={"Wahlkreise"} usePagination={true} pageSize={10} onRowClick={(id) => showWahlkreisDetails(id)} />
+        <GridC gridData={wahlkreisGridData} contentTileConfig={new ContentTileConfig("Wahlkreise")} onRowClick={(id) => showWahlkreisDetails(id)} />
     )
 }

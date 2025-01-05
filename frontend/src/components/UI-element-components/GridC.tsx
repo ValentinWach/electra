@@ -1,16 +1,15 @@
 import ContentTileC from "./ContentTileC.tsx";
 import './GridC.css';
-import {GridData} from "../../models/GridData.ts";
+import {GridData, ContentTileConfig} from "../../models/GridData.ts";
 import InputC from "./InputC.tsx";
 import {useEffect, useState} from "react";
 import PaginationC from "./PaginationC.tsx";
 
-export default function GridC({gridData, header, usePagination, doubleSize = true, pageSize, onRowClick}: {
+export default function GridC({gridData, usePagination = true, pageSize = 10, contentTileConfig, onRowClick}: {
     gridData: GridData,
-    header: string,
-    usePagination: boolean,
-    doubleSize?: boolean,
+    usePagination?: boolean,
     pageSize?: number,
+    contentTileConfig?: ContentTileConfig,
     onRowClick?: (id: number) => void,
 }) {
 
@@ -29,7 +28,6 @@ export default function GridC({gridData, header, usePagination, doubleSize = tru
         direction: 'asc' | 'desc'
     }>({columnId: gridData.columns[0]?.id ?? 0, direction: 'asc'});
     const [currentPage, setCurrentPage] = useState<number>(1);
-    pageSize = pageSize ?? 50;
 
     useEffect(() => {
         const filterAndSortData = () => {
@@ -100,44 +98,49 @@ export default function GridC({gridData, header, usePagination, doubleSize = tru
             }
         };
         pageinateData();
-    }, [currentPage, filteredGridData, pageSize]);
+    }, [currentPage, filteredGridData]);
 
-
-    return (
-        <ContentTileC header={header} doubleSize={doubleSize}>
-            <table className="table">
-                <thead>
-                <tr>
-                    {gridData.columns.map(column => (
-                        <th key={column.id} scope="col">
-                            <div onClick={() => handleSort(column.id)}>
-                                {column.label} {sortConfig.columnId === column.id ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
-                            </div>
-                            {gridData.columns.some(col => col.searchable) && (
-                                <InputC placeholder={column.label + " filtern"}
-                                        onInputFunction={(filter_val) => setFilters(column.id, filter_val)}
-                                        hidden={!column.searchable} id={column.id.toString()} name={column.label}/>
-                            )}
-                        </th>
-                    ))}
-                </tr>
-                </thead>
-                <tbody>
-                {currentPageGridData.rows.map((row) => (
-                    <tr key={row.key} className={`${onRowClick ? "hover:cursor-pointer" : ""}`} onClick={() => onRowClick && onRowClick(row.key)}>
-                        {row.values.map((col, index) => (
-                            <td key={index} style={col.style}>{col.value}</td>
-                        ))}
-                    </tr>
+    const tableContent = (
+        <>
+        <table className="table">
+        <thead>
+        <tr>
+            {gridData.columns.map(column => (
+                <th key={column.id} scope="col">
+                    <div onClick={() => handleSort(column.id)}>
+                        {column.label} {sortConfig.columnId === column.id ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
+                    </div>
+                    {gridData.columns.some(col => col.searchable) && (
+                        <InputC placeholder={column.label + " filtern"}
+                                onInputFunction={(filter_val) => setFilters(column.id, filter_val)}
+                                hidden={!column.searchable} id={column.id.toString()} name={column.label}/>
+                    )}
+                </th>
+            ))}
+        </tr>
+        </thead>
+        <tbody>
+        {currentPageGridData.rows.map((row) => (
+            <tr key={row.key} className={`${onRowClick ? "hover:cursor-pointer" : ""}`} onClick={() => onRowClick && onRowClick(row.key)}>
+                {row.values.map((col, index) => (
+                    <td key={index} style={col.style}>{col.value}</td>
                 ))}
-                </tbody>
-            </table>
-            {usePagination &&
+            </tr>
+        ))}
+        </tbody>
+    </table>
+    {usePagination &&
                 <PaginationC numOfPages={Math.ceil(filteredGridData.rows.length / pageSize)}
                              selectedPageProp={currentPage} switchPage={(p: number) => {
                     setCurrentPage(p)
                 }}/>
             }
+    </>
+    ) 
+
+    return contentTileConfig ? (
+        <ContentTileC header={contentTileConfig.header} doubleSize={contentTileConfig.doubleSize}>
+            {tableContent}
         </ContentTileC>
-    );
+    ) : tableContent;
 }

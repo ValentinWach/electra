@@ -1,7 +1,7 @@
 import {OverviewWahlkreis} from "../../../api";
 import GridC from "../../UI-element-components/GridC";
 import {getPartyColor} from "../../../utils/utils";
-
+import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
 export default function DirektkandidatC({overview}: {overview: OverviewWahlkreis | undefined}) {
     return (
         <GridC
@@ -29,9 +29,7 @@ export default function DirektkandidatC({overview}: {overview: OverviewWahlkreis
                 }]
             }}
             usePagination={false}
-            pageSize={1}
-            header={"Direktkandidat"}
-            doubleSize={false}
+            contentTileConfig={new ContentTileConfig("Direktkandidat", false)}
         />
     );
 }
