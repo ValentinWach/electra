@@ -43,6 +43,6 @@ export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisD
         setWahlkreisGridData(wahlkreisGridDataNew);
     }, [wahlkreise]);
     return (
-        <GridC gridData={wahlkreisGridData} contentTileConfig={new ContentTileConfig("Wahlkreise")} onRowClick={(id) => showWahlkreisDetails(id)} />
+        <GridC gridData={wahlkreisGridData} contentTileConfig={new ContentTileConfig("Wahlkreise")} defaultSortColumnId={1} defaultSortDirection="asc" onRowClick={(id) => showWahlkreisDetails(id)} />
     )
 }

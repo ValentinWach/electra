@@ -3,8 +3,8 @@ export interface DropdownItem {
     id: number;
 }
 
-export interface DropdownType {
-    label: string | undefined, //Leave empty to use item labels
-    defaultChosen: number,
+export interface DropdownData {
+    label?: string,
+    defaultChosenId: number,
     items: DropdownItem[];
 }

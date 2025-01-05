@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {
     fetchStimmanteileWahlkreis,
     fetchWahlkreise,
@@ -26,6 +26,7 @@ export default function Wahlkreise() {
     const [wahlkreise, setWahlkreise] = useState<Wahlkreis[]>();
     const [selectedWahlkreis, setSelectedWahlkreis] = useState<Wahlkreis | null>(null);
     const [overview, setOverview] = useState<OverviewWahlkreis>();
+    const [loading, setLoading] = useState(true);
 
 
     useEffect(() => {
@@ -43,8 +44,10 @@ export default function Wahlkreise() {
     useEffect(() => {
         const getOverview = async () => {
             try {
+                setLoading(true);
                 const data = await fetchWahlkreisOverview(selectedElection?.id ?? 0, selectedWahlkreis?.id ?? 0, calcOnAggregate);
                 setOverview(data);
+                setLoading(false);
             } catch (error) {
                 console.error('Error fetching Wahlkreis Overview:', error);
             }
@@ -54,7 +57,6 @@ export default function Wahlkreise() {
 
     const Wahlbeteiligung = Math.round((overview?.wahlbeteiligung ?? 0) * 100) / 100;
     const NichtWaehler = Math.round((100 - (overview?.wahlbeteiligung ?? 0)) * 100) / 100;
-    console.log(Wahlbeteiligung);
     
     let wahlbeteiligungData: ChartData = {
         labels: [`Wähler: ${Wahlbeteiligung}%`, `Nichtwähler: ${NichtWaehler}%`],
@@ -69,13 +71,15 @@ export default function Wahlkreise() {
         setSelectedWahlkreis(wahlkreise?.find(wahlkreis => wahlkreis.id === id) ?? null);
     }
 
-    async function wrapFetchStimmanteileWahlkreis(wahlId: number): Promise<Stimmanteil[]> {
-        return fetchStimmanteileWahlkreis(wahlId, selectedWahlkreis?.id ?? 0, calcOnAggregate);
-    }
+    const wrapFetchStimmanteileWahlkreis = useCallback(async (wahlId: number) => {
+        const data = await fetchStimmanteileWahlkreis(wahlId, selectedWahlkreis?.id ?? 0, calcOnAggregate);
+        return data;
+    }, [selectedWahlkreis?.id, calcOnAggregate]);
 
-    async function wrapFetchWinningPartiesWahlkreis(wahlId: number): Promise<WinningParties> {
-        return fetchWinningPartiesWahlkreis(wahlId, selectedWahlkreis?.id ?? 0);
-    }
+    const wrapFetchWinningPartiesWahlkreis = useCallback(async (wahlId: number) => {
+        const data = await fetchWinningPartiesWahlkreis(wahlId, selectedWahlkreis?.id ?? 0);
+        return data;
+    }, [selectedWahlkreis?.id]);
 
     return (
         <div className={"flex flex-col items-center"}>
@@ -97,14 +101,18 @@ export default function Wahlkreise() {
                     <>
                         <WinningPartiesC fetchWinningParties={wrapFetchWinningPartiesWahlkreis}/>
                         <div className="w-chart-lg max-lg:w-char flex flex-col justify-start gap-5 -mb-5">
-                            <ToggleSwitchC defaultEnabled={!calcOnAggregate} setEnabledPar={(calcOnEinzelstimmen: boolean) => setCalcOnAggregate(!calcOnEinzelstimmen)} label={"Ab hier auf Einzelstimmen berechnen"}/>
+                            <ToggleSwitchC defaultEnabled={!calcOnAggregate} setEnabledInputFunct={(calcOnEinzelstimmen: boolean) => setCalcOnAggregate(!calcOnEinzelstimmen)} label={"Ab hier auf Einzelstimmen berechnen"}/>
                         </div>
-                        <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis}
-                                             showAbsoluteVotesDefault={true}/>
-                        <DirektkandidatC overview={overview} />
-                        <ContentTileC header={"Wahlbeteiligung"}>
-                            <DoughnutChart data={wahlbeteiligungData} fullCircle={true}></DoughnutChart>
-                        </ContentTileC>
+                        {loading ? <div className="flex items-center justify-center min-h-[400px]">Loading...</div> :
+                        <>
+                            <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis}
+                                                showAbsoluteVotesDefault={true}/>
+                            <DirektkandidatC overview={overview} />
+                            <ContentTileC header={"Wahlbeteiligung"}>
+                                <DoughnutChart data={wahlbeteiligungData} fullCircle={true}></DoughnutChart>
+                            </ContentTileC>
+                        </>
+                        }
                     </>
                     :
                     null

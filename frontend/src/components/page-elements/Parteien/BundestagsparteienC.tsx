@@ -3,7 +3,7 @@ import GridC from "../../UI-element-components/GridC.tsx"
 import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
 
 export default function BundestagsparteienC({showParteiDetails}: {showParteiDetails: (rowId: number) => void}) {
-    const parteien = useBundestagsParteien()
+    const {parteien} = useBundestagsParteien()
     return (
         <GridC
         gridData={{

@@ -10,13 +10,13 @@ import {WinningParties} from "../../../api/index.ts";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {getPartyColor} from "../../../utils/utils.tsx";
 import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
-import {DropdownType} from "../../../models/DropDownData.ts";
+import {DropdownData} from "../../../models/DropDownData.ts";
 import './WahlkreisMapC.css';
 
 export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number) => void} ) {
-    let mapDD: DropdownType = {
+    let mapDD: DropdownData = {
         label: undefined,
-        defaultChosen: 2,
+        defaultChosenId: 2,
         items: [{
             label: "Erststimmen",
             id: 1
@@ -30,12 +30,11 @@ export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number)
 
     const {selectedElection} = useElection();
     const [winningParties, setWinningParties] = useState<WinningParties>()
-    const [stimmenType, setStimmenType] = useState(mapDD.defaultChosen);
+    const [stimmenType, setStimmenType] = useState(mapDD.defaultChosenId);
     useEffect(() => {
         const getWinningParties = async () => {
             try {
                 const data = await fetchWinningPartiesWahlkreise(selectedElection?.id ?? 0);
-                console.log(data)
                 setWinningParties(data);
             } catch (error) {
                 console.error('Error fetching Wahlkreis Overview:', error);

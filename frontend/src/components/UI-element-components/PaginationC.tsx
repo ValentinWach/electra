@@ -79,7 +79,6 @@ export default function PaginationC({numOfPages, switchPage, selectedPageProp}: 
                         if (numOfPages <= 9) {
                             return renderPageLink(i);
                         } else if (selectedPage < 5 || selectedPage > numOfPages - 4) { //Ellipsis in the middle
-                            console.log("case ellipsis in the middle");
                             if (i < 5)
                                 return renderPageLink(i);
                             else if (i === 5)

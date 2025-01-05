@@ -33,7 +33,6 @@ export default function GridC({gridData, usePagination = true, pageSize = 10, co
 
     useEffect(() => {
         const filterAndSortData = () => {
-            console.log("Filtering and sorting data");
             let data = [...(gridData.rows ?? [])];
 
             // Apply filters
@@ -92,7 +91,6 @@ export default function GridC({gridData, usePagination = true, pageSize = 10, co
                 else if (currentPage < 1)
                     setCurrentPage(1);
 
-                console.log("Rows", filteredGridData.rows);
                 let newRows = filteredGridData.rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
                 setCurrentPageGridData({...filteredGridData, rows: newRows});
             } else {

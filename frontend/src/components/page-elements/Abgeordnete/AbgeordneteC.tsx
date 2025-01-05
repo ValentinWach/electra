@@ -50,6 +50,6 @@ export default function AbgeordneteC({fetchAbgeordnete}: {
     }, [abgeordnete]);
 
     return (
-        <GridC gridData={abgeordneteGridData} contentTileConfig={new ContentTileConfig("Abgeordnete")} pageSize={15} />
+        <GridC gridData={abgeordneteGridData} contentTileConfig={new ContentTileConfig("Abgeordnete")} defaultSortColumnId={1} defaultSortDirection="asc" pageSize={15} />
     )
 }

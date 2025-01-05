@@ -1,5 +1,4 @@
 Features - Unbeding:
-- "Sonstiges" & anklickbar/Toggle
 
 Design - Unbeding:
 - Lade-Animationen
@@ -10,10 +9,10 @@ Design - Unbeding:
 
 Refactoring-Unbedingt
 - !!!Vernünfite Default-Werte bzw. REQUIRED attributes!
-- Label für Dropdowns? Nicht der input werte sondern allgemein
+- (optionale) Label für Dropdowns!
+- Default füllen der Dropdows korrigieren
 - Schriftfarben in Tabellen überdenken
 - Nicht immer direkt alle APIs abfragen
-- Dropdown labels nach neuem Schema
 - "DefaultSortColumn" und direction vernünftig in gridEinbauen
 - Null-Handling optimieren
 - Alle übrigen Warnungen beseitigen

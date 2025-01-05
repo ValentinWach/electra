@@ -4,7 +4,7 @@ import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {getPartyColor} from "../../../utils/utils.tsx";
 import BarchartC from "../../chart-components/BarchartC.tsx";
-import type {DropdownType} from "../../../models/DropDownData.ts";
+import type {DropdownData} from "../../../models/DropDownData.ts";
 import { useBundestagsParteien } from '../../../hooks/useBundestagsParteien.ts';
 import GridC from '../../UI-element-components/GridC.tsx';
 import CheckboxC from '../../UI-element-components/CheckboxC.tsx';
@@ -20,7 +20,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
     const [comparedElection, setComparedElection] = useState<Wahl | null>()
     const [summarizeOtherParties, setSummarizeOtherParties] = useState(true);
     const [showAbsoluteVotes, setShowAbsoluteVotes] = useState(showAbsoluteVotesDefault);
-    const Bundestagsparteien = useBundestagsParteien();
+    const { parteien: Bundestagsparteien } = useBundestagsParteien();
 
     const processStimmanteile = (data: Stimmanteil[] | undefined) => {
         if (!data) return [];
@@ -50,6 +50,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
     };
 
     useEffect(() => {
+        console.log('ZweitstimmenanteilC useEffect triggered');
         const getStimmanteile = async () => {
             try {
                 const data = await fetchStimmanteile(selectedElection?.id ?? 0);
@@ -60,16 +61,15 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
             }
         };
         getStimmanteile();
-    }, [selectedElection, fetchStimmanteile]); //Use for every chart; always depends on the selected election
+    }, [selectedElection, fetchStimmanteile]); //fetchStimmanteile could be changed depending on the use of aggregate or not
 
-    const compareWahlDD: DropdownType = {
+    const compareWahlDD: DropdownData = {
         items: [{label: "Nicht vergleichen", id: -1},
             ...elections.filter(e => e.id != selectedElection?.id).map(election => ({
                 label: election.date.toLocaleDateString('de-DE', {month: 'long', year: 'numeric'}),
                 id: election.id
             }))],
-        defaultChosen: -1,
-        label: "Vergleichen mit"
+        defaultChosenId: -1,
     };
 
     async function compareStimmanteile(wahlId: number) {
