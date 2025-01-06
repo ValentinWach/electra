@@ -64,17 +64,15 @@ export default function DoughnutChart(props: { data?: ChartDataNum, fullCircle?:
     const options = fullCircle ? fullCircleOptions : partialCircleOptions;
 
     return (
-        <div className={""}>
+        <div className="w-full max-w-[400px] sm:h-[250px] 2xl:h-[300px] h-auto">
             <Doughnut 
                 data={data} 
                 options={{
                     ...options,
-                    maintainAspectRatio: false,
-                    aspectRatio: 1
+                    maintainAspectRatio: false
                 }} 
                 style={{
-                    width: '400px',
-                    height: '300px',
+                    width: '100%',
                     marginTop: fullCircle ? 'auto' : '-40px'
                 }}
             />

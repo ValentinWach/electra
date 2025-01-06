@@ -50,8 +50,8 @@ export default function ParteiDetail() {
 
     return (
         partei != null && (
-            <div className={"flex flex-col items-center"}>
-                <div className="w-chart-xl max-lg:w-char flex justify-start">
+            <>
+                <div className="max-w-[1300px] sm:w-full xl:w-[90%] 2xl:w-3/4 flex flex-row justify-between gap-5">
                     <BackBreadcrumbsC
                         breadcrumbData={{
                             items: ["Parteien", partei.name ? (`${partei.name} (${partei.shortname})`) : partei.shortname]
@@ -61,7 +61,7 @@ export default function ParteiDetail() {
                 </div>
                 <ClosestWinnersC fetchClostestWinners={wrapFetchClosestWinners}/>
                 <UeberhangC fetchUeberhang={wrapFetchUeberhang}></UeberhangC>
-            </div>
+            </>
         )
     );
 }

@@ -86,14 +86,14 @@ export default function WahlkreiseDetail() {
 
     return (
         wahlkreis != null && (
-            <div className={"flex flex-col items-center"}>
-                <div className="w-chart-lg max-lg:w-char flex flex-row justify-between gap-5">
+            <>
+                <div className="max-w-[1100px] sm:w-full xl:w-[90%] 2xl:w-3/4 flex flex-row justify-between gap-5">
                     <BackBreadcrumbsC
                         breadcrumbData={{ items: ["Wahlkreise", `Nr. ${wahlkreis.id}: ${wahlkreis.name}`] }}
                         backFunction={() => navigate('/wahlkreise')} />
                 </div>
                 <WinningPartiesC fetchWinningParties={wrapFetchWinningPartiesWahlkreis} />
-                <div className="w-chart-lg max-lg:w-char flex flex-col justify-start gap-5 -mb-5">
+                <div className="max-w-[1100px] sm:w-full xl:w-[90%] 2xl:w-3/4 flex flex-col justify-start gap-5 -mb-5">
                     <ToggleSwitchC defaultEnabled={!calcOnAggregate} setEnabledInputFunct={(calcOnEinzelstimmen: boolean) => setCalcOnAggregate(!calcOnEinzelstimmen)} label={"Ab hier auf Einzelstimmen berechnen"} />
                 </div>
                 <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis}
@@ -102,6 +102,6 @@ export default function WahlkreiseDetail() {
                 <ContentTileC header={"Wahlbeteiligung"} loading={loading}>
                     <DoughnutChart data={wahlbeteiligungData} fullCircle={true}></DoughnutChart>
                 </ContentTileC>
-            </div>
+            </>
         ));
 }

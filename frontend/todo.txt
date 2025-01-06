@@ -1,8 +1,8 @@
 Features - Unbeding: (/)
 
-Design - Unbeding:
+Design - Unbedingt:
 - (Bedingte) Responsiveness, alles im default etwas breiter
-- Grid: Spaltenbreite automatisch anpassen
+[- Grid: Spaltenbreite automatisch anpassen (mal mit Zacha besprechen)]
 
 Refactoring-Unbedingt: (/)
 
@@ -16,4 +16,7 @@ Design-Optional:
 
 Refactoring-Optional
 - Weniger glitches, mehr smoothness
-- Beim "Ab hier auf einzelstimmen berechnen" versuchen APIs parallel zu laden
+- Beim "Ab hier auf einzelstimmen berechnen" versuchen APIs parallel zu laden (oder wird das schon gemacht)
+
+
+Known Bugs:

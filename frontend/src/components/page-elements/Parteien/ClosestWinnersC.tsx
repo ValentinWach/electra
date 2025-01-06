@@ -31,36 +31,52 @@ export default function ClosestWinnersC({ fetchClostestWinners }: {
     }, [selectedElection]);
 
     return (
-        closestWinners?.closestWinners?.length != null && closestWinners?.closestWinners?.length > 0 ? (
+        showLoader ? (
             <GridC
-                loading={showLoader}
+                loading={true}
                 gridData={{
                     columns: [
-                        { id: 1, label: 'Name', searchable: false },
-                        { id: 2, label: 'Vorname', searchable: false },
-                        { id: 3, label: 'Beruf', searchable: false },
-                        { id: 4, label: 'Geburtsjahr', searchable: false },
-                        { id: 5, label: 'Wahlkreisname', searchable: false }
                     ],
-                    rows: closestWinners?.closestWinners?.map(winner => ({
-                        key: winner.abgeordneter.id,
-                        values: [
-                            { column_id: 1, value: winner.abgeordneter.name },
-                            { column_id: 2, value: winner.abgeordneter.firstname },
-                            { column_id: 3, value: winner.abgeordneter.profession ?? '' },
-                            { column_id: 4, value: winner.abgeordneter.yearOfBirth?.toString() ?? '' },
-                            { column_id: 5, value: winner.wahlkreis.name }
-                        ]
-                    })) ?? []
+                    rows: []
                 }}
                 contentTileConfig={new ContentTileConfig(
-                    closestWinners?.closestType === "Winner" ? "Knappste Sieger" : "Knappste Verlierer",
+                    "Knappste Sieger",
                     true
                 )}
                 usePagination={false}
             />
         ) : (
-            <WarningYellowC text="Daten nur für Bundestagsparteien verfügbar" />
+            closestWinners?.closestWinners?.length != null && closestWinners?.closestWinners?.length > 0 ? (
+                <GridC
+                    loading={showLoader}
+                    gridData={{
+                        columns: [
+                            { id: 1, label: 'Name', searchable: false },
+                            { id: 2, label: 'Vorname', searchable: false },
+                            { id: 3, label: 'Beruf', searchable: false },
+                            { id: 4, label: 'Geburtsjahr', searchable: false },
+                            { id: 5, label: 'Wahlkreisname', searchable: false }
+                        ],
+                        rows: closestWinners?.closestWinners?.map(winner => ({
+                            key: winner.abgeordneter.id,
+                            values: [
+                                { column_id: 1, value: winner.abgeordneter.name },
+                                { column_id: 2, value: winner.abgeordneter.firstname },
+                                { column_id: 3, value: winner.abgeordneter.profession ?? '' },
+                                { column_id: 4, value: winner.abgeordneter.yearOfBirth?.toString() ?? '' },
+                                { column_id: 5, value: winner.wahlkreis.name }
+                            ]
+                        })) ?? []
+                    }}
+                    contentTileConfig={new ContentTileConfig(
+                        closestWinners?.closestType === "Winner" ? "Knappste Sieger" : "Knappste Verlierer",
+                        true
+                    )}
+                    usePagination={false}
+                />
+            ) : (
+                <WarningYellowC text="Daten nur für Bundestagsparteien verfügbar" />
+            )
         )
     )
 }

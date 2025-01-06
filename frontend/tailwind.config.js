@@ -4,9 +4,13 @@ export default {
   theme: {
     extend: {
       width: {
-        'chart' : '800px',
-        'chart-lg' : '1000px',
-        'chart-xl' : '1300px',
+        'chart-screen-sm' : '100%',
+        'chart-screen-2xl' : '66.666667%',
+        'pie' : '500px'
+      },
+      maxWidth: {
+        'chart' : '1200px',
+        'chart-xl' : '1500px',
         'pie' : '500px'
       },
       height: {

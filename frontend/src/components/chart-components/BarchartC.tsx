@@ -24,6 +24,7 @@ export default function BarchartC(props: { data?: ChartDataNum }) {
                 beginAtZero: true,
             }
         },
+        maintainAspectRatio: false,
         layout: {
             padding: 0,
         },
@@ -39,8 +40,10 @@ export default function BarchartC(props: { data?: ChartDataNum }) {
     };
 
     return (
-        <div>
-            <Bar data={data} options={options} style={{ height: '500px', width: '700px'}}/>
+        <div className="w-full max-w-[700px] sm:h-[300px] xl:h-[350px]  h-auto">
+            <Bar data={data} options={options} style={{ 
+              width: '100%',
+            }}/>
         </div>
     );
 };

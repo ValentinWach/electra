@@ -3,8 +3,8 @@ import AbgeordneteC from "../../components/page-elements/Abgeordnete/Abgeordnete
 
 export default function Abgeordnete() {
     return (
-        <div className={"flex flex-col items-center"}>
+        <>
             <AbgeordneteC fetchAbgeordnete={fetchAbgeordnete}/>
-        </div>
+        </>
     )
 }

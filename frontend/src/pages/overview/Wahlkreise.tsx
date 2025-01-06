@@ -38,9 +38,9 @@ export default function Wahlkreise() {
 
 
         return (
-            <div className={"flex flex-col items-center"}>
+            <>
                 <WahlkreislisteC showWahlkreisDetails={showWahlkreisDetails} />
                 <WahlkreisMapC openDetails={showWahlkreisDetails}></WahlkreisMapC>
-            </div>
+            </>
         )
 }

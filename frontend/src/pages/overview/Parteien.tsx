@@ -33,9 +33,9 @@ export default function Parteien() {
     }
 
     return (
-        <div className={"flex flex-col items-center"}>
+        <>
             <BundestagsparteienC showParteiDetails={showParteiDetails}/>
             <AngetreteneParteienC/>
-        </div>
+        </>
     )
 }

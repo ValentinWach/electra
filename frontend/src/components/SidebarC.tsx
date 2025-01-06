@@ -5,7 +5,7 @@ import {
     UserGroupIcon,
     PresentationChartLineIcon
 } from '@heroicons/react/24/outline'
-import {Link, Router, useLocation} from 'react-router-dom';
+import {Link, useLocation} from 'react-router-dom';
 import DropdownC from "./UI-element-components/DropdownC.tsx";
 import type {DropdownData} from "../models/DropDownData.ts";
 import { useElection } from '../context/ElectionContext.tsx';
@@ -43,7 +43,7 @@ export default function Example() {
     };
 
     return (
-        <div className="sticky top-0 gap-y-5 flex w-64 flex-col overflow-y-auto border-r border-gray-200 bg-white px-6">
+        <div className="sticky top-0 gap-y-5 flex w-60 min-w-60 flex-col overflow-y-auto border-r border-gray-200 bg-white px-6">
             <div className="flex h-16 shrink-0 justify-center mt-2 items-center">
                 <img
                     alt="Electra logo"

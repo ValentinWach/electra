@@ -1,4 +1,4 @@
-import {ChartDataNum, ChartDataXYR} from '../../models/ChartData.ts';
+import {ChartDataXYR} from '../../models/ChartData.ts';
 import { Bubble } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -42,6 +42,7 @@ export default function BubbleChartC(props: { data?: ChartDataXYR, xLabel?: stri
                 } : undefined,
             }
         },
+        maintainAspectRatio: false,
         plugins: {
             legend: {
                 position: 'bottom' as const,
@@ -54,8 +55,8 @@ export default function BubbleChartC(props: { data?: ChartDataXYR, xLabel?: stri
     };
 
     return (
-        <div>
-            <Bubble data={data} options={options} style={{ height: '500px', width: '700px' }} />
+        <div className="w-full max-w-[1000px] sm:h-[350px] xl:h-[400px]">
+            <Bubble data={data} options={options} style={{ width: '100%' }} />
         </div>
     );
 }

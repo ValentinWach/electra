@@ -5,9 +5,9 @@ import ZweitstimmenanteilC from "../../components/page-elements/_shared/Zweitsti
 export default function Stimmverteilungen() {
 
     return (
-        <div className={"flex flex-col items-center"}>
+        <>
             <SitzverteilungC/>
             <ZweitstimmenanteilC fetchStimmanteile={fetchStimmanteile} />
-        </div>
+        </>
     )
 }

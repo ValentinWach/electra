@@ -130,7 +130,6 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
     };
     
     return (
-        <div className={"flex-grow"}>
             <ContentTileC loading={showLoader} dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={"Zweitstimmenanteile"}>
                 {comparedElection ?
                     <BarchartC data={comparedData}></BarchartC>
@@ -172,6 +171,5 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
                     null
                 }
             </ContentTileC>
-        </div>
     )
 }
