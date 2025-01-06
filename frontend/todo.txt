@@ -3,12 +3,9 @@ Features - Unbeding: (/)
 Design - Unbeding:
 - (Bedingte) Responsiveness, alles im default etwas breiter
 - Header
-- überdenken ob und welche Tabelle bunt sein muss (evtl. nur Bundestagsparteien?)
 - Grid: Spaltenbreite automatisch anpassen
 
-Refactoring-Unbedingt
-- Vernünfite Default-Werte bzw. REQUIRED attributes, null handling optimieren
-- Ladereihenfolge: Vor wahlen nichts abfragen! Alle Warnungen beseitingen! Warum wird alles mehrmals abgefragt?
+Refactoring-Unbedingt: (/)
 
 
 Features - Optional:
@@ -19,6 +16,5 @@ Design-Optional:
 [- Hovering Tabelle & Chart verbinden (Bereits Zeit und Promts verschwendet)]
 
 Refactoring-Optional
-- Detailansichten in subpfade, eigene Komponenten für Detailpages
 - Weniger glitches, mehr smoothness
 - Beim "Ab hier auf einzelstimmen berechnen" versuchen APIs parallel zu laden
