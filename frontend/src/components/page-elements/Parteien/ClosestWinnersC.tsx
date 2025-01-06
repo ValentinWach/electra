@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ClosestWinners } from "../../../api/index.ts";
 import { useElection } from "../../../context/ElectionContext.tsx";
 import GridC from "../../UI-element-components/GridC.tsx";
-import { GridData, ContentTileConfig } from "../../../models/GridData.ts";
+import { ContentTileConfig } from "../../../models/GridData.ts";
 import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
 import WarningYellowC from "../../UI-element-components/WarningYellowC.tsx";
 

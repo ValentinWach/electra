@@ -3,7 +3,7 @@ import GridC from "../../UI-element-components/GridC.tsx"
 import { Partei } from "../../../api/index.ts";
 import { useElection } from "../../../context/ElectionContext.tsx";
 import { fetchParteien } from "../../../apiServices.ts";
-import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
+import {ContentTileConfig} from "../../../models/GridData.ts";
 import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
 import { getPartyColor } from "../../../utils/utils.tsx";
 export default function AngetreteneParteienC() {

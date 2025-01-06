@@ -3,7 +3,7 @@ import {getPartyColor} from "../../../utils/utils.tsx";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {useEffect, useState} from "react";
 import GridC from "../../UI-element-components/GridC.tsx";
-import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
+import {ContentTileConfig} from "../../../models/GridData.ts";
 import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
 
 export default function WinningPartiesC({fetchWinningParties}: {

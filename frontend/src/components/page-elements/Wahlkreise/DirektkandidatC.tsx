@@ -1,7 +1,7 @@
 import {OverviewWahlkreis} from "../../../api";
 import GridC from "../../UI-element-components/GridC";
 import {getPartyColor} from "../../../utils/utils";
-import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
+import {ContentTileConfig} from "../../../models/GridData.ts";
 import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
 
 export default function DirektkandidatC({overview, loading = false}: {overview: OverviewWahlkreis | undefined, loading?: boolean}) {

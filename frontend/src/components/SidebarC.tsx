@@ -30,7 +30,7 @@ function classNames(...classes : any[]) {
 
 export default function Example() {
     const location = useLocation();
-    const { elections, selectedElection, setSelectedElection } = useElection();
+    const { elections, setSelectedElection } = useElection();
     const handleElectionChange = (newElectionId: number) => {
         setSelectedElection(elections.find(e => e.id === newElectionId) ?? elections[0]);
     };
