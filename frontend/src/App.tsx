@@ -27,11 +27,11 @@ function AppContent() {
                     <Sidebar/>
                     {/* Main Content Area */}
                     <div className={"flex-grow flex flex-col overflow-auto bg-gray-50"}>
-                        <header className={"sticky top-0 left-0 z-10"}>
+                        {/*<header className={"sticky top-0 left-0 z-10"}>
                             <div className={"h-20 bg-white w-full shadow font-bold flex flex-row items-center justify-center"}>
                                 Header Placeholder
                             </div>
-                        </header>
+                        </header>*/}
                         <main className={"flex-grow p-10"}>
                             <Routes>
                                 <Route path="/uebersicht" element={<Uebersicht/>}/>

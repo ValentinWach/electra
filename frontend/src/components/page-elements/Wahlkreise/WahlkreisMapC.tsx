@@ -1,7 +1,7 @@
 import {MapContainer, GeoJSON} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {LatLngExpression} from 'leaflet';
-import geoData from '../../../assets/Wahl.json';
+import geoData from '../../../assets/WahlkreisGeo.json';
 import {GeoJsonObject, Feature} from 'geojson';
 import L from 'leaflet';
 import {useEffect, useState} from "react";
