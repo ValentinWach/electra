@@ -40,7 +40,7 @@ export default function GridC({ gridData, usePagination = true, pageSize = 10, c
             // Apply filters
             data = data.filter(row => {
                 return Array.from(currentFilters.entries()).every(([key, value]) =>
-                    row.values.some(col => col.column_id === key && col.value.toLowerCase().startsWith(value.toLowerCase()))
+                    row.values.some(col => col.column_id === key && col.value.toLowerCase().includes(value.toLowerCase()))
                 );
             });
 
