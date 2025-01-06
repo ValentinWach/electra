@@ -39,8 +39,8 @@ export default function AngetreteneParteienC() {
             rows: alleParteien?.map(partei => ({
                 key: partei.id,
                 values: [
-                    {column_id: 1, value: partei.name},
-                    {column_id: 2, value: partei.shortname, badge: {color: getPartyColor(partei.shortname ?? '', false)}}
+                    {column_id: 1, value: partei.name ?? ''},
+                    {column_id: 2, value: partei.shortname ?? '', badge: {color: getPartyColor(partei.shortname ?? '', false)}}
                 ]
             })) ?? []
         }}

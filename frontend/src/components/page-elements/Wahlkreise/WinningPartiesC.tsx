@@ -45,7 +45,7 @@ export default function WinningPartiesC({fetchWinningParties}: {
                             {column_id: 2, value: winningParties.erststimme[0].party.shortname ?? '', badge: {color: getPartyColor(winningParties.erststimme[0].party.shortname ?? '', true)}},
                             {
                                 column_id: 3, 
-                                value: winningParties.erststimme[0].party.name,
+                                value: winningParties.erststimme[0].party.name ?? '',
                             }
                         ]
                     },
@@ -56,7 +56,7 @@ export default function WinningPartiesC({fetchWinningParties}: {
                             {column_id: 2, value: winningParties.zweitstimme[0].party.shortname ?? '', badge: {color: getPartyColor(winningParties.zweitstimme[0].party.shortname ?? '', true)}},
                             {
                                 column_id: 3,
-                                value: winningParties.zweitstimme[0].party.name,
+                                value: winningParties.zweitstimme[0].party.name ?? '',
                             }
                         ]
                     }

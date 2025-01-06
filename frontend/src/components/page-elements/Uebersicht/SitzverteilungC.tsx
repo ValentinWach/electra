@@ -3,7 +3,7 @@ import {fetchSitzveteilung} from '../../../apiServices.ts';
 import {SeatDistribution} from "../../../api/index.ts";
 import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
 import DoughnutChart from "../../chart-components/DoughnutChartC.tsx";
-import {ChartData} from "chart.js";
+import {ChartDataNum} from "../../../models/ChartData.ts";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {getPartyColor} from "../../../utils/utils.tsx";
 import { useMinLoadingTime } from '../../../hooks/useMinLoadingTime.ts';
@@ -30,13 +30,13 @@ export default function SitzverteilungC() {
         getSitzverteilung();
     }, [selectedElection]);
 
-    let data: ChartData = {
-        labels: sitzverteilung?.distribution?.map((partei) => `${partei.party.shortname}: ${partei.seats}`),
+    let data: ChartDataNum = {
+        labels: sitzverteilung?.distribution?.map((partei) => `${partei.party.shortname}: ${partei.seats}`) ?? [],
         datasets: [{
-            data: sitzverteilung?.distribution?.map((partei) => partei.seats),
-            backgroundColor: sitzverteilung?.distribution?.map((partei) => getPartyColor(partei.party.shortname)),
+            data: sitzverteilung?.distribution?.map((partei) => partei.seats) ?? [],
+            backgroundColor: sitzverteilung?.distribution?.map((partei) => getPartyColor(partei.party.shortname)) ?? [],
             borderWidth: 0,
-        },],
+        }],
     };
 
 
@@ -54,8 +54,8 @@ export default function SitzverteilungC() {
                         rows: sitzverteilung?.distribution?.map(partei => ({
                             key: partei.party.id,
                             values: [
-                                {column_id: 1, value: partei.party.shortname, badge: {color: getPartyColor(partei.party.shortname, false)}},
-                                {column_id: 2, value: partei.party.name},
+                                {column_id: 1, value: partei.party.shortname ?? '', badge: {color: getPartyColor(partei.party.shortname, false)}},
+                                {column_id: 2, value: partei.party.name ?? ''},
                                 {column_id: 3, value: partei.seats.toString()}
                             ]
                         })) ?? []
