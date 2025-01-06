@@ -16,7 +16,7 @@ Features - Optional:
 [- Hässliches Quadrat beim Klick auf Karte entfernen (vorsicht, schon ordentlich Zeit versenkt)]
 
 Design-Optional:
-- Hovering Tabelle & Chart verbinden
+[- Hovering Tabelle & Chart verbinden (Bereits Zeit und Promts verschwendet)]
 
 Refactoring-Optional
 - Detailansichten in subpfade, eigene Komponenten für Detailpages

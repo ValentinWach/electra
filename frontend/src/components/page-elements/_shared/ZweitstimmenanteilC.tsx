@@ -110,7 +110,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
         datasets: [{
             data: processStimmanteile(stimmanteil).map((partei) => partei.share),
             backgroundColor: processStimmanteile(stimmanteil).map((partei) => 
-                partei.party.shortname === "Sonstige" ? "#808080" : getPartyColor(partei.party.shortname)
+                partei.party.shortname === "Sonstige" ? "#808080" : getPartyColor(partei.party.shortname, true)
             ),
             borderWidth: 0,
         }],
@@ -123,7 +123,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
         datasets: [{
             data: processStimmanteile(comparedStimmanteil).map((partei) => partei.share),
             backgroundColor: processStimmanteile(comparedStimmanteil).map((partei) => 
-                partei.party.shortname === "Sonstige" ? "#808080" : getPartyColor(partei.party.shortname)
+                partei.party.shortname === "Sonstige" ? "#808080" : getPartyColor(partei.party.shortname, true)
             ),
             borderWidth: 0,
         }],
@@ -157,7 +157,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
                                 return {
                                     key: partei.party.id,
                                     values: [
-                                        {column_id: 1, value: partei.party.shortname || '', style: {color: getPartyColor(partei.party.shortname || '')}},
+                                        {column_id: 1, value: partei.party.shortname || '', badge: {color: getPartyColor(partei.party.shortname || '')}},
                                         {column_id: 2, value: partei.party.name || ''},
                                         {column_id: 3, value: comparedValueStr}
                                     ]
@@ -166,6 +166,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
                         }}
                         defaultSortColumnId={3}
                         defaultSortDirection={'desc'}
+                        usePagination={!summarizeOtherParties}
                     />
                     :
                     null

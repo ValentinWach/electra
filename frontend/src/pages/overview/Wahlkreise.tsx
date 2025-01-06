@@ -1,23 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-    fetchStimmanteileWahlkreis,
-    fetchWahlkreise,
-    fetchWinningPartiesWahlkreis,
-    fetchWahlkreisOverview
-} from "../../apiServices.ts";
-import { OverviewWahlkreis, Stimmanteil, Wahlkreis, WinningParties } from "../../api/index.ts";
+    fetchWahlkreise} from "../../apiServices.ts";
+import { Wahlkreis } from "../../api/index.ts";
 import { useElection } from "../../context/ElectionContext.tsx";
 import WahlkreislisteC from "../../components/page-elements/Wahlkreise/WahlkreislisteC.tsx";
-import ZweitstimmenanteilC from "../../components/page-elements/_shared/ZweitstimmenanteilC.tsx";
-import WinningPartiesC from "../../components/page-elements/Wahlkreise/WinningPartiesC.tsx";
-import ContentTileC from "../../components/UI-element-components/ContentTileC.tsx";
-import DoughnutChart from "../../components/chart-components/DoughnutChartC.tsx";
-import { ChartData } from "chart.js";
 import WahlkreisMapC from "../../components/page-elements/Wahlkreise/WahlkreisMapC.tsx";
-import BackBreadcrumbsC from "../../components/UI-element-components/BackBreadcrumbsC.tsx";
-import ToggleSwitchC from "../../components/UI-element-components/ToggleSwitchC.tsx";
-import { useCalcOnAggregate } from "../../context/CalcOnAggregateContext.tsx";
-import DirektkandidatC from "../../components/page-elements/Wahlkreise/DirektkandidatC.tsx";
 import { useNavigate } from 'react-router-dom';
 
 export default function Wahlkreise() {

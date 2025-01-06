@@ -27,7 +27,7 @@ export default function DirektkandidatC({overview, loading = false}: {overview: 
                         {
                             column_id: 5,
                             value: overview?.direktkandidat?.party?.shortname ?? '',
-                            style: {color: getPartyColor(overview?.direktkandidat?.party?.shortname ?? '')}
+                            badge: {color: getPartyColor(overview?.direktkandidat?.party?.shortname ?? '', true)}
                         }
                     ]
                 }]

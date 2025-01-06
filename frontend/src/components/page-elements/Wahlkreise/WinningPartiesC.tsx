@@ -42,11 +42,10 @@ export default function WinningPartiesC({fetchWinningParties}: {
                         key: 1,
                         values: [
                             {column_id: 1, value: 'Erststimmen'},
-                            {column_id: 2, value: winningParties.erststimme[0].party.shortname},
+                            {column_id: 2, value: winningParties.erststimme[0].party.shortname ?? '', badge: {color: getPartyColor(winningParties.erststimme[0].party.shortname ?? '', true)}},
                             {
                                 column_id: 3, 
                                 value: winningParties.erststimme[0].party.name,
-                                style: {color: getPartyColor(winningParties.erststimme[0].party.shortname)}
                             }
                         ]
                     },
@@ -54,11 +53,10 @@ export default function WinningPartiesC({fetchWinningParties}: {
                         key: 2,
                         values: [
                             {column_id: 1, value: 'Zweitstimmen'},
-                            {column_id: 2, value: winningParties.zweitstimme[0].party.shortname},
+                            {column_id: 2, value: winningParties.zweitstimme[0].party.shortname ?? '', badge: {color: getPartyColor(winningParties.zweitstimme[0].party.shortname ?? '', true)}},
                             {
                                 column_id: 3,
                                 value: winningParties.zweitstimme[0].party.name,
-                                style: {color: getPartyColor(winningParties.zweitstimme[0].party.shortname)}
                             }
                         ]
                     }

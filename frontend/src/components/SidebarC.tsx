@@ -65,7 +65,7 @@ export default function Example() {
                                     <Link
                                         to={item.href}
                                         className={classNames(
-                                            item.current = location.pathname === item.href,
+                                            item.current = location.pathname.startsWith(item.href),
                                             item.current
                                                 ? 'bg-gray-50 text-indigo-600'
                                                 : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',

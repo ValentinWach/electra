@@ -8,8 +8,8 @@ export interface GridColumnValue {
     column_id: number;
     value: string;
     style?: { [key: string]: string };
+    badge?: {color: string};
 }
-
 export interface GridRow {
     values: GridColumnValue[];
     key: number;

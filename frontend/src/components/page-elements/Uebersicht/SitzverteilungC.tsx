@@ -7,6 +7,7 @@ import {ChartData} from "chart.js";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {getPartyColor} from "../../../utils/utils.tsx";
 import { useMinLoadingTime } from '../../../hooks/useMinLoadingTime.ts';
+import GridC from '../../UI-element-components/GridC.tsx';
 
 export default function SitzverteilungC() {
     const {selectedElection} = useElection();
@@ -43,27 +44,26 @@ export default function SitzverteilungC() {
         <div className={"flex-grow"}>
             <ContentTileC loading={showLoader} header={"Sitzverteilung"}>
                 <DoughnutChart data={data}></DoughnutChart>
-                <table className="table">
-                    <thead>
-                    <tr>
-                        <th scope="col">Kürzel</th>
-                        <th scope="col">Partei</th>
-                        <th scope="col">Sitze</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {sitzverteilung?.distribution.map((partei) => (
-                        <tr key={partei.party.id}>
-                            <td style={{color: getPartyColor(partei.party.shortname)}}>
-                                {partei.party.shortname}
-                            </td>
-                            <td>{partei.party.name}</td>
-                            <td>{partei.seats}</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-
+                <GridC
+                    gridData={{
+                        columns: [
+                            {id: 1, label: 'Kürzel', searchable: false},
+                            {id: 2, label: 'Partei', searchable: false},
+                            {id: 3, label: `Sitze (${sitzverteilung?.distribution?.reduce((sum, partei) => sum + partei.seats, 0)})`, searchable: false}
+                        ],
+                        rows: sitzverteilung?.distribution?.map(partei => ({
+                            key: partei.party.id,
+                            values: [
+                                {column_id: 1, value: partei.party.shortname, badge: {color: getPartyColor(partei.party.shortname, false)}},
+                                {column_id: 2, value: partei.party.name},
+                                {column_id: 3, value: partei.seats.toString()}
+                            ]
+                        })) ?? []
+                    }}
+                    usePagination={false}
+                    defaultSortColumnId={3}
+                    defaultSortDirection={"desc"}
+                />
             </ContentTileC>
         </div>
     )

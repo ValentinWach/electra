@@ -2,6 +2,7 @@ import { useBundestagsParteien } from "../../../hooks/useBundestagsParteien"
 import GridC from "../../UI-element-components/GridC.tsx"
 import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
 import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
+import { getPartyColor } from "../../../utils/utils.tsx";
 
 export default function BundestagsparteienC({showParteiDetails}: {showParteiDetails: (rowId: number) => void}) {
     const {parteien, isLoading} = useBundestagsParteien()
@@ -18,12 +19,14 @@ export default function BundestagsparteienC({showParteiDetails}: {showParteiDeta
                 key: partei.id,
                 values: [
                     {column_id: 1, value: partei.name ?? ''},
-                    {column_id: 2, value: partei.shortname ?? ''}
+                    {column_id: 2, value: partei.shortname ?? '', badge: {color: getPartyColor(partei.shortname, false)}}
                 ]
             })) ?? []
         }}
         contentTileConfig={new ContentTileConfig("Bundestagsparteien")}
         usePagination={false}
+        defaultSortColumnId={1}
+        defaultSortDirection="asc"
         onRowClick={(id) => showParteiDetails(id)}
     />
     )

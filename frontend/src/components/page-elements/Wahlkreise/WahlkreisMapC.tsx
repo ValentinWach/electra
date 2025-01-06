@@ -66,8 +66,8 @@ export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number)
         return {
             color: 'black',
             weight: 2,
-            fillColor: getPartyColor(winningParty?.shortname ?? "gray"),
-            fillOpacity: 0.7
+            fillColor: getPartyColor(winningParty?.shortname ?? "gray", true),
+            fillOpacity: 1
         };
     };
 

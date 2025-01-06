@@ -33,13 +33,13 @@ export default function DoughnutChart(props: { data?: ChartDataNum, fullCircle?:
             },
         },
     };
-
     const partialCircleOptions = {
-        circumference: 220,
-        rotation: 70,
+        circumference: 180,
+        rotation: 270,
         cutout: '40%',
         layout: {
-            padding: 0,
+            padding: 20,
+
         },
         plugins: {
             legend: {
@@ -50,13 +50,34 @@ export default function DoughnutChart(props: { data?: ChartDataNum, fullCircle?:
                 },
             },
         },
+        hover: {
+            mode: 'index',
+            intersect: true,
+        },
+        elements: {
+            arc: {
+                hoverOffset: 15,
+            }
+        }
     };
 
     const options = fullCircle ? fullCircleOptions : partialCircleOptions;
 
     return (
         <div className={""}>
-            <Doughnut data={data} options={options}  />
+            <Doughnut 
+                data={data} 
+                options={{
+                    ...options,
+                    maintainAspectRatio: false,
+                    aspectRatio: 1
+                }} 
+                style={{
+                    width: '400px',
+                    height: '300px',
+                    marginTop: fullCircle ? 'auto' : '-40px'
+                }}
+            />
         </div>
     );
 };

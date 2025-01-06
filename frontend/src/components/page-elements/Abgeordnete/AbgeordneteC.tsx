@@ -4,6 +4,7 @@ import {useElection} from "../../../context/ElectionContext.tsx";
 import GridC from "../../UI-element-components/GridC.tsx";
 import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
 import { useMinLoadingTime } from '../../../hooks/useMinLoadingTime.ts';
+import { getPartyColor } from "../../../utils/utils.tsx";
 
 export default function AbgeordneteC({fetchAbgeordnete}: {
     fetchAbgeordnete: (id: number) => Promise<Abgeordneter[]>
@@ -46,7 +47,7 @@ export default function AbgeordneteC({fetchAbgeordnete}: {
                     {column_id: 2, value: abgeordneter.firstname},
                     {column_id: 3, value: abgeordneter.profession ?? ''},
                     {column_id: 4, value: abgeordneter.yearOfBirth ? abgeordneter.yearOfBirth.toString() : ''},
-                    {column_id: 5, value: abgeordneter.party ? abgeordneter.party.shortname : "Einzelbewerber"}
+                    {column_id: 5, value: abgeordneter.party ? abgeordneter.party.shortname : "Einzelbewerber", badge: {text: abgeordneter.party?.shortname ?? '', color: getPartyColor(abgeordneter.party?.shortname ?? '', false)}}
                 ]
             })) ?? []
         );
