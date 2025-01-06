@@ -2,7 +2,6 @@ Features - Unbeding: (/)
 
 Design - Unbeding:
 - (Bedingte) Responsiveness, alles im default etwas breiter
-- Header
 - Grid: Spaltenbreite automatisch anpassen
 
 Refactoring-Unbedingt: (/)
