@@ -14,9 +14,9 @@ const navigation = [
     {name: 'Übersicht', href: '/uebersicht', icon: HomeIcon, current: false},
     //{name: 'Bundesländer', href: '#', icon: ChartPieIcon, current: false},
     {name: 'Wahlkreise', href: '/wahlkreise', icon: ChartPieIcon, current: false},
-    {name: 'Abgeordnete', href: '/Abgeordnete', icon: UsersIcon, current: false},
-    {name: 'Parteien', href: '/Parteien', icon: UserGroupIcon, current: false},
-    {name: 'Analysen', href: '/Analysen', icon: PresentationChartLineIcon, current: false},
+    {name: 'Abgeordnete', href: '/abgeordnete', icon: UsersIcon, current: false},
+    {name: 'Parteien', href: '/parteien', icon: UserGroupIcon, current: false},
+    {name: 'Analysen', href: '/analysen', icon: PresentationChartLineIcon, current: false},
 ]
 const teams = [
     {id: 1, name: 'Heroicons', href: '#', initial: 'H', current: false},
