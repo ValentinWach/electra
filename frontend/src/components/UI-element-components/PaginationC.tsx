@@ -32,6 +32,7 @@ export default function PaginationC({numOfPages, switchPage, selectedPageProp}: 
     function renderEllipses(i:number) {
         return (
             <span
+                key={`ellipsis-${i}`}
                 className="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:cursor-pointer"
                 onClick={() => {
                     if (selectedPage < 5) {
@@ -89,7 +90,7 @@ export default function PaginationC({numOfPages, switchPage, selectedPageProp}: 
                             if (i < 3)
                                 return renderPageLink(i);
                             else if (i === 3)
-                                return [renderEllipses(i)];
+                                return renderEllipses(i);
 
                             if (i === selectedPage - 1 || i === selectedPage || i === selectedPage + 1)
                                 return renderPageLink(i);

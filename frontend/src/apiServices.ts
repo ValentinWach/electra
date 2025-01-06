@@ -63,11 +63,12 @@ export async function fetchStimmanteile(wahlid: number) {
     }
 }
 
-export async function fetchStimmanteileWahlkreis(wahlid: number, wahlkreisid: number, generatefromaggregate: boolean = true) {
+export async function fetchStimmanteileWahlkreis(wahlid: number, wahlkreisid: number, generateFromAggregate: boolean = true) {
     try {
         const wahlkreisApi = new WahlkreisApi();
-        const stimmanteile = await wahlkreisApi.getStimmanteilWahlkreis({wahlid, wahlkreisid, generatefromaggregate: generatefromaggregate});
+        const stimmanteile = await wahlkreisApi.getStimmanteilWahlkreis({wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate});
         console.log('Fetched Stimmanteile:', stimmanteile);
+        console.log('Used aggregate: ', generateFromAggregate);
         return stimmanteile;
     } catch (error) {
         console.error('Error fetching Stimmanteile:', error);

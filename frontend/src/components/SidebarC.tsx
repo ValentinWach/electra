@@ -62,25 +62,24 @@ export default function Example() {
                         <ul role="list" className="-mx-2 space-y-1">
                             {navigation.map((item) => (
                                 <li key={item.name}>
-                                    <Link to={item.href}>
-                                        <a
+                                    <Link
+                                        to={item.href}
+                                        className={classNames(
+                                            item.current = location.pathname === item.href,
+                                            item.current
+                                                ? 'bg-gray-50 text-indigo-600'
+                                                : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
+                                            'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
+                                        )}
+                                    >
+                                        <item.icon
+                                            aria-hidden="true"
                                             className={classNames(
-                                                item.current = location.pathname === item.href,
-                                                item.current
-                                                    ? 'bg-gray-50 text-indigo-600'
-                                                    : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
-                                                'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
+                                                item.current ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
+                                                'size-6 shrink-0',
                                             )}
-                                        >
-                                            <item.icon
-                                                aria-hidden="true"
-                                                className={classNames(
-                                                    item.current ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
-                                                    'size-6 shrink-0',
-                                                )}
-                                            />
-                                            {item.name}
-                                        </a>
+                                        />
+                                        {item.name}
                                     </Link>
                                 </li>
                             ))}

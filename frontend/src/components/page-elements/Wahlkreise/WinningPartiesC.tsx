@@ -39,7 +39,7 @@ export default function WinningPartiesC({fetchWinningParties}: {
                 ],
                 rows: winningParties ? [
                     {
-                        key: winningParties.erststimme[0].party.id,
+                        key: 1,
                         values: [
                             {column_id: 1, value: 'Erststimmen'},
                             {column_id: 2, value: winningParties.erststimme[0].party.shortname},
@@ -51,7 +51,7 @@ export default function WinningPartiesC({fetchWinningParties}: {
                         ]
                     },
                     {
-                        key: winningParties.zweitstimme[0].party.id,
+                        key: 2,
                         values: [
                             {column_id: 1, value: 'Zweitstimmen'},
                             {column_id: 2, value: winningParties.zweitstimme[0].party.shortname},

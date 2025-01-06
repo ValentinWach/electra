@@ -9,34 +9,29 @@ interface CharttileProps {
 export default function ContentTileC({ children, header, doubleSize, dropDownContent, loading = false, dropDownFunction }: CharttileProps & { header: string, doubleSize?: Boolean, dropDownContent?: DropdownData, dropDownFunction?: (id: number) => void } & { loading?: boolean }) {
     doubleSize = doubleSize ?? false;
 
-    const tableSkeletonRow =
-        <div className="flex flex-row mb-3 justify-evenly">
-            {Array.from({ length: doubleSize ? 5 : 4 }).map(_ => <div className="h-3 bg-gray-200 rounded-full dark:bg-gray-300 w-40 mb-2.5"></div>)}
+    const tableSkeletonRow = (index: number) => (
+        <div key={`skeleton-row-${index}`} className="flex flex-row mb-3 justify-evenly">
+            {Array.from({ length: doubleSize ? 5 : 4 }).map((_, i) => (
+                <div key={`skeleton-cell-${index}-${i}`} className="h-3 bg-gray-200 rounded-full dark:bg-gray-300 w-40 mb-2.5"></div>
+            ))}
         </div>
+    );
 
-    const tileSkeleton =
+    const tileSkeleton = (
         <div role="status" className="w-full mt-2 p-4 border border-gray-100 rounded shadow-sm animate-pulse md:p-6 dark:border-gray-300">
             <div className="flex items-baseline mt-4 mb-12">
-                <div className="w-full bg-gray-100 rounded-t-lg h-40 dark:bg-gray-300"></div>
-                <div className="w-full h-48 ms-6 bg-gray-100 rounded-t-lg dark:bg-gray-300"></div>
-                <div className="w-full bg-gray-100 rounded-t-lg h-32 ms-6 dark:bg-gray-300"></div>
-                <div className="w-full h-44 ms-6 bg-gray-100 rounded-t-lg dark:bg-gray-300"></div>
-                <div className="w-full bg-gray-100 rounded-t-lg h-36 ms-6 dark:bg-gray-300"></div>
-                <div className="w-full bg-gray-100 rounded-t-lg h-40 ms-6 dark:bg-gray-300"></div>
-                <div className="w-full h-48 ms-6 bg-gray-100 rounded-t-lg dark:bg-gray-300"></div>
-                <div className="w-full bg-gray-100 rounded-t-lg h-32 ms-6 dark:bg-gray-300"></div>
-                <div className="w-full bg-gray-100 rounded-t-lg h-44 ms-6 dark:bg-gray-300"></div>
-                {doubleSize && (
-                    <>
-                        <div className="w-full h-36 ms-6 bg-gray-100 rounded-t-lg dark:bg-gray-300"></div>
-                        <div className="w-full bg-gray-100 rounded-t-lg h-44 ms-6 dark:bg-gray-300"></div>
-                        <div className="w-full h-32 ms-6 bg-gray-100 rounded-t-lg dark:bg-gray-300"></div>
-                        <div className="w-full bg-gray-100 rounded-t-lg h-48 ms-6 dark:bg-gray-300"></div>
-                    </>
-                )}
+                {Array.from({ length: doubleSize ? 13 : 9 }).map((_, i) => (
+                    <div 
+                        key={`skeleton-column-${i}`} 
+                        className={`w-full ${i > 0 ? 'ms-6' : ''} bg-gray-100 rounded-t-lg ${
+                            i % 2 === 0 ? 'h-40' : i % 3 === 0 ? 'h-48' : 'h-32'
+                        } dark:bg-gray-300`}
+                    ></div>
+                ))}
             </div>
-            {Array.from({ length: doubleSize ? 4 : 3 }).map(_ => tableSkeletonRow)}
+            {Array.from({ length: doubleSize ? 4 : 3 }).map((_, i) => tableSkeletonRow(i))}
         </div>
+    );
     return (
 
         <div

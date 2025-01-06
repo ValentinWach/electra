@@ -17,13 +17,13 @@ export default function SitzverteilungC() {
     useEffect(() => {
         const getSitzverteilung = async () => {
             try {
-                setLoading(true);
                 const data = await fetchSitzveteilung(selectedElection?.id ?? 0);
                 setSitzverteilung(data);
             } catch (error) {
                 console.error('Error fetching Sitzverteilung:', error);
-            } finally {
-                setLoading(false);
+            }
+            finally {
+                setLoading(false); //It looks better when loading is only in beginning, but when changing election
             }
         };
         getSitzverteilung();

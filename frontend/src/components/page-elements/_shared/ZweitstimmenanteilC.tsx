@@ -53,7 +53,6 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
     };
 
     useEffect(() => {
-        console.log('ZweitstimmenanteilC useEffect triggered');
         const getStimmanteile = async () => {
             try {
                 setLoading(true);

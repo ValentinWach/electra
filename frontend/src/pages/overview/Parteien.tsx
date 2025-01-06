@@ -1,18 +1,15 @@
 import {useEffect, useState} from "react";
-import {fetchClosestWinners, fetchParteien, fetchSitzveteilung, fetchUeberhangProBundesland} from "../../apiServices.ts";
-import {ClosestWinners, Partei, Ueberhang} from "../../api/index.ts";
+import {fetchParteien} from "../../apiServices.ts";
+import {Partei} from "../../api/index.ts";
 import {useElection} from "../../context/ElectionContext.tsx";
-import ClosestWinnersC from "../../components/page-elements/Parteien/ClosestWinnersC.tsx";
-import BackBreadcrumbsC from "../../components/UI-element-components/BackBreadcrumbsC.tsx";
-import UeberhangC from "../../components/page-elements/Parteien/UeberhangC.tsx";
 import BundestagsparteienC from "../../components/page-elements/Parteien/BundestagsparteienC.tsx";
 import AngetreteneParteienC from "../../components/page-elements/Parteien/AngetreteneParteienC.tsx";
+import { useNavigate } from 'react-router-dom';
 
 export default function Parteien() {
-
     const {selectedElection} = useElection();
     const [alleParteien, setAlleParteien] = useState<Partei[]>();
-    const [selectedPartei, setSelectedPartei] = useState<Partei | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const getAlleParteien = async () => {
@@ -27,43 +24,18 @@ export default function Parteien() {
     }, [selectedElection]);
 
     const showParteiDetails = (id: number) => {
-        setSelectedPartei(alleParteien?.find(partei => partei.id === id) ?? null);
-    }
-
-    async function fetchClosestWinnersWrapper(wahlId: number): Promise<ClosestWinners> {
-        return fetchClosestWinners(wahlId, selectedPartei?.id ?? 0);
-    }
-
-    async function fetchUeberhangWrapper(wahlId: number): Promise<Ueberhang> {
-        return fetchUeberhangProBundesland(wahlId, selectedPartei?.id ?? 0);
+        const selectedPartei = alleParteien?.find(partei => partei.id === id);
+        if (selectedPartei) {
+            navigate(`/parteien/${id}`, { state: { partei: selectedPartei } });
+        } else {
+            navigate(`/parteien/${id}`, { state: { partei: null } });
+        }
     }
 
     return (
         <div className={"flex flex-col items-center"}>
-            {
-                selectedPartei ?
-                    <div className="w-chart-xl max-lg:w-char flex justify-start">
-                        <BackBreadcrumbsC breadcrumbData={{
-                            items: ["Parteien", selectedPartei.name ? (`${selectedPartei.name} (${selectedPartei.shortname})`) :
-                                selectedPartei.shortname]
-                        }} backFunction={() => setSelectedPartei(null)}/>
-                    </div>
-                    :
-                    <>
-                        <BundestagsparteienC showParteiDetails={showParteiDetails}/>
-                        <AngetreteneParteienC/>
-                    </>
-
-            }
-            {
-                selectedPartei ?
-                    <>
-                        <ClosestWinnersC fetchClostestWinners={fetchClosestWinnersWrapper}/>
-                        <UeberhangC fetchUeberhang={fetchUeberhangWrapper}></UeberhangC>
-                    </>
-                    :
-                    null
-            }
+            <BundestagsparteienC showParteiDetails={showParteiDetails}/>
+            <AngetreteneParteienC/>
         </div>
     )
 }

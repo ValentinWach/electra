@@ -9,6 +9,8 @@ import {CalcOnAggregateProvider} from "./context/CalcOnAggregateContext.tsx";
 import Analysen from "./pages/overview/Analysen.tsx";
 import FullPageLoadingC from './components/UI-element-components/FullPageLoadingC.tsx';
 import { useMinLoadingTime } from './hooks/useMinLoadingTime';
+import WahlkreiseDetail from './pages/detail/WahlkreiseDetail.tsx';
+import ParteiDetail from './pages/detail/ParteiDetail.tsx';
 
 function AppContent() {
     const { isLoading } = useElection();
@@ -34,8 +36,10 @@ function AppContent() {
                             <Routes>
                                 <Route path="/uebersicht" element={<Uebersicht/>}/>
                                 <Route path="/wahlkreise" element={<Wahlkreise/>}/>
+                                <Route path="/wahlkreise/:id" element={<WahlkreiseDetail/>}/>
                                 <Route path="/abgeordnete" element={<Abgeordnete/>}/>
                                 <Route path="/parteien" element={<Parteien/>}/>
+                                <Route path="/parteien/:id" element={<ParteiDetail/>}/>
                                 <Route path="/analysen" element={<Analysen/>}/>
                             </Routes>
                         </main>
