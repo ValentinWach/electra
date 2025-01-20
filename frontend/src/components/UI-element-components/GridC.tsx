@@ -119,14 +119,23 @@ export default function GridC({ gridData, usePagination = true, pageSize = 10, c
                                 )}
                             </th>
                         ))}
+                        {onRowClick && <th className="w-32"></th>}
                     </tr>
                 </thead>
                 <tbody>
-                    {currentPageGridData.rows.map((row) => (
-                        <tr key={row.key} className={`${onRowClick ? "hover:cursor-pointer" : ""}`} onClick={() => onRowClick && onRowClick(row.key)}>
+                    {currentPageGridData.rows.map((row, index) => (
+                        <tr key={row.key} className={`${onRowClick ? "hover:cursor-pointer hover:underline" : ""}`} onClick={() => onRowClick && onRowClick(row.key)}>
                             {row.values.map((col, index) => (
                                 <td title={col.value} key={index} style={col.style}>{col.badge ? <BadgeC text={col.value} color={col.badge.color} /> : col.value}</td>
                             ))}
+                            {onRowClick && <td className="w-32">
+                                <button
+                                    type="button"
+                                    className="rounded-full bg-white px-2.5 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-100"
+                                >
+                                    Details
+                                </button>
+                            </td>}
                         </tr>
                     ))}
                 </tbody>

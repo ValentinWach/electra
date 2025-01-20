@@ -25,3 +25,11 @@
 .table tbody tr {
     @apply hover:bg-gray-100;
 }
+
+.table tbody tr:hover button {
+    @apply bg-gray-50;
+}
+
+.table tbody tr:hover button:hover {
+    @apply bg-gray-200;
+}
