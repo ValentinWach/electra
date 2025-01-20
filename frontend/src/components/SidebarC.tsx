@@ -43,7 +43,7 @@ export default function Example() {
     };
 
     return (
-        <div className="sticky top-0 gap-y-5 flex w-60 min-w-60 flex-col overflow-y-auto border-r border-gray-200 bg-white px-6">
+        <div className="sticky top-0 gap-y-5 flex sm:w-52 sm:min-w-52 xl:w-60 xl:min-w-60 flex-col overflow-y-auto border-r border-gray-200 bg-white px-6">
             <div className="flex h-16 shrink-0 justify-center mt-2 items-center">
                 <img
                     alt="Electra logo"
