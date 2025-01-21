@@ -132,7 +132,7 @@ export default function WahlzettelC({checkMode = false}: {checkMode?: boolean}) 
                                                     type="radio"
                                                     name="candidate"
                                                     value={index + 1}
-                                                    className="peer appearance-none w-11 h-11 border border-black rounded-full"
+                                                    className="peer appearance-none w-11 h-11 border border-black rounded-full hover:cursor-pointer"
                                                 />
                                                 <div className="absolute inset-0 hidden peer-checked:block pointer-events-none">
                                                     <div className="absolute rounded-full top-1/2 left-1/2 w-9 h-[2px] bg-black -translate-x-1/2 -translate-y-1/2 rotate-45 "></div>
@@ -155,7 +155,7 @@ export default function WahlzettelC({checkMode = false}: {checkMode?: boolean}) 
                                                 type="radio"
                                                 name="party"
                                                 value={`list-${index + 1}`}
-                                                className="peer appearance-none w-11 h-11 border border-blue-900 rounded-full"
+                                                className="peer appearance-none w-11 h-11 border border-blue-900 rounded-full hover:cursor-pointer"
                                             />
                                             <div className="absolute inset-0 hidden peer-checked:block pointer-events-none">
                                                 <div className="absolute rounded-full top-1/2 left-1/2 w-9 h-[2px] bg-blue-900 -translate-x-1/2 -translate-y-1/2 rotate-45 "></div>
