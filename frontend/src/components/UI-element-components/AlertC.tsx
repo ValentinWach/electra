@@ -3,17 +3,31 @@ import { AlertData, AlertType } from '../../models/AlertData';
 
 export default function AlertC({ alertData }: { alertData: AlertData }) {
 
-    const color = (() => {
-        switch (alertData.type) {
+    const getColorClasses = (type: AlertType) => {
+        switch (type) {
             case AlertType.info:
-                return "blue";
+                return {
+                    bg: "bg-blue-100",
+                    text: "text-blue-800",
+                    textLight: "text-blue-700"
+                };
             case AlertType.warning:
-                return "yellow";
+                return {
+                    bg: "bg-yellow-100", 
+                    text: "text-yellow-800",
+                    textLight: "text-yellow-700"
+                };
             case AlertType.error:
             default:
-                return "red";
+                return {
+                    bg: "bg-red-100",
+                    text: "text-red-800", 
+                    textLight: "text-red-700"
+                };
         }
-    })();
+    };
+
+    const colorClasses = getColorClasses(alertData.type);
 
     const icon = (() => {
         switch (alertData.type) {
@@ -24,15 +38,16 @@ export default function AlertC({ alertData }: { alertData: AlertData }) {
                 return <InformationCircleIcon aria-hidden="true" className="size-5 text-blue-400" />;
         }
     })();
+
     return (
-        <div className={`rounded-md bg-${color}-50 p-4 mb-4`}>
+        <div className={`rounded-md ${colorClasses.bg} p-4 mb-4`}>
             <div className="flex">
                 <div className="shrink-0">
                     {icon}
                 </div>
                 <div className="ml-3">
-                    {alertData.title && <h3 className={` font-medium text-${color}-800`}>{alertData.title}</h3>}
-                    <div className={`mt-2  text-${color}-700`}>
+                    {alertData.title && <h3 className={`font-medium ${colorClasses.text}`}>{alertData.title}</h3>}
+                    <div className={`mt-2 ${colorClasses.textLight}`}>
                         <p>
                             {alertData.message}
                         </p>
