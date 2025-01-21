@@ -5,6 +5,7 @@ import {useElection} from "../../context/ElectionContext.tsx";
 import BundestagsparteienC from "../../components/page-elements/Parteien/BundestagsparteienC.tsx";
 import AngetreteneParteienC from "../../components/page-elements/Parteien/AngetreteneParteienC.tsx";
 import { useNavigate } from 'react-router-dom';
+import { resultPrefix } from "../../utils/Constants.tsx";
 
 export default function Parteien() {
     const {selectedElection} = useElection();
@@ -26,9 +27,9 @@ export default function Parteien() {
     const showParteiDetails = (id: number) => {
         const selectedPartei = alleParteien?.find(partei => partei.id === id);
         if (selectedPartei) {
-            navigate(`/parteien/${id}`, { state: { partei: selectedPartei } });
+            navigate(`${resultPrefix}/parteien/${id}`, { state: { partei: selectedPartei } });
         } else {
-            navigate(`/parteien/${id}`, { state: { partei: null } });
+            navigate(`${resultPrefix}/parteien/${id}`, { state: { partei: null } });
         }
     }
 

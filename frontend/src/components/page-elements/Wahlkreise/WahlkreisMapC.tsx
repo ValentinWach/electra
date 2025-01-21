@@ -8,7 +8,7 @@ import {useEffect, useState} from "react";
 import {fetchWinningPartiesWahlkreise} from "../../../apiServices.ts";
 import {WinningParties} from "../../../api/index.ts";
 import {useElection} from "../../../context/ElectionContext.tsx";
-import {getPartyColor} from "../../../utils/utils.tsx";
+import {getPartyColor} from "../../../utils/GetPartyColor.tsx";
 import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
 import {DropdownData} from "../../../models/DropDownData.ts";
 import './WahlkreisMapC.css';

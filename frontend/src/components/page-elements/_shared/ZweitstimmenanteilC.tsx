@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {Stimmanteil, Wahl} from "../../../api/index.ts";
 import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
 import {useElection} from "../../../context/ElectionContext.tsx";
-import {getPartyColor} from "../../../utils/utils.tsx";
+import {getPartyColor} from "../../../utils/GetPartyColor.tsx";
 import BarchartC from "../../chart-components/BarchartC.tsx";
 import type {DropdownData} from "../../../models/DropDownData.ts";
 import { useBundestagsParteien } from '../../../hooks/useBundestagsParteien.ts';

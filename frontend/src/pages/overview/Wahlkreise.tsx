@@ -6,6 +6,7 @@ import { useElection } from "../../context/ElectionContext.tsx";
 import WahlkreislisteC from "../../components/page-elements/Wahlkreise/WahlkreislisteC.tsx";
 import WahlkreisMapC from "../../components/page-elements/Wahlkreise/WahlkreisMapC.tsx";
 import { useNavigate } from 'react-router-dom';
+import { resultPrefix } from "../../utils/Constants.tsx";
 
 export default function Wahlkreise() {
 
@@ -30,9 +31,9 @@ export default function Wahlkreise() {
     const showWahlkreisDetails = (id: number) => {
         const selectedWahlkreis = wahlkreise?.find(wahlkreis => wahlkreis.id === id);
         if (selectedWahlkreis) {
-            navigate(`/wahlkreise/${id}`, { state: { wahlkreis: selectedWahlkreis } });
+            navigate(`${resultPrefix}/wahlkreise/${id}`, { state: { wahlkreis: selectedWahlkreis } });
         } else {
-            navigate(`/wahlkreise/${id}`, { state: { wahlkreis: selectedWahlkreis } });
+            navigate(`${resultPrefix}/wahlkreise/${id}`, { state: { wahlkreis: selectedWahlkreis } });
         }
     }
 

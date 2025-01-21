@@ -4,7 +4,7 @@ import {useElection} from "../../../context/ElectionContext.tsx";
 import GridC from "../../UI-element-components/GridC.tsx";
 import {GridData, ContentTileConfig} from "../../../models/GridData.ts";
 import { useMinLoadingTime } from '../../../hooks/useMinLoadingTime.ts';
-import { getPartyColor } from "../../../utils/utils.tsx";
+import { getPartyColor } from "../../../utils/GetPartyColor.tsx";
 
 export default function AbgeordneteC({fetchAbgeordnete}: {
     fetchAbgeordnete: (id: number) => Promise<Abgeordneter[]>

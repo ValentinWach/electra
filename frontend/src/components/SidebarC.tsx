@@ -10,15 +10,15 @@ import DropdownC from "./UI-element-components/DropdownC.tsx";
 import type {DropdownData} from "../models/DropDownData.ts";
 import { useElection } from '../context/ElectionContext.tsx';
 import { useNavigate } from 'react-router-dom';
-
+import { resultPrefix } from '../utils/Constants.tsx';
 
 const navigation = [
-    {name: 'Übersicht', href: '/uebersicht', icon: HomeIcon, current: false},
+    {name: 'Übersicht', href: resultPrefix + "/uebersicht", icon: HomeIcon, current: false},
     //{name: 'Bundesländer', href: '#', icon: ChartPieIcon, current: false},
-    {name: 'Wahlkreise', href: '/wahlkreise', icon: ChartPieIcon, current: false},
-    {name: 'Abgeordnete', href: '/abgeordnete', icon: UsersIcon, current: false},
-    {name: 'Parteien', href: '/parteien', icon: UserGroupIcon, current: false},
-    {name: 'Analysen', href: '/analysen', icon: PresentationChartLineIcon, current: false},
+    {name: 'Wahlkreise', href: resultPrefix + "/wahlkreise", icon: ChartPieIcon, current: false},
+    {name: 'Abgeordnete', href: resultPrefix + "/abgeordnete", icon: UsersIcon, current: false},
+    {name: 'Parteien', href: resultPrefix + "/parteien", icon: UserGroupIcon, current: false},
+    {name: 'Analysen', href: resultPrefix + "/analysen", icon: PresentationChartLineIcon, current: false},
 ]
 
 function classNames(...classes : any[]) {

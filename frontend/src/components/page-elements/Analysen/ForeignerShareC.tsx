@@ -6,7 +6,7 @@ import {useEffect, useState} from 'react';
 import {fetchForeignerShareAnalysis} from "../../../apiServices.ts";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {ChartDataXYR} from "../../../models/ChartData.ts";
-import {getPartyColor} from "../../../utils/utils.tsx";
+import {getPartyColor} from "../../../utils/GetPartyColor.tsx";
 
 export default function ForeignerShareC({parteien} : {parteien: Partei[]}) {
     const {selectedElection} = useElection();

@@ -2,7 +2,7 @@ import { useBundestagsParteien } from "../../../hooks/useBundestagsParteien"
 import GridC from "../../UI-element-components/GridC.tsx"
 import {ContentTileConfig} from "../../../models/GridData.ts";
 import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
-import { getPartyColor } from "../../../utils/utils.tsx";
+import { getPartyColor } from "../../../utils/GetPartyColor.tsx";
 
 export default function BundestagsparteienC({showParteiDetails}: {showParteiDetails: (rowId: number) => void}) {
     const {parteien, isLoading} = useBundestagsParteien()

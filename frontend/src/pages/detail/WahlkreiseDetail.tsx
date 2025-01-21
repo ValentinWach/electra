@@ -17,6 +17,7 @@ import { useCalcOnAggregate } from "../../context/CalcOnAggregateContext.tsx";
 import DirektkandidatC from "../../components/page-elements/Wahlkreise/DirektkandidatC.tsx";
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { ChartDataNum } from "../../models/ChartData";
+import { resultPrefix } from "../../utils/Constants.tsx";
 
 export default function WahlkreiseDetail() {
     const { id } = useParams();
@@ -90,7 +91,7 @@ export default function WahlkreiseDetail() {
                 <div className="max-w-[1100px] sm:w-full xl:w-[90%] 2xl:w-3/4 flex flex-row justify-between gap-5">
                     <BackBreadcrumbsC
                         breadcrumbData={{ items: ["Wahlkreise", `Nr. ${wahlkreis.id}: ${wahlkreis.name}`] }}
-                        backFunction={() => navigate('/wahlkreise')} />
+                        backFunction={() => navigate(`${resultPrefix}/wahlkreise`)} />
                 </div>
                 <WinningPartiesC fetchWinningParties={wrapFetchWinningPartiesWahlkreis} />
                 <div className="max-w-[1100px] sm:w-full xl:w-[90%] 2xl:w-3/4 flex flex-col justify-start gap-5 -mb-5">

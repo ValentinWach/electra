@@ -5,7 +5,7 @@ import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
 import DoughnutChart from "../../chart-components/DoughnutChartC.tsx";
 import { ChartDataNum } from "../../../models/ChartData.ts";
 import { useElection } from "../../../context/ElectionContext.tsx";
-import { getPartyColor } from "../../../utils/utils.tsx";
+import { getPartyColor } from "../../../utils/GetPartyColor.tsx";
 import { useMinLoadingTime } from '../../../hooks/useMinLoadingTime.ts';
 import GridC from '../../UI-element-components/GridC.tsx';
 

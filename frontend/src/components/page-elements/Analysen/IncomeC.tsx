@@ -6,7 +6,7 @@ import {useEffect, useState} from 'react';
 import {fetchIncomeAnalysis} from "../../../apiServices.ts";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {ChartDataXYR} from "../../../models/ChartData.ts";
-import {getPartyColor} from "../../../utils/utils.tsx";
+import {getPartyColor} from "../../../utils/GetPartyColor.tsx";
 
 export default function IncomeC({parteien} : {parteien: Partei[]}) {
     const {selectedElection} = useElection();

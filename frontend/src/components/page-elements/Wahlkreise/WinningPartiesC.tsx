@@ -1,5 +1,5 @@
 import type {WinningParties} from "../../../api/index.ts";
-import {getPartyColor} from "../../../utils/utils.tsx";
+import {getPartyColor} from "../../../utils/GetPartyColor.tsx";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {useEffect, useState} from "react";
 import GridC from "../../UI-element-components/GridC.tsx";

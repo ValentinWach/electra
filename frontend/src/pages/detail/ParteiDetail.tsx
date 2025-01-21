@@ -10,6 +10,7 @@ import BackBreadcrumbsC from "../../components/UI-element-components/BackBreadcr
 import ClosestWinnersC from "../../components/page-elements/Parteien/ClosestWinnersC.tsx";
 import UeberhangC from "../../components/page-elements/Parteien/UeberhangC.tsx";
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { resultPrefix } from "../../utils/Constants.tsx";
 
 export default function ParteiDetail() {
     const { id } = useParams();
@@ -56,7 +57,7 @@ export default function ParteiDetail() {
                         breadcrumbData={{
                             items: ["Parteien", partei.name ? (`${partei.name} (${partei.shortname})`) : partei.shortname]
                         }}
-                        backFunction={() => navigate('/parteien')}
+                        backFunction={() => navigate(`${resultPrefix}/parteien`)}
                     />
                 </div>
                 <ClosestWinnersC fetchClostestWinners={wrapFetchClosestWinners}/>

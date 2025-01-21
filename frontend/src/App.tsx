@@ -11,6 +11,11 @@ import FullPageLoadingC from './components/UI-element-components/FullPageLoading
 import { useMinLoadingTime } from './hooks/useMinLoadingTime';
 import WahlkreiseDetail from './pages/detail/WahlkreiseDetail.tsx';
 import ParteiDetail from './pages/detail/ParteiDetail.tsx';
+import { resultPrefix, votePrefix } from './utils/Constants.tsx';
+import Authentication from './pages/vote/Authentication.tsx';
+import HeaderC from './components/page-elements/Vote/HeaderC.tsx';
+import Wahlentscheidung from './pages/vote/Wahlentscheidung.tsx';
+import Stimmabgabe from './pages/vote/Stimmabgabe.tsx';
 
 function AppContent() {
     const { isLoading } = useElection();
@@ -19,25 +24,39 @@ function AppContent() {
     if (showLoader) {
         return <FullPageLoadingC />;
     }
-
     return (
         <CalcOnAggregateProvider>
             <Router>
-                <div className={"flex flex-row h-screen bg-gray-50"}>
-                    <Sidebar />
-                    {/* Main Content Area */}
-                    <main className={"flex-grow p-10 flex flex-col items-center overflow-auto bg-gray-50"}>
-                        <Routes>
-                            <Route path="/uebersicht" element={<Uebersicht />} />
-                            <Route path="/wahlkreise" element={<Wahlkreise />} />
-                            <Route path="/wahlkreise/:id" element={<WahlkreiseDetail />} />
-                            <Route path="/abgeordnete" element={<Abgeordnete />} />
-                            <Route path="/parteien" element={<Parteien />} />
-                            <Route path="/parteien/:id" element={<ParteiDetail />} />
-                            <Route path="/analysen" element={<Analysen />} />
-                        </Routes>
-                    </main>
-                </div>
+                <Routes>
+                    <Route path={resultPrefix + "/*"} element={
+                        <div className={"flex flex-row h-screen bg-gray-50"}>
+                            <Sidebar />
+                            <main className={"flex-grow p-10 flex flex-col items-center overflow-auto bg-gray-50"}>
+                                <Routes>
+                                    <Route path="uebersicht" element={<Uebersicht />} />
+                                    <Route path="wahlkreise" element={<Wahlkreise />} />
+                                    <Route path="wahlkreise/:id" element={<WahlkreiseDetail />} />
+                                    <Route path="abgeordnete" element={<Abgeordnete />} />
+                                    <Route path="parteien" element={<Parteien />} />
+                                    <Route path="parteien/:id" element={<ParteiDetail />} />
+                                    <Route path="analysen" element={<Analysen />} />
+                                </Routes>
+                            </main>
+                        </div>
+                    } />
+                    <Route path={votePrefix + "/*"} element={
+                        <div className={"h-screen w-screen flex flex-col justify-center bg-gray-50"}>
+                            <HeaderC />
+                            <main className={"flex-grow p-10 flex flex-col items-center overflow-auto bg-gray-50"}>
+                                <Routes>
+                                    <Route path="authentication" element={<Authentication />} />
+                                    <Route path="wahlentscheidung" element={<Wahlentscheidung />} />
+                                    <Route path="stimmabgabe" element={<Stimmabgabe />} />
+                                </Routes>
+                            </main>
+                        </div>
+                    } />
+                </Routes>
             </Router>
         </CalcOnAggregateProvider>
     );

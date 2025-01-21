@@ -1,6 +1,6 @@
 import {OverviewWahlkreis} from "../../../api";
 import GridC from "../../UI-element-components/GridC";
-import {getPartyColor} from "../../../utils/utils";
+import {getPartyColor} from "../../../utils/GetPartyColor.tsx";
 import {ContentTileConfig} from "../../../models/GridData.ts";
 import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
 

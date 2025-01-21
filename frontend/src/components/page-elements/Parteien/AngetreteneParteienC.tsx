@@ -5,7 +5,7 @@ import { useElection } from "../../../context/ElectionContext.tsx";
 import { fetchParteien } from "../../../apiServices.ts";
 import {ContentTileConfig} from "../../../models/GridData.ts";
 import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
-import { getPartyColor } from "../../../utils/utils.tsx";
+import { getPartyColor } from "../../../utils/GetPartyColor.tsx";
 export default function AngetreteneParteienC() {
     const [alleParteien, setAlleParteien] = useState<Partei[]>();
     const {selectedElection} = useElection();
