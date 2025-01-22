@@ -19,6 +19,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from openapi_server.apis.general_api import router as GeneralApiRouter
 from openapi_server.apis.global_api import router as GlobalApiRouter
 from openapi_server.apis.wahlkreis_api import router as WahlkreisApiRouter
+from openapi_server.apis.elect_api import router as ElectApiRouter
+
 
 # Create FastAPI app
 app = FastAPI(
@@ -44,3 +46,4 @@ app.add_middleware(
 app.include_router(GeneralApiRouter)
 app.include_router(GlobalApiRouter)
 app.include_router(WahlkreisApiRouter)
+app.include_router(ElectApiRouter)

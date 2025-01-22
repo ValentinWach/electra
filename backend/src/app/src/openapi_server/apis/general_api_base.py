@@ -15,7 +15,6 @@ from sqlalchemy import text
 from pydantic import StrictInt
 
 
-
 def to_dict(instance):
     return {column.name: getattr(instance, column.name) for column in instance.__table__.columns}
 

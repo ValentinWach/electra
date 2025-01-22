@@ -32,9 +32,10 @@ class EinkommenWahlkreiseInner(BaseModel):
     EinkommenWahlkreiseInner
     """ # noqa: E501
     wahlkreis_id: StrictInt
+    wahlkreis_name: str
     einkommen: Union[StrictFloat, StrictInt]
-    stimmen: StrictInt
-    __properties: ClassVar[List[str]] = ["wahlkreis_id", "einkommen", "stimmen"]
+    stimmanteil: StrictFloat
+    __properties: ClassVar[List[str]] = ["wahlkreis_id", "wahlkreis_name","einkommen", "stimmenanteil"]
 
     model_config = {
         "populate_by_name": True,
@@ -86,8 +87,9 @@ class EinkommenWahlkreiseInner(BaseModel):
 
         _obj = cls.model_validate({
             "wahlkreis_id": obj.get("wahlkreis_id"),
+            "wahlkreis_name": obj.get("wahlkreis_name"),
             "einkommen": obj.get("einkommen"),
-            "stimmen": obj.get("stimmen")
+            "stimmenanteil": obj.get("stimmenanteil")
         })
         return _obj
 

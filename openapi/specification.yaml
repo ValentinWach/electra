@@ -635,6 +635,7 @@ components:
             type: object
             required:
               - wahlkreis_id
+              - wahlkreis_name
               - auslaenderanteil
               - stimmen
             properties:

@@ -32,9 +32,10 @@ class AuslaenderanteilWahlkreiseInner(BaseModel):
     AuslaenderanteilWahlkreiseInner
     """ # noqa: E501
     wahlkreis_id: StrictInt
+    wahlkreis_name: str
     auslaenderanteil: Union[StrictFloat, StrictInt]
-    stimmen: StrictInt
-    __properties: ClassVar[List[str]] = ["wahlkreis_id", "auslaenderanteil", "stimmen"]
+    stimmanteil: StrictFloat
+    __properties: ClassVar[List[str]] = ["wahlkreis_id", "wahlkreis_name","auslaenderanteil", "stimmenanteil"]
 
     model_config = {
         "populate_by_name": True,
@@ -86,8 +87,9 @@ class AuslaenderanteilWahlkreiseInner(BaseModel):
 
         _obj = cls.model_validate({
             "wahlkreis_id": obj.get("wahlkreis_id"),
+            "wahlkreis_name": obj.get("wahlkreis_name"),
             "auslaenderanteil": obj.get("auslaenderanteil"),
-            "stimmen": obj.get("stimmen")
+            "stimmenanteil": obj.get("stimmenanteil")
         })
         return _obj
 

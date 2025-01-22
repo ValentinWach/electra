@@ -91,4 +91,15 @@ class Partei(BaseModel):
         })
         return _obj
 
+    def __hash__(self):
+        return hash((self.id, self.name, self.shortname))
+
+    def __eq__(self, other):
+        if isinstance(other, Partei):
+            return (self.id, self.name, self.shortname) == (other.id, other.name, other.shortname)
+        return False
+
+    def __repr__(self):
+        return f"Partei(id={self.id}, name={self.name}, shortname={self.shortname})"
+
 

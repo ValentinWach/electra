@@ -70,9 +70,7 @@ async def get_competing_parties(
     wahlid: StrictInt = Path(..., description=""),
     wahlkreisid: StrictInt = Path(..., description=""),
 ) -> ParteiWahlzettel:
-    if not BaseElectApi.subclasses:
-        raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseElectApi.subclasses[0]().get_competing_parties(wahlid, wahlkreisid)
+    return await BaseElectApi.get_competing_parties(wahlid, wahlkreisid, self=None)
 
 
 @router.get(
@@ -87,6 +85,4 @@ async def get_direktkandidaten(
     wahlid: StrictInt = Path(..., description=""),
     wahlkreisid: StrictInt = Path(..., description=""),
 ) -> Direktkandidaten:
-    if not BaseElectApi.subclasses:
-        raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseElectApi.subclasses[0]().get_direktkandidaten(wahlid, wahlkreisid)
+    return await BaseElectApi.get_direktkandidaten(wahlid, wahlkreisid, self=None)

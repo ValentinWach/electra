@@ -256,13 +256,20 @@ class BaseWahlkreisApi:
         try:
             with db_session() as db:
                 auslaenderanteil_query = text('''
-                    SELECT s.wahlkreis_id, s.auslaenderanteil, zwp.stimmen_sum
-                    FROM strukturdaten s
-                    LEFT JOIN zweitstimmen_wahlkreis_partei zwp
-                        ON s.wahlkreis_id = zwp.wahlkreise_id
-                        AND s.wahl_id = zwp.wahlen_id
-                        AND zwp.parteien_id = :parteiId
-                    WHERE s.wahl_id = :wahlId;
+                WITH total_stimmen AS (
+                    SELECT wahlkreise_id, SUM(stimmen_sum) AS total_stimmen_sum
+                    FROM zweitstimmen_wahlkreis_partei
+                    WHERE wahlen_id = :wahlId
+                    GROUP BY wahlkreise_id
+                )
+                SELECT s.wahlkreis_id, w.name, s.auslaenderanteil,
+                       ROUND(zwp1.stimmen_sum / ts.total_stimmen_sum * 100, 2) AS stimmanteil
+                FROM strukturdaten s
+                LEFT JOIN zweitstimmen_wahlkreis_partei zwp1
+                    ON s.wahlkreis_id = zwp1.wahlkreise_id AND s.wahl_id = zwp1.wahlen_id AND zwp1.parteien_id = :parteiId
+                JOIN wahlkreise w ON s.wahlkreis_id = w.id
+                LEFT JOIN total_stimmen ts ON s.wahlkreis_id = ts.wahlkreise_id
+                WHERE s.wahl_id = :wahlId;
                 ''')
 
                 auslaenderanteil_results = db.execute(
@@ -279,18 +286,19 @@ class BaseWahlkreisApi:
                 auslaenderanteil_response = Auslaenderanteil(wahlkreise=[])
 
                 for result in auslaenderanteil_results:
-                    wahlkreis_id, auslaenderanteil_value, stimmen_result = result
+                    wahlkreis_id, wahlkreis_name, auslaenderanteil_value, stimmen_anteil = result
 
-                    if stimmen_result is None:
-                        stimmen_sum = 0
+                    if stimmen_anteil is None:
+                        adjusted_stimmen_anteil = 0.0
                     else:
-                        stimmen_sum = stimmen_result
+                        adjusted_stimmen_anteil = stimmen_anteil
 
                     auslaenderanteil_response.wahlkreise.append(
                         AuslaenderanteilWahlkreiseInner(
                             wahlkreis_id=wahlkreis_id,
+                            wahlkreis_name=wahlkreis_name,
                             auslaenderanteil=auslaenderanteil_value,
-                            stimmen=stimmen_sum
+                            stimmanteil=adjusted_stimmen_anteil
                         )
                     )
 
@@ -311,12 +319,19 @@ class BaseWahlkreisApi:
         try:
             with db_session() as db:
                 einkommen_query = text('''
-                    SELECT wahlkreis_id, einkommen, zwp.stimmen_sum
+                    WITH total_stimmen AS (
+                        SELECT wahlkreise_id, SUM(stimmen_sum) AS total_stimmen_sum
+                        FROM zweitstimmen_wahlkreis_partei
+                        WHERE wahlen_id = :wahlId
+                        GROUP BY wahlkreise_id
+                    )
+                    SELECT s.wahlkreis_id, w.name, s.einkommen,
+                           ROUND(zwp1.stimmen_sum / ts.total_stimmen_sum * 100, 2) AS stimmanteil
                     FROM strukturdaten s
-                    LEFT JOIN zweitstimmen_wahlkreis_partei zwp
-                        ON s.wahlkreis_id = zwp.wahlkreise_id
-                        AND s.wahl_id = zwp.wahlen_id
-                        AND zwp.parteien_id = :parteiId
+                    LEFT JOIN zweitstimmen_wahlkreis_partei zwp1
+                        ON s.wahlkreis_id = zwp1.wahlkreise_id AND s.wahl_id = zwp1.wahlen_id AND zwp1.parteien_id = :parteiId
+                    JOIN wahlkreise w ON s.wahlkreis_id = w.id
+                    LEFT JOIN total_stimmen ts ON s.wahlkreis_id = ts.wahlkreise_id
                     WHERE s.wahl_id = :wahlId;
                 ''')
 
@@ -334,18 +349,19 @@ class BaseWahlkreisApi:
                 einkommen_response = Einkommen(wahlkreise=[])
 
                 for result in einkommen_results:
-                    wahlkreis_id, einkommen_value, stimmen_result = result
+                    wahlkreis_id, wahlkreis_name, einkommen_value, stimmen_anteil = result
 
-                    if stimmen_result is None:
-                        stimmen_sum = 0
+                    if stimmen_anteil is None:
+                        adjusted_stimmen_anteil = 0.0
                     else:
-                        stimmen_sum = stimmen_result
+                        adjusted_stimmen_anteil = stimmen_anteil
 
                     einkommen_response.wahlkreise.append(
                         EinkommenWahlkreiseInner(
                             wahlkreis_id=wahlkreis_id,
+                            wahlkreis_name=wahlkreis_name,
                             einkommen=einkommen_value,
-                            stimmen=stimmen_sum
+                            stimmanteil=adjusted_stimmen_anteil
                         )
                     )
 
