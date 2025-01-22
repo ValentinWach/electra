@@ -26,6 +26,7 @@ class BaseWahlkreisApi:
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         BaseWahlkreisApi.subclasses = BaseWahlkreisApi.subclasses + (cls,)
+
     async def get_overview_wahlkreis(
         wahlid: StrictInt,
         wahlkreisid: StrictInt,
@@ -35,14 +36,16 @@ class BaseWahlkreisApi:
         try:
             with db_session() as db:
                 if generatefromaggregate:
-                    abgeordneter_query = text('''
-                                SELECT k.id, k.name, k.firstname, k.profession, k."yearOfBirth", ww.partei_id 
+                    overview_query = text('''
+                                SELECT k.id, k.name, k.firstname, k.profession, k."yearOfBirth", p.id, p.name, p."shortName", wahlbeteiligung
                                 FROM wahlkreis_winners ww 
                                 JOIN kandidaten k ON ww.kandidat_id = k.id 
+                                JOIN parteien p ON ww.partei_id = p.id
+                                JOIN strukturdaten s ON s.wahl_id = :wahlId AND s.wahlkreis_id = :wahlkreisId
                                 WHERE ww.wahlkreis_id = :wahlkreisId AND ww.wahl_id = :wahlId;
                             ''')
                 else:
-                    abgeordneter_query = text('''
+                    overview_query = text('''
                                 WITH candidate_votes AS
                                     (SELECT w.kandidat_id, w.partei_id, COUNT(*) AS votes
                                     FROM erststimmen e
@@ -52,51 +55,32 @@ class BaseWahlkreisApi:
                                 max_votes AS (SELECT kandidat_id, partei_id
                                     FROM candidate_votes
                                     WHERE votes = (SELECT MAX(votes) FROM candidate_votes)) 
-                                SELECT k.id, k.name, k.firstname, k.profession, k."yearOfBirth", mv.partei_id
-                                FROM max_votes mv JOIN kandidaten k ON mv.kandidat_id = k.id;
+                                SELECT k.id, k.name, k.firstname, k.profession, k."yearOfBirth", p.id, p.name, p."shortName", wahlbeteiligung
+                                FROM max_votes mv 
+                                JOIN kandidaten k ON mv.kandidat_id = k.id
+                                JOIN parteien p ON mv.partei_id = p.id
+                                JOIN strukturdaten s ON s.wahl_id = :wahlId AND s.wahlkreis_id = :wahlkreisId; ;
                             ''')
 
-                abgeordneter_results = db.execute(
-                    abgeordneter_query,
+                overview_results = db.execute(
+                    overview_query,
                     {"wahlId": wahlid, "wahlkreisId": wahlkreisid}
                 ).fetchall()
 
-                if not abgeordneter_results:
+                if not overview_results:
                     raise HTTPException(status_code=404, detail="No direktkandidat found")
 
-                direktkandidat = abgeordneter_results[0]
-
-                partei = db.execute(
-                    text('SELECT id, name, "shortName" FROM parteien WHERE id = :partei_id'),
-                    {"partei_id": direktkandidat[5]}
-                ).fetchone()
-
-                if not partei:
-                    raise HTTPException(status_code=404, detail="No Partei details found")
-
-                wahlbeteiligung_query = text('''
-                            SELECT wahlbeteiligung 
-                            FROM strukturdaten 
-                            WHERE wahl_id = :wahlId AND wahlkreis_id = :wahlkreisId;
-                        ''')
-
-                wahlbeteiligung_results = db.execute(
-                    wahlbeteiligung_query,
-                    {"wahlId": wahlid, "wahlkreisId": wahlkreisid}
-                ).fetchone()
-
-                if not wahlbeteiligung_results:
-                    raise HTTPException(status_code=404, detail="No wahlbeteiligung found")
+                overview_data = overview_results[0]
 
                 overview = OverviewWahlkreis(
-                    wahlbeteiligung=wahlbeteiligung_results[0],
+                    wahlbeteiligung=overview_data[8],
                     direktkandidat=Abgeordneter(
-                        id=direktkandidat[0],
-                        name=direktkandidat[1],
-                        firstname=direktkandidat[2],
-                        profession=direktkandidat[3],
-                        year_of_birth=direktkandidat[4],
-                        party=Partei(id=partei[0], name=partei[1], shortname=partei[2])
+                        id=overview_data[0],
+                        name=overview_data[1],
+                        firstname=overview_data[2],
+                        profession=overview_data[3],
+                        year_of_birth=overview_data[4],
+                        party=Partei(id=overview_data[5], name=overview_data[6], shortname=overview_data[7])
                     )
                 )
 
@@ -237,6 +221,7 @@ class BaseWahlkreisApi:
                     zweitstimmen_winner_query,
                     {"wahlId": wahlId}
                 ).fetchall()
+
             if not erstimmen_winner_results or not zweitstimmen_winner_results:
                 raise HTTPException(status_code=404, detail="No winners found")
             erststimme_winners = [
