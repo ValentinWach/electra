@@ -362,7 +362,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/wahlid'
         - $ref: '#/components/parameters/wahlkreisid'
-        - in: body
+        - in: query
           name: amount
           required: true
           schema:
