@@ -28,7 +28,6 @@ from openapi_server.models.bundesland import Bundesland
 from openapi_server.models.partei import Partei
 from openapi_server.models.wahl import Wahl
 from openapi_server.models.wahlkreis import Wahlkreis
-# app/src/openapi_server/apis/general_api.py
 
 router = APIRouter()
 

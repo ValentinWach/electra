@@ -8,19 +8,15 @@ from openapi_server.models.wahl import Wahl
 from openapi_server.models.bundesland import Bundesland
 from openapi_server.database.models import Wahl as WahlModel
 from openapi_server.database.models import Bundesland as BundelandModel
-from openapi_server.database.connection import Session as db_session  # Import Session from connection.py
+from openapi_server.database.connection import Session as db_session
 from openapi_server.models.wahlkreis import Wahlkreis
-from openapi_server.database.models import Partei as ParteiModel
 from openapi_server.models.partei import Partei
-from openapi_server.database.models import Wahlkreis as WahlkreisModel
 from sqlalchemy import text
 from pydantic import StrictInt
 
 
 
 def to_dict(instance):
-    """Convert SQLAlchemy instance to dictionary"""
-    # Return a dictionary with column names as keys and column values as values
     return {column.name: getattr(instance, column.name) for column in instance.__table__.columns}
 
 
@@ -34,16 +30,15 @@ class BaseGeneralApi:
         self
     ) -> List[Wahl]:
         try:
-            # Query the database for elections
             with db_session() as db:
-                elections = db.query(WahlModel).all()  # This retrieves all rows from the "wahlen" table
+                elections = db.query(WahlModel).all()
 
             if not elections:
                 raise HTTPException(status_code=404, detail="No elections found")
 
             election_dicts = [to_dict(election) for election in elections]
 
-            election_list = [Wahl.model_validate(election) for election in election_dicts]  # Use model_validate()
+            election_list = [Wahl.model_validate(election) for election in election_dicts]
 
             return election_list
 
@@ -63,7 +58,7 @@ class BaseGeneralApi:
 
             bundesland_dicts = [to_dict(bundesland) for bundesland in bundeslaender]
 
-            bundesland_list = [Bundesland.model_validate(bundesland) for bundesland in bundesland_dicts]  # Use model_validate()
+            bundesland_list = [Bundesland.model_validate(bundesland) for bundesland in bundesland_dicts]
 
             return bundesland_list
 
@@ -80,13 +75,11 @@ class BaseGeneralApi:
                             SELECT w.id, w.name, b.*
                             FROM wahlkreise w JOIN bundeslaender b ON b.id = bundesland_id;
                             ''')
-                # Execute the query with parameterized input, avoiding direct string interpolation
                 wahlkreis_results = db.execute(wahlkreis_query).fetchall()
 
             if not wahlkreis_results:
                 raise HTTPException(status_code=404, detail="No winners found")
 
-            # Return the WinningParties object with the filled lists
             wahlkreise = []
             for result in wahlkreis_results:
                 id, name, bundesland_id, bundesland_name = result
