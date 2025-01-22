@@ -338,12 +338,13 @@ paths:
           content:
             application/json:
               schema:
-                title: partei-wahlzettel
+                title: wahlzettel-parteien
                 properties:
                   parteien:
                     type: array
                     items:
                       type: object
+                      title: wahlzettel-partei-wrapper
                       required:
                         - partei
                         - topfive
@@ -355,12 +356,40 @@ paths:
                           items:
                             $ref: '#/components/schemas/Abgeordneter'
 
-  /elect/{wahlid}/authenticate/{wahlkreisid}:
+  /admin/generate/generatetoken/{wahlid}/{wahlkreisid}:
     post:
+      operationId: generateToken
       parameters:
         - $ref: '#/components/parameters/wahlid'
         - $ref: '#/components/parameters/wahlkreisid'
-      summary: Authenticate with token
+        - in: body
+          name: amount
+          required: true
+          schema:
+            type: object
+            properties:
+              amount:
+                type: number
+            required:
+              - amount
+      tags:
+        - Admin
+      responses:
+        '200':
+          description: Returning the generated token
+          content:
+            application/json:
+              schema:
+                type: array
+                title: tokens
+                items:
+                  type: string
+                  title: token
+  
+  
+  /elect/authenticate:
+    post:
+      operationId: authenticate
       tags:
         - Elect
       requestBody:
@@ -368,30 +397,53 @@ paths:
         content:
           application/json:
             schema:
-              title: authentication-details
-              type: object
-              properties:
-                token:
-                  type: string
-                  description: Authentication token
-                ausweisnummer:
-                  type: number
-                  description: Ausweisnummer
-              required:
-                - token
-                - ausweisnummer
+              type: string
+              title: authentication-token
+              description: Authentication token
+
       responses:
         '200':
           description: User successfully authenticated
           content:
             application/json:
               schema:
-                title: sessionToken
+                title: authenticatedResponse
                 type: object
                 properties:
-                  sessionToken:
-                    type: string
-                    description: returns a session token
+                  wahl:
+                    $ref: '#/components/schemas/Wahl'
+                  wahlkreis:
+                    $ref: '#/components/schemas/Wahlkreis'
+        '401':
+          description: Invalid authentication token
+
+  /elect/vote:
+    post:
+      operationId: vote
+      tags:
+        - Elect
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: vote-request
+              properties:
+                token:
+                  type: string
+                  description: Authentication token
+                directCandidateId:
+                  type: integer
+                  description: Direct Candidate ID
+                partyId:
+                  type: integer
+                  description: Party ID
+      responses:
+        '200':
+          description: Vote successfully cast
+        '400':
+          description: Invalid request, e.g. the partyid or directCandidateId is not valid for the tokens wahlkreis
         '401':
           description: Invalid authentication token
 
