@@ -1,8 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, Float, Enum as SQLEnum
+from sqlalchemy import Column, Integer, Boolean, String, ForeignKey, Date, Float, Enum as SQLEnum
 from sqlalchemy.orm import relationship, declarative_base
 from enum import Enum
-
-Base = declarative_base()
+from openapi_server.database.base import Base
 
 class Wahl(Base):
     __tablename__ = 'wahlen'
@@ -169,3 +168,28 @@ class Strukturdatum(Base):
             f"wahlbeteiligung={self.wahlbeteiligung}, auslaenderanteil={self.auslaenderanteil}, "
             f"unternehmensdichte={self.unternehmensdichte}, einkommen={self.einkommen})>"
         )
+
+
+class Token(Base):
+    __tablename__ = 'token'
+
+    id = Column(Integer, primary_key=True, index=True)
+    # Relations
+    wahl = relationship('Wahl', back_populates='token')
+    wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)
+    wahlkreis = relationship('Wahlkreis', back_populates='token')
+    wahlkreis_id = Column(Integer, ForeignKey('wahlkreise.id'), nullable=False)
+
+    voted = Column(Boolean, nullable=False)
+    token = Column(String, nullable=False)
+
+    def __repr__(self):
+        return (
+            f"<Token(id={self.id}, "
+            f"wahl_id={self.wahl_id}, "
+            f"wahlkreis_id={self.wahlkreis_id}, "
+            f"voted={self.voted}, "
+            f"token='{self.token}')>"
+        )
+
+
