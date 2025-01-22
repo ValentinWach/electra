@@ -641,11 +641,14 @@ components:
               wahlkreis_id:
                 type: integer
                 title: Wahlkreis_Id
+              wahlkreis_name:
+                type: string
+                title: Wahlkreis_Name
               auslaenderanteil:
                 type: number
                 title: Wahlkreis_Id
-              stimmen:
-                type: integer
+              stimmanteil:
+                type: number
                 title: Stimmen
 
     Einkommen:
@@ -665,9 +668,12 @@ components:
               wahlkreis_id:
                 type: integer
                 title: Wahlkreis_Id
+              wahlkreis_name:
+                type: string
+                title: Wahlkreis_Name
               einkommen:
                 type: number
                 title: Wahlkreis_Id
-              stimmen:
-                type: integer
+              stimmanteil:
+                type: number
                 title: Stimmen
