@@ -34,7 +34,6 @@ class BaseWahlkreisApi:
     ) -> OverviewWahlkreis:
         try:
             with db_session() as db:
-                # SQL query for `generatefromaggregate=True`
                 if generatefromaggregate:
                     abgeordneter_query = text('''
                                 SELECT k.id, k.name, k.firstname, k.profession, k."yearOfBirth", ww.partei_id 
@@ -43,7 +42,6 @@ class BaseWahlkreisApi:
                                 WHERE ww.wahlkreis_id = :wahlkreisId AND ww.wahl_id = :wahlId;
                             ''')
                 else:
-                    # SQL query for `generatefromaggregate=False`
                     abgeordneter_query = text('''
                                 WITH candidate_votes AS
                                     (SELECT w.kandidat_id, w.partei_id, COUNT(*) AS votes
@@ -58,7 +56,6 @@ class BaseWahlkreisApi:
                                 FROM max_votes mv JOIN kandidaten k ON mv.kandidat_id = k.id;
                             ''')
 
-                # Execute the abgeordneter query
                 abgeordneter_results = db.execute(
                     abgeordneter_query,
                     {"wahlId": wahlid, "wahlkreisId": wahlkreisid}
@@ -69,7 +66,6 @@ class BaseWahlkreisApi:
 
                 direktkandidat = abgeordneter_results[0]
 
-                # Fetch the Partei details
                 partei = db.execute(
                     text('SELECT id, name, "shortName" FROM parteien WHERE id = :partei_id'),
                     {"partei_id": direktkandidat[5]}
@@ -78,7 +74,6 @@ class BaseWahlkreisApi:
                 if not partei:
                     raise HTTPException(status_code=404, detail="No Partei details found")
 
-                # Fetch the Wahlbeteiligung
                 wahlbeteiligung_query = text('''
                             SELECT wahlbeteiligung 
                             FROM strukturdaten 
@@ -93,7 +88,6 @@ class BaseWahlkreisApi:
                 if not wahlbeteiligung_results:
                     raise HTTPException(status_code=404, detail="No wahlbeteiligung found")
 
-                # Construct the response
                 overview = OverviewWahlkreis(
                     wahlbeteiligung=wahlbeteiligung_results[0],
                     direktkandidat=Abgeordneter(
@@ -149,7 +143,6 @@ class BaseWahlkreisApi:
                                                 p.id, p.name, p."shortName";
                                                 ''')
 
-                # Execute the query with parameterized input, avoiding direct string interpolation
                 stimmanteil_results = db.execute(stimmanteil_query,
                     {"wahlId": wahlid, "wahlkreisId": wahlkreisid}
                 ).fetchall()
@@ -158,7 +151,6 @@ class BaseWahlkreisApi:
                 raise HTTPException(status_code=404, detail="No stimmanteil found")
             print(stimmanteil_results)
 
-            # Return the WinningParties object with the filled lists
             stimmanteile = []
             for result in stimmanteil_results:
                 partei_id, partei_name, partei_short_name, stimmenanzahl, prozentualer_anteil = result
@@ -182,7 +174,6 @@ class BaseWahlkreisApi:
         self,
     ) -> WinningParties:
         try:
-            # Query the database for elections
             with db_session() as db:
                 erstimmen_winner_query = text('''
                                 SELECT parteien."shortName", parteien.id, parteien.name AS erstimmen_winner, wahlkreise.name FROM wahlkreise JOIN wahlkreis_winners ON wahlkreise.id = wahlkreis_winners.wahlkreis_id JOIN parteien ON wahlkreis_winners.partei_id = parteien.id WHERE wahlkreis_winners.wahl_id = :wahlId AND wahlkreis_winners.wahlkreis_id = :wahlkreisId;
@@ -190,7 +181,6 @@ class BaseWahlkreisApi:
                 zweitstimmen_winner_query = text('''
                                 SELECT parteien."shortName", parteien.id, parteien.name AS zweitstimmen_winner, wahlkreise.name FROM wahlkreise JOIN zweitstimmen_wahlkreis_partei ON wahlkreise.id = zweitstimmen_wahlkreis_partei.wahlkreise_id JOIN parteien ON parteien.id = zweitstimmen_wahlkreis_partei.parteien_id WHERE zweitstimmen_wahlkreis_partei.wahlen_id = :wahlId AND wahlkreise.id = :wahlkreisId AND zweitstimmen_wahlkreis_partei.stimmen_sum = (SELECT MAX(z2.stimmen_sum) FROM zweitstimmen_wahlkreis_partei z2 WHERE z2.wahlkreise_id = wahlkreise.id AND z2.wahlen_id = :wahlId);
                             ''')
-                # Execute the query with parameterized input, avoiding direct string interpolation
                 erstimmen_winner_results = db.execute(
                     erstimmen_winner_query,
                     {"wahlId": wahlId, "wahlkreisId": wahlkreisId}
@@ -204,7 +194,7 @@ class BaseWahlkreisApi:
                 raise HTTPException(status_code=404, detail="No winners found")
             erststimme_winners = [
                 WinningPartiesErststimmeInner(
-                    party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
+                    party=Partei(id=row[1], shortname=row[0], name=row[2]),
                     region_id=wahlkreisId,
                     region_name=row[3]
                 ) for row in erstimmen_winner_results
@@ -212,13 +202,12 @@ class BaseWahlkreisApi:
 
             zweitstimme_winners = [
                 WinningPartiesZweitstimmeInner(
-                    party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
+                    party=Partei(id=row[1], shortname=row[0], name=row[2]),
                     region_id=wahlkreisId,
                     region_name=row[3]
                 ) for row in zweitstimmen_winner_results
             ]
 
-            # Return the WinningParties object with the filled lists
             return WinningParties(
                 erststimme=erststimme_winners,
                 zweitstimme=zweitstimme_winners
@@ -232,7 +221,6 @@ class BaseWahlkreisApi:
         self,
     ) -> WinningParties:
         try:
-            # Query the database for elections
             with db_session() as db:
                 erstimmen_winner_query = text('''
                                 SELECT parteien."shortName", parteien.id, parteien.name AS erstimmen_winner, wahlkreise.id, wahlkreise.name FROM wahlkreise JOIN wahlkreis_winners ON wahlkreise.id = wahlkreis_winners.wahlkreis_id JOIN parteien ON wahlkreis_winners.partei_id = parteien.id WHERE wahlkreis_winners.wahl_id = :wahlId;
@@ -240,7 +228,6 @@ class BaseWahlkreisApi:
                 zweitstimmen_winner_query = text('''
                                 SELECT parteien."shortName", parteien.id, parteien.name AS zweitstimmen_winner, wahlkreise.id, wahlkreise.name FROM wahlkreise JOIN zweitstimmen_wahlkreis_partei ON wahlkreise.id = zweitstimmen_wahlkreis_partei.wahlkreise_id JOIN parteien ON parteien.id = zweitstimmen_wahlkreis_partei.parteien_id WHERE zweitstimmen_wahlkreis_partei.wahlen_id = :wahlId AND zweitstimmen_wahlkreis_partei.stimmen_sum = (SELECT MAX(z2.stimmen_sum) FROM zweitstimmen_wahlkreis_partei z2 WHERE z2.wahlkreise_id = wahlkreise.id AND z2.wahlen_id = :wahlId);
                             ''')
-                # Execute the query with parameterized input, avoiding direct string interpolation
                 erstimmen_winner_results = db.execute(
                     erstimmen_winner_query,
                     {"wahlId": wahlId}
@@ -254,7 +241,7 @@ class BaseWahlkreisApi:
                 raise HTTPException(status_code=404, detail="No winners found")
             erststimme_winners = [
                 WinningPartiesErststimmeInner(
-                    party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
+                    party=Partei(id=row[1], shortname=row[0], name=row[2]),
                     region_id=row[3],
                     region_name=row[4]
                 ) for row in erstimmen_winner_results
@@ -262,13 +249,12 @@ class BaseWahlkreisApi:
 
             zweitstimme_winners = [
                 WinningPartiesZweitstimmeInner(
-                    party=Partei(id=row[1], shortname=row[0], name=row[2]),  # Assuming Partei is an existing class
+                    party=Partei(id=row[1], shortname=row[0], name=row[2]),
                     region_id=row[3],
                     region_name=row[4]
                 ) for row in zweitstimmen_winner_results
             ]
 
-            # Return the WinningParties object with the filled lists
             return WinningParties(
                 erststimme=erststimme_winners,
                 zweitstimme=zweitstimme_winners
@@ -283,9 +269,7 @@ class BaseWahlkreisApi:
             self
     ) -> Auslaenderanteil:
         try:
-            # Use the context manager for the database session
             with db_session() as db:
-                # Query to fetch foreigner share for the specified election
                 auslaenderanteil_query = text('''
                     SELECT s.wahlkreis_id, s.auslaenderanteil, zwp.stimmen_sum
                     FROM strukturdaten s
@@ -307,7 +291,6 @@ class BaseWahlkreisApi:
                         detail=f"No foreigner share data found for Wahl ID: {wahlid}"
                     )
 
-                # Initialize the response object
                 auslaenderanteil_response = Auslaenderanteil(wahlkreise=[])
 
                 for result in auslaenderanteil_results:
@@ -341,9 +324,7 @@ class BaseWahlkreisApi:
             self
     ) -> Einkommen:
         try:
-            # Use the context manager for the database session
             with db_session() as db:
-                # Query to fetch foreigner share for the specified election
                 einkommen_query = text('''
                     SELECT wahlkreis_id, einkommen, zwp.stimmen_sum
                     FROM strukturdaten s
@@ -365,10 +346,8 @@ class BaseWahlkreisApi:
                         detail=f"No foreigner share data found for Wahl ID: {wahlid}"
                     )
 
-                # Initialize the response object
                 einkommen_response = Einkommen(wahlkreise=[])
 
-                # Iterate through results and fetch associated votes for each wahlkreis
                 for result in einkommen_results:
                     wahlkreis_id, einkommen_value, stimmen_result = result
 

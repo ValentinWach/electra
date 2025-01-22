@@ -1,5 +1,4 @@
 # coding: utf-8
-import pdb
 from fastapi import HTTPException
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 
@@ -18,8 +17,6 @@ from openapi_server.models.ueberhang_bundesland import UeberhangBundesland
 from openapi_server.models.wahlkreis import Wahlkreis
 from openapi_server.models.bundesland import Bundesland
 
-from openapi_server.models.wahl import Wahl
-from openapi_server.database.models import Wahl as WahlModel
 from openapi_server.database.connection import Session as db_session
 
 
@@ -35,7 +32,6 @@ class BaseGlobalApi:
         self
     ) -> List[Abgeordneter]:
         try:
-            # Query the database for elections
             with db_session() as db:
 
                 abgeordnete = []
@@ -73,9 +69,7 @@ class BaseGlobalApi:
         self
     ) -> ClosestWinners:
         try:
-            # Query the database for elections
             with db_session() as db:
-                # Query for closest winners
                 closest_for_party_query = text('''
                     SELECT p.id, p.name, p."shortName", wk.id, wk.name, bl.id AS bundesland_id, bl.name AS bundesland_name, result_status, k.id, k.name, k.firstname, k."yearOfBirth", k.profession
                     FROM wahlkreis_knappste_sieger wks JOIN parteien p ON wks.partei_id = p.id JOIN kandidaten k ON wks.kandidat_id = k.id JOIN wahlkreise wk ON wks.wahlkreis_id = wk.id JOIN bundeslaender bl ON wk.bundesland_id = bl.id
@@ -84,7 +78,6 @@ class BaseGlobalApi:
                 closest_for_party_results = db.execute(closest_for_party_query,
                                                        {"wahlid": wahlId, "partyid": parteiId}).fetchall()
 
-                # Create the ClosestWinners instance for the current party
                 closest_winner = ClosestWinners(
                     party=Partei(id=closest_for_party_results[0][0], name=closest_for_party_results[0][1], shortname=closest_for_party_results[0][2]),
                     closest_type=closest_for_party_results[0][7],
@@ -124,7 +117,6 @@ class BaseGlobalApi:
         self
     ) -> SeatDistribution:
         try:
-            # Query the database for elections
             with db_session() as db:
                 query = text('''
                                 SELECT parteien."shortName", name, partei_id, ov_sitzkontingente_erhoehung.sitze_nach_erhoehung, stimmen_sum 
@@ -132,7 +124,6 @@ class BaseGlobalApi:
                                 JOIN parteien ON ov_sitzkontingente_erhoehung.partei_id = parteien.id
                                 WHERE ov_sitzkontingente_erhoehung.wahl_id = :wahlid
                             ''')
-                # Execute the query with parameterized input, avoiding direct string interpolation
                 query_results = db.execute(query, {"wahlid": wahlId}).fetchall()
             if not query_results:
                 raise HTTPException(status_code=404, detail="No elections found")
@@ -142,18 +133,15 @@ class BaseGlobalApi:
             for row in query_results:
                 shortname, name, party_id, seats, total = row
 
-                # Parse individual party details
                 party = Partei(id=party_id, name=name, shortname=shortname)
 
-                # Add to distribution list
                 distribution_inner = SeatDistributionDistributionInner(
                     party=party,
-                    seats=int(seats)  # Convert Decimal to int
+                    seats=int(seats)
                 )
                 distribution.append(distribution_inner)
 
-                # Update total seats
-                total_seats = int(total)  # Same total for all rows; will overwrite
+                total_seats = int(total)
 
             return SeatDistribution(distribution=distribution, numberofseats=total_seats)
 
@@ -182,7 +170,6 @@ class BaseGlobalApi:
                                 zweitstimmen_partei z JOIN parteien p on z.parteien_id = p.id
                             WHERE wahlen_id = :wahlId;
                             ''')
-                # Execute the query with parameterized input, avoiding direct string interpolation
                 stimmanteil_results = db.execute(stimmanteil_query,
                     {"wahlId": wahlId}
                 ).fetchall()
@@ -190,7 +177,6 @@ class BaseGlobalApi:
             if not stimmanteil_results:
                 raise HTTPException(status_code=404, detail="No winners found")
 
-            # Return the WinningParties object with the filled lists
             stimmanteile = []
             for result in stimmanteil_results:
                 id, name, short_name, stimmenanzahl, prozentualer_anteil = result
