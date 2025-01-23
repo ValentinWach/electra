@@ -1,90 +1,115 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { fetchDirektkandidaten, fetchCompetingParties } from '../apiServices';
-import { Abgeordneter, Partei, Wahlkreis, WahlzettelParteien, Wahl } from '../api';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { Abgeordneter, Wahlkreis, WahlzettelParteien, Wahl, WahlzettelParteiWrapper } from '../api';
+import { authenticateVoter, fetchDirektkandidaten} from '../apiServices';
+import { fetchCompetingParties } from '../apiServices';
 
 interface VoteContextType {
     token: string | undefined;
-    wahlid: number | undefined;
     wahl: Wahl | undefined;
-    wahlkreisid: number | undefined;
     wahlkreis: Wahlkreis | undefined;
     parties: WahlzettelParteien | undefined;
     candidates: Abgeordneter[] | undefined;
-    selectedDirectCandidateId: number | null;
-    selectedPartyId: number | null;
+    selectedDirectCandidate: Abgeordneter | null;
+    selectedParty: WahlzettelParteiWrapper | null;
     isVoting: boolean;
-    startVoting: (token: string, wahlid: number, wahl: Wahl, wahlkreisid: number, wahlkreis: Wahlkreis, parties: WahlzettelParteien, candidates: Abgeordneter[]) => void;
-    setDirectCandidate: (candidateId: number | null) => void;
-    setParty: (partyId: number | null) => void;
+    setSelectedDirectCandidate: (candidate: Abgeordneter | null) => void;
+    setSelectedParty: (party: WahlzettelParteiWrapper | null) => void;
     resetVoting: () => void;
+    initialize: (token: string, wahlId: number, wahlkreisId: number, wahl?: Wahl, wahlkreis?: Wahlkreis) => Promise<void>;
 }
 
 const VoteContext = createContext<VoteContextType | undefined>(undefined);
 
 export const VoteProvider = ({ children }: { children: ReactNode }) => {
-    const [state, setState] = useState<Omit<VoteContextType, 'startVoting' | 'setDirectCandidate' | 'setParty' | 'resetVoting'>>({
+
+    // Initialize on page reload
+    useEffect(() => {
+        const storedToken = sessionStorage.getItem('token');
+        const storedWahlId = sessionStorage.getItem('wahlId');
+        const storedWahlkreisId = sessionStorage.getItem('wahlkreisId');
+        
+        if (storedToken && storedWahlId && storedWahlkreisId) {
+            initialize(
+                storedToken,
+                parseInt(storedWahlId),
+                parseInt(storedWahlkreisId)
+            ).catch(console.error);
+        }
+    }, []);
+
+    //If you pass in wahl and wahlkreis, it will not fetch them from the server. Better for performance.
+    const initialize = async (token: string, wahlId: number, wahlkreisId: number, wahl?: Wahl, wahlkreis?: Wahlkreis) => {
+        try {
+            const [direktkandidaten, parties] = await Promise.all([
+                fetchDirektkandidaten(wahlId, wahlkreisId),
+                fetchCompetingParties(wahlId, wahlkreisId),
+            ]);
+            if(wahl === undefined || wahlkreis === undefined) {
+                const response = await authenticateVoter(token);
+                wahl = response.wahl;
+                wahlkreis = response.wahlkreis;
+            }
+            setState(prevState => ({
+                ...prevState,
+                token,
+                wahl,
+                wahlkreis,
+                parties,
+                candidates: direktkandidaten.kandidaten,
+                isVoting: true,
+                selectedDirectCandidate: null,
+                selectedParty: null
+            }));
+        } catch (error) {
+            console.error('Failed to initialize voting context:', error);
+            throw error;
+        }
+    };
+
+    const [state, setState] = useState<Omit<VoteContextType, 'setSelectedDirectCandidate' | 'setSelectedParty' | 'resetVoting'>>({
         token: undefined,
-        wahlid: undefined,
         wahl: undefined,
-        wahlkreisid: undefined,
         wahlkreis: undefined,
         parties: undefined,
         candidates: undefined,
-        selectedDirectCandidateId: null,
-        selectedPartyId: null,
-        isVoting: false
+        selectedDirectCandidate: null,
+        selectedParty: null,
+        isVoting: false,
+        initialize
     });
 
-    const startVoting = (token: string, wahlid: number, wahl: Wahl, wahlkreisid: number, wahlkreis: Wahlkreis, parties: WahlzettelParteien, candidates: Abgeordneter[]) => {
-        setState({
-            ...state,
-            token,
-            wahlid,
-            wahl,
-            wahlkreisid,
-            wahlkreis,
-            parties,
-            candidates,
-            isVoting: true,
-            selectedDirectCandidateId: null,
-            selectedPartyId: null
-        });
+    const setSelectedDirectCandidate = (candidate: Abgeordneter | null) => {
+        setState(prevState => ({
+            ...prevState,
+            selectedDirectCandidate: candidate ?? null
+        }));
     };
 
-    const setDirectCandidate = (candidateId: number | null) => {
-        setState({
-            ...state,
-            selectedDirectCandidateId: candidateId
-        });
-    };
-
-    const setParty = (partyId: number | null) => {
-        setState({
-            ...state,
-            selectedPartyId: partyId
-        });
+    const setSelectedParty = (party: WahlzettelParteiWrapper | null) => {
+        setState(prevState => ({
+            ...prevState,
+            selectedParty: party ?? null
+        }));
     };
 
     const resetVoting = () => {
         setState({
             token: undefined,
-            wahlid: undefined,
             wahl: undefined,
-            wahlkreisid: undefined,
             wahlkreis: undefined,
             parties: undefined,
             candidates: undefined,
-            selectedDirectCandidateId: null,
-            selectedPartyId: null,
-            isVoting: false
+            selectedDirectCandidate: null,
+            selectedParty: null,
+            isVoting: false,
+            initialize
         });
     };
 
     const value = {
         ...state,
-        startVoting,
-        setDirectCandidate,
-        setParty,
+        setSelectedDirectCandidate,
+        setSelectedParty,
         resetVoting
     };
 
