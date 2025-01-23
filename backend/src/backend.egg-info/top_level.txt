@@ -1,2 +1,2 @@
-database
+app
 openapi_server

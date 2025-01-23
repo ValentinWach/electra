@@ -24,6 +24,7 @@ from fastapi import (  # noqa: F401
 
 from openapi_server.models.authenticated_response import AuthenticatedResponse
 from openapi_server.models.authentication_request import AuthenticationRequest
+from openapi_server.models.direktkandidaten import Direktkandidaten
 from openapi_server.models.extra_models import TokenModel  # noqa: F401
 from pydantic import StrictInt
 from openapi_server.models.vote_request import VoteRequest
@@ -51,6 +52,20 @@ async def authenticate(
     elect_api = BaseElectApi()
     return await elect_api.authenticate(authentication_request)
 
+@router.get(
+    "/elect/{wahlid}/direktkandidaten/{wahlkreisid}",
+    responses={
+        200: {"model": Direktkandidaten, "description": "Returning the direktkandidaten per wahlkreis"},
+    },
+    tags=["Elect"],
+    response_model_by_alias=True,
+)
+async def get_direktkandidaten(
+    wahlid: StrictInt = Path(..., description=""),
+    wahlkreisid: StrictInt = Path(..., description=""),
+) -> Direktkandidaten:
+    elect_api = BaseElectApi()
+    return await elect_api.get_direktkandidaten(wahlid, wahlkreisid)
 
 @router.get(
     "/elect/{wahlid}/parteien/{wahlkreisid}",

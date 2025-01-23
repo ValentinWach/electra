@@ -38,7 +38,7 @@ class BaseElectApi:
 
             with db_session() as db:
                 query = text("""
-                    SELECT w.id, w.date, wk.id, wk.name, b.id, b.name
+                    SELECT w.id, w.date, wk.id, wk.name, b.id, b.name, t.voted
                     FROM token t
                     INNER JOIN wahlen w ON t.wahl_id = w.id
                     INNER JOIN wahlkreise wk ON t.wahlkreis_id = wk.id
@@ -48,11 +48,11 @@ class BaseElectApi:
 
                 result = db.execute(query, {"token_value": token_value}).fetchone()
 
-                if not result:
+                if not result or result.voted == True:
                     raise HTTPException(
                         status_code=401, detail="Invalid authentication token"
                     )
-                wahl_id, date, wahlkreis_id, wahlkreis_name, bundesland_id, name = result
+                wahl_id, date, wahlkreis_id, wahlkreis_name, bundesland_id, name, voted = result
 
                 bundesland = Bundesland(
                     id=bundesland_id,
@@ -140,9 +140,9 @@ class BaseElectApi:
 
 
     async def get_direktkandidaten(
+        self,
         wahlid: StrictInt,
         wahlkreisid: StrictInt,
-        self,
     ) -> Direktkandidaten:
         try:
             with db_session() as db:
@@ -180,4 +180,31 @@ class BaseElectApi:
             self,
             vote_request: VoteRequest,
     ) -> None:
-        ...
+        try:
+            token_value = vote_request.token
+
+            with db_session() as db:
+                query = text("""
+                    SELECT w.id, w.date, wk.id, wk.name, b.id, b.name, t.voted
+                    FROM token t
+                    INNER JOIN wahlen w ON t.wahl_id = w.id
+                    INNER JOIN wahlkreise wk ON t.wahlkreis_id = wk.id
+                    INNER JOIN bundeslaender b on b.id = wk.bundesland_id
+                    WHERE t.token = :token_value
+                """)
+
+                result = db.execute(query, {"token_value": token_value}).fetchone()
+
+                if not result or result.voted == True:
+                    raise HTTPException(
+                        status_code=401, detail="Invalid authentication token"
+                    )
+
+        except HTTPException as http_ex:
+            raise http_ex
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Internal server error: {str(e)}"
+            )
+
+

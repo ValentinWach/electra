@@ -32,12 +32,12 @@ Copy `.env.example` to `.env` and update the values as needed.
 
 4. Run the server:
 ```bash
-uvicorn src.openapi_server.main:app --host 0.0.0.0 --port 8000
+uvicorn src.openapi_server.main:app --reload
 ```
 
 The API documentation will be available at:
-- Swagger UI: http://localhost:8080/docs
-- ReDoc: http://localhost:8080/redoc
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
 
 ## Development
 
