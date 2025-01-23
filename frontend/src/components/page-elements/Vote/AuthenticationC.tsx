@@ -17,7 +17,7 @@ export default function AuthenticationC({ authentificationError, isAuthenticatin
 
     const authentificationErrorData: AlertData = {
         title: "Authentifizierung fehlgeschlagen",
-        message: "Die Authentifizierung ist fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut. Wenn der Fehler besteht, wenden Sie sich bitte an den Wahlhelfer.",
+        message: "Die Authentifizierung ist fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut. Wenn der Fehler besteht, wenden Sie sich bitte an anwesendes Personal.",
         type: AlertType.error
     }
 

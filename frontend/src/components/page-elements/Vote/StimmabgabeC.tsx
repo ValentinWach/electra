@@ -98,7 +98,7 @@ export default function StimmabgabeC() {
                     <ResultDialogC success={true} useBackdrop={false} title="Wahl erfolgreich" message="Ihre Stimme wurde gespeichert. Sie werden jetzt abgemeldet." />
                 )}
                 {submitVoteError && (
-                    <ResultDialogC success={false} useBackdrop={false} title="Fehler" message="Es ist ein Fehler aufgetreten. Bitte wenden Sie sich an den Wahlhelfer. Sie werden jetzt abgemeldet." />
+                    <ResultDialogC success={false} useBackdrop={false} title="Fehler" message="Es ist ein Fehler aufgetreten. Bitte wenden Sie sich an anwesendes Personal. Sie werden jetzt abgemeldet." />
                 )}
             </div>
         </>
