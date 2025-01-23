@@ -32,13 +32,14 @@ export interface Direktkandidaten {
      * @type {Array<Abgeordneter>}
      * @memberof Direktkandidaten
      */
-    kandidaten?: Array<Abgeordneter>;
+    kandidaten: Array<Abgeordneter>;
 }
 
 /**
  * Check if a given object implements the Direktkandidaten interface.
  */
 export function instanceOfDirektkandidaten(value: object): value is Direktkandidaten {
+    if (!('kandidaten' in value) || value['kandidaten'] === undefined) return false;
     return true;
 }
 
@@ -52,7 +53,7 @@ export function DirektkandidatenFromJSONTyped(json: any, ignoreDiscriminator: bo
     }
     return {
         
-        'kandidaten': json['kandidaten'] == null ? undefined : ((json['kandidaten'] as Array<any>).map(AbgeordneterFromJSON)),
+        'kandidaten': ((json['kandidaten'] as Array<any>).map(AbgeordneterFromJSON)),
     };
 }
 
@@ -67,7 +68,7 @@ export function DirektkandidatenToJSONTyped(value?: Direktkandidaten | null, ign
 
     return {
         
-        'kandidaten': value['kandidaten'] == null ? undefined : ((value['kandidaten'] as Array<any>).map(AbgeordneterToJSON)),
+        'kandidaten': ((value['kandidaten'] as Array<any>).map(AbgeordneterToJSON)),
     };
 }
 

@@ -15,26 +15,27 @@
 
 import * as runtime from '../runtime';
 import type {
-  AuthenticationDetails,
+  AuthenticatedResponse,
+  AuthenticationRequest,
   Direktkandidaten,
-  ParteiWahlzettel,
-  SessionToken,
+  VoteRequest,
+  WahlzettelParteien,
 } from '../models/index';
 import {
-    AuthenticationDetailsFromJSON,
-    AuthenticationDetailsToJSON,
+    AuthenticatedResponseFromJSON,
+    AuthenticatedResponseToJSON,
+    AuthenticationRequestFromJSON,
+    AuthenticationRequestToJSON,
     DirektkandidatenFromJSON,
     DirektkandidatenToJSON,
-    ParteiWahlzettelFromJSON,
-    ParteiWahlzettelToJSON,
-    SessionTokenFromJSON,
-    SessionTokenToJSON,
+    VoteRequestFromJSON,
+    VoteRequestToJSON,
+    WahlzettelParteienFromJSON,
+    WahlzettelParteienToJSON,
 } from '../models/index';
 
-export interface ElectWahlidAuthenticateWahlkreisidPostRequest {
-    wahlid: number;
-    wahlkreisid: number;
-    authenticationDetails: AuthenticationDetails;
+export interface AuthenticateRequest {
+    authenticationRequest: AuthenticationRequest;
 }
 
 export interface GetCompetingPartiesRequest {
@@ -47,33 +48,22 @@ export interface GetDirektkandidatenRequest {
     wahlkreisid: number;
 }
 
+export interface VoteOperationRequest {
+    voteRequest: VoteRequest;
+}
+
 /**
  * 
  */
 export class ElectApi extends runtime.BaseAPI {
 
     /**
-     * Authenticate with token
      */
-    async electWahlidAuthenticateWahlkreisidPostRaw(requestParameters: ElectWahlidAuthenticateWahlkreisidPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SessionToken>> {
-        if (requestParameters['wahlid'] == null) {
+    async authenticateRaw(requestParameters: AuthenticateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AuthenticatedResponse>> {
+        if (requestParameters['authenticationRequest'] == null) {
             throw new runtime.RequiredError(
-                'wahlid',
-                'Required parameter "wahlid" was null or undefined when calling electWahlidAuthenticateWahlkreisidPost().'
-            );
-        }
-
-        if (requestParameters['wahlkreisid'] == null) {
-            throw new runtime.RequiredError(
-                'wahlkreisid',
-                'Required parameter "wahlkreisid" was null or undefined when calling electWahlidAuthenticateWahlkreisidPost().'
-            );
-        }
-
-        if (requestParameters['authenticationDetails'] == null) {
-            throw new runtime.RequiredError(
-                'authenticationDetails',
-                'Required parameter "authenticationDetails" was null or undefined when calling electWahlidAuthenticateWahlkreisidPost().'
+                'authenticationRequest',
+                'Required parameter "authenticationRequest" was null or undefined when calling authenticate().'
             );
         }
 
@@ -84,27 +74,26 @@ export class ElectApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/elect/{wahlid}/authenticate/{wahlkreisid}`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))).replace(`{${"wahlkreisid"}}`, encodeURIComponent(String(requestParameters['wahlkreisid']))),
+            path: `/elect/authenticate`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: AuthenticationDetailsToJSON(requestParameters['authenticationDetails']),
+            body: AuthenticationRequestToJSON(requestParameters['authenticationRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => SessionTokenFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => AuthenticatedResponseFromJSON(jsonValue));
     }
 
     /**
-     * Authenticate with token
      */
-    async electWahlidAuthenticateWahlkreisidPost(requestParameters: ElectWahlidAuthenticateWahlkreisidPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SessionToken> {
-        const response = await this.electWahlidAuthenticateWahlkreisidPostRaw(requestParameters, initOverrides);
+    async authenticate(requestParameters: AuthenticateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AuthenticatedResponse> {
+        const response = await this.authenticateRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
      */
-    async getCompetingPartiesRaw(requestParameters: GetCompetingPartiesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ParteiWahlzettel>> {
+    async getCompetingPartiesRaw(requestParameters: GetCompetingPartiesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WahlzettelParteien>> {
         if (requestParameters['wahlid'] == null) {
             throw new runtime.RequiredError(
                 'wahlid',
@@ -130,12 +119,12 @@ export class ElectApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ParteiWahlzettelFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => WahlzettelParteienFromJSON(jsonValue));
     }
 
     /**
      */
-    async getCompetingParties(requestParameters: GetCompetingPartiesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ParteiWahlzettel> {
+    async getCompetingParties(requestParameters: GetCompetingPartiesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WahlzettelParteien> {
         const response = await this.getCompetingPartiesRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -176,6 +165,39 @@ export class ElectApi extends runtime.BaseAPI {
     async getDirektkandidaten(requestParameters: GetDirektkandidatenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Direktkandidaten> {
         const response = await this.getDirektkandidatenRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async voteRaw(requestParameters: VoteOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['voteRequest'] == null) {
+            throw new runtime.RequiredError(
+                'voteRequest',
+                'Required parameter "voteRequest" was null or undefined when calling vote().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/elect/vote`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: VoteRequestToJSON(requestParameters['voteRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     */
+    async vote(requestParameters: VoteOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.voteRaw(requestParameters, initOverrides);
     }
 
 }

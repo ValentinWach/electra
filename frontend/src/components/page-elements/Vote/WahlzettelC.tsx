@@ -1,89 +1,14 @@
-export default function WahlzettelC({ checkMode = false }: { checkMode?: boolean }) {
+import { Abgeordneter } from "../../../api/models/Abgeordneter";
+import { Wahlkreis, WahlzettelParteien, WahlzettelParteiWrapper } from "../../../api";
+import { useVote } from "../../../context/VoteContext";
 
-    const candidates = checkMode ? [
-        {
-            name: "Künast, Renate",
-            partyShortName: "Grüne",
-            partyLongName: "BÜNDNIS 90/DIE GRÜNEN",
-            description: "Mitgdlied des deutschen Bundestags (MdB)",
-            location: "Berlin"
-        }
-    ] : [
-        {
-            name: "Künast, Renate",
-            partyShortName: "Grüne",
-            partyLongName: "BÜNDNIS 90/DIE GRÜNEN",
-            description: "Mitgdlied des deutschen Bundestags (MdB)",
-            location: "Berlin"
-        },
-        {
-            name: "Merkel, Angela",
-            partyShortName: "CDU",
-            partyLongName: "Christlich Demokratische Union Deutschlands",
-            description: "Bundeskanzlerin a.D.",
-            location: "Berlin"
-        },
-        {
-            name: "Scholz, Olaf",
-            partyShortName: "SPD",
-            partyLongName: "Sozialdemokratische Partei Deutschlands",
-            description: "Bundeskanzler",
-            location: "Hamburg"
-        },
-        {
-            name: "Lindner, Christian",
-            partyShortName: "FDP",
-            partyLongName: "Freie Demokratische Partei",
-            description: "Bundesminister der Finanzen",
-            location: "Nordrhein-Westfalen"
-        },
-        {
-            name: "Wagenknecht, Sahra",
-            partyShortName: "BSW",
-            partyLongName: "Bündnis Sahra Wagenknecht",
-            description: "Mitglied des deutschen Bundestags (MdB)",
-            location: "Nordrhein-Westfalen"
-        }
-    ]
+export default function WahlzettelC({ wahlkreis, directCandidates, parties, checkMode = false }: { checkMode?: boolean, wahlkreis?: Wahlkreis, directCandidates?: Abgeordneter[], parties?: WahlzettelParteiWrapper[] }) {
 
-    const partyLists = checkMode ? [
-        {
-            partyShortName: "CDU",
-            partyLongName: "Christlich Demokratische Union Deutschlands",
-            candidates: "Peter Meier, Johannes Müller, Markus Schmidt, Max Mustermann"
-        }
-    ] : [
-        {
-            partyShortName: "CDU",
-            partyLongName: "Christlich Demokratische Union Deutschlands",
-            candidates: "Peter Meier, Johannes Müller, Markus Schmidt, Max Mustermann"
-        },
-        {
-            partyShortName: "SPD",
-            partyLongName: "Sozialdemokratische Partei Deutschlands",
-            candidates: "Anna Schmidt, Michael Weber, Sarah Meyer, Thomas Klein"
-        },
-        {
-            partyShortName: "Grüne",
-            partyLongName: "BÜNDNIS 90/DIE GRÜNEN",
-            candidates: "Lisa Wagner, Felix Bauer, Julia Koch, David Fischer"
-        },
-        {
-            partyShortName: "FDP",
-            partyLongName: "Freie Demokratische Partei",
-            candidates: "Martin Schulz, Laura Wolf, Daniel König, Sophie Becker"
-        },
-        {
-            partyShortName: "BSW",
-            partyLongName: "Bündnis Sahra Wagenknecht",
-            candidates: "Robert Berg, Maria Krause, Paul Winter, Emma Richter"
-        }
-    ]
+    const {selectedDirectCandidateId, selectedPartyId, setDirectCandidate, setParty } = useVote();
 
     const handleClearSelection = () => {
-        const candidateInputs = document.getElementsByName('candidate');
+        const candidateInputs = document.getElementsByName('direct-candidate');
         const partyInputs = document.getElementsByName('party');
-
         candidateInputs.forEach((input: any) => {
             input.checked = false;
         });
@@ -91,14 +16,17 @@ export default function WahlzettelC({ checkMode = false }: { checkMode?: boolean
         partyInputs.forEach((input: any) => {
             input.checked = false;
         });
+        setDirectCandidate(null);
+        setParty(null);
     };
 
     return (
         <>
+            {wahlkreis && directCandidates && parties && (
             <div className="flex flex-col items-end justify-center">
                 <div className="bg-[#f5f5f0] p-8 rounded-lg shadow-md">
-                    <h2 className="font-bold text-2xl pb-10 text-center w-[1000px]">{checkMode ? "Dies sind Ihre 2 Stimmen." : "Sie haben 2 Stimmen"} </h2>
-                    <h2 className="font-bold text-lg pb-10 text-center w-[1000px]">Ihr Wahlkreis: 124 Berlin-Rammersdorf-Lippe-II</h2>
+                    <h2 className="font-bold text-3xl pb-10 text-center w-[1000px]">{checkMode ? "Dies sind Ihre 2 Stimmen." : "Sie haben 2 Stimmen"} </h2>
+                    <h2 className="font-bold text-lg pb-10 text-center w-[1000px]">Ihr Wahlkreis: {wahlkreis.id} {wahlkreis.name}</h2>
                     <div className="flex flex-row items-start justify-start gap-10 bg-[#f5f5f0] pb-5">
                         <h2 className="font-bold text-lg text-center w-[500px]">Hier 1 Stimme für die Wahl eines/einer Wahlkreiseabgeordneten <br /> (Erststimme)</h2>
                         <h2 className="font-bold text-lg text-center w-[500px]">Hier 1 Stimme für die Wahl einer Landesliste (Partei) <br /> (Zweitstimme)</h2>
@@ -106,33 +34,35 @@ export default function WahlzettelC({ checkMode = false }: { checkMode?: boolean
                     <div className="flex flex-row items-start justify-start gap-10 bg-[#f5f5f0]">
                         <div className="flex flex-col gap-2">
                             <table className="w-[500px]">
-                                {candidates.map((candidate, index) => {
-                                    const [lastName, firstName] = candidate.name.split(", ");
+                                {directCandidates.map((candidate, index) => {
                                     return (
                                         <tr key={index} className="border-solid border ">
                                             <td className="border-solid border border-black text-center font-bold w-[40px]">{index + 1}</td>
                                             <td className="border-solid border border-black pl-2 pr-4 w-[224px] border-r-0 h-24 overflow-hidden">
                                                 <div className="flex flex-col items-start justify-between h-full">
                                                     <p className="flex flex-wrap">
-                                                        <span className="font-bold text-xl">{lastName},&nbsp;</span>
-                                                        <span className="text-xl">{firstName}</span>
+                                                        <span className="font-bold text-xl">{candidate.name},&nbsp;</span>
+                                                        <span className="font-bold text-xl">{candidate.firstname}</span>
                                                     </p>
                                                     <div>
-                                                        <p className="text-xs">{candidate.description}</p>
-                                                        <p className="text-xs">{candidate.location}</p>
+                                                        <p className="text-xs">{candidate.profession ?? ""}</p>
+                                                        {/*<p className="text-xs">{candidate.location}</p>*/}
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="border-solid border border-black border-l-0 align-bottom pb-3 w-[224px] h-24 overflow-hidden">
-                                                <p className="font-bold text-lg">{candidate.partyShortName}</p>
-                                                <p className="text-xs">{candidate.partyLongName}</p>
+                                                <p className="font-bold text-lg">{candidate.party?.shortname ?? ""}</p>
+                                                <p className="text-xs">{candidate.party?.name ?? ""}</p>
                                             </td>
                                             <td className="border-solid border w-11 border-black">
                                                 <div className="relative w-11 h-11">
                                                     <input
                                                         type="radio"
-                                                        name="candidate"
+                                                        disabled={checkMode}
+                                                        name="direct-candidate"
+                                                        onChange={(e) => e.target.checked && setDirectCandidate(candidate.id)}
                                                         value={index + 1}
+                                                        checked={selectedDirectCandidateId === candidate.id}
                                                         className="peer appearance-none w-11 h-11 border border-black rounded-full hover:cursor-pointer"
                                                     />
                                                     <div className="absolute inset-0 hidden peer-checked:block pointer-events-none">
@@ -148,13 +78,16 @@ export default function WahlzettelC({ checkMode = false }: { checkMode?: boolean
                         </div>
                         <div className="flex flex-col gap-2">
                             <table className="w-[500px]">
-                                {partyLists.map((party, index) => (
+                                {parties.map((party, index) => (
                                     <tr key={index} className="border-solid border border-blue-900">
                                         <td className="border-solid border w-11 border-blue-900">
                                             <div className="relative w-11 h-11">
                                                 <input
                                                     type="radio"
+                                                    disabled={checkMode}
                                                     name="party"
+                                                    onChange={(e) => e.target.checked && setParty(party.partei.id)}
+                                                    checked={selectedPartyId === party.partei.id}
                                                     value={`list-${index + 1}`}
                                                     className="peer appearance-none w-11 h-11 border border-blue-900 rounded-full hover:cursor-pointer"
                                                 />
@@ -167,14 +100,14 @@ export default function WahlzettelC({ checkMode = false }: { checkMode?: boolean
                                         <td className="border-solid border border-blue-900 pl-2 pr-4 w-[154px] border-r-0 h-24 overflow-hidden">
                                             <div className="flex flex-col items-start justify-center h-full">
                                                 <p className="flex flex-wrap">
-                                                    <span className="font-bold text-xl text-blue-900">{party.partyShortName}</span>
+                                                    <span className="font-bold text-xl text-blue-900">{party.partei.shortname}</span>
                                                 </p>
                                             </div>
                                         </td>
                                         <td className="border-solid border border-blue-900 border-l-0 align-bottom pb-1 pr-3 w-[294px] h-24 overflow-hidden">
                                             <div className="flex flex-col items-start justify-between h-full">
-                                                <p className="font-bold text-sm text-blue-900">{party.partyLongName}</p>
-                                                <p className="text-xs text-blue-900">{party.candidates}</p>
+                                                <p className="font-bold text-sm text-blue-900">{party.partei.name ?? ""}</p>
+                                                <p className="text-xs text-blue-900">{party.topfive.map(p => `${p.firstname} ${p.name}`).join(", ")}</p>
                                             </div>
                                         </td>
                                         <td className="border-solid border border-blue-900 text-center font-bold w-[40px] text-blue-900">{index + 1}</td>
@@ -190,8 +123,9 @@ export default function WahlzettelC({ checkMode = false }: { checkMode?: boolean
                     className="mt-5 rounded-md bg-rose-800 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
                     Auswahl löschen
-                </button>}
-            </div>
+                    </button>}
+                </div>
+            )}
         </>
     );
 }

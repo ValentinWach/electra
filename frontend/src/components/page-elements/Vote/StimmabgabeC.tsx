@@ -5,10 +5,12 @@ import AlertC from "../../UI-element-components/AlertC";
 import { AlertData } from "../../../models/AlertData";
 import { AlertType } from "../../../models/AlertData";
 import SuccessDialogC from "../../UI-element-components/SuccessDialogC";
+import { useVote } from "../../../context/VoteContext";
 
 export default function StimmabgabeC() {
     const [showFinalWarning, setShowFinalWarning] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const { wahlkreis, parties, candidates, selectedDirectCandidateId, selectedPartyId } = useVote();
 
     const alertData: AlertData = {
         type: AlertType.info,
@@ -21,7 +23,7 @@ export default function StimmabgabeC() {
             <AlertC alertData={alertData} />
             <div className="relative">
                 <div className={`flex flex-col items-center ${showFinalWarning ? 'opacity-50' : ''}`}>
-                    <WahlzettelC checkMode={true} />
+                    <WahlzettelC checkMode={true} wahlkreis={wahlkreis} directCandidates={candidates?.filter(candidate => candidate.id === selectedDirectCandidateId)} parties={parties?.parteien?.filter(party => party.partei.id === selectedPartyId) ?? []} onSelectDirectCandidate={() => {}} onSelectParty={() => {}} />
                     <div className="w-full flex flex-row gap-2 items-end justify-end">
                         <button
                             type="button"

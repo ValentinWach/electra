@@ -27,6 +27,12 @@ export interface EinkommenWahlkreiseInner {
     wahlkreisId: number;
     /**
      * 
+     * @type {string}
+     * @memberof EinkommenWahlkreiseInner
+     */
+    wahlkreisName?: string;
+    /**
+     * 
      * @type {number}
      * @memberof EinkommenWahlkreiseInner
      */
@@ -36,7 +42,7 @@ export interface EinkommenWahlkreiseInner {
      * @type {number}
      * @memberof EinkommenWahlkreiseInner
      */
-    stimmen: number;
+    stimmanteil?: number;
 }
 
 /**
@@ -45,7 +51,6 @@ export interface EinkommenWahlkreiseInner {
 export function instanceOfEinkommenWahlkreiseInner(value: object): value is EinkommenWahlkreiseInner {
     if (!('wahlkreisId' in value) || value['wahlkreisId'] === undefined) return false;
     if (!('einkommen' in value) || value['einkommen'] === undefined) return false;
-    if (!('stimmen' in value) || value['stimmen'] === undefined) return false;
     return true;
 }
 
@@ -60,8 +65,9 @@ export function EinkommenWahlkreiseInnerFromJSONTyped(json: any, ignoreDiscrimin
     return {
         
         'wahlkreisId': json['wahlkreis_id'],
+        'wahlkreisName': json['wahlkreis_name'] == null ? undefined : json['wahlkreis_name'],
         'einkommen': json['einkommen'],
-        'stimmen': json['stimmen'],
+        'stimmanteil': json['stimmanteil'] == null ? undefined : json['stimmanteil'],
     };
 }
 
@@ -77,8 +83,9 @@ export function EinkommenWahlkreiseInnerToJSONTyped(value?: EinkommenWahlkreiseI
     return {
         
         'wahlkreis_id': value['wahlkreisId'],
+        'wahlkreis_name': value['wahlkreisName'],
         'einkommen': value['einkommen'],
-        'stimmen': value['stimmen'],
+        'stimmanteil': value['stimmanteil'],
     };
 }
 

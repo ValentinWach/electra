@@ -1,7 +1,7 @@
 import {GeneralApi} from "./api/apis/GeneralApi";
 import {GlobalApi} from "./api/apis/GlobalApi";
 import {WahlkreisApi} from "./api/apis/WahlkreisApi";
-import {SeatDistribution, Wahl} from "./api";
+import {ElectApi, SeatDistribution, Wahl, Wahlkreis} from "./api";
 
 interface CacheEntry<T> {
     data: T;
@@ -104,7 +104,7 @@ export async function fetchSitzveteilung(wahlid: number): Promise<SeatDistributi
     });
 }
 
-export async function fetchWahlkreise() {
+export async function fetchWahlkreise(): Promise<Wahlkreis[]> {
     const cacheKey = getCacheKey('fetchWahlkreise');
     return withCache(cacheKey, async () => {
         try {
@@ -278,4 +278,57 @@ export async function fetchIncomeAnalysis(wahlid: number, parteiid: number) {
             throw error;
         }
     });
+}
+
+export async function fetchDirektkandidaten(wahlid: number, wahlkreisid: number) {
+    const cacheKey = getCacheKey('fetchDirektkandidaten', wahlid, wahlkreisid);
+    return withCache(cacheKey, async () => {
+        try {
+            const electApi = new ElectApi();
+            const direktkandidaten = await electApi.getDirektkandidaten({wahlid, wahlkreisid});
+            console.log('Fetched Direktkandidaten:', direktkandidaten);
+            return direktkandidaten;
+        } catch (error) {
+            console.error('Error fetching Direktkandidaten:', error);
+            throw error;
+        }
+    });
+}
+
+export async function fetchCompetingParties(wahlid: number, wahlkreisid: number) {
+    const cacheKey = getCacheKey('fetchCompetingParties', wahlid, wahlkreisid);
+    return withCache(cacheKey, async () => {
+        try {
+            const electApi = new ElectApi();
+            const competingParties = await electApi.getCompetingParties({wahlid, wahlkreisid});
+            console.log('Fetched Competing Parties:', competingParties);
+            return competingParties;
+        } catch (error) {
+            console.error('Error fetching Competing Parties:', error);
+            throw error;
+        }
+    });
+}
+
+export async function authenticateVoter(token: string) {
+    const cacheKey = getCacheKey('authenticateVoter', token);
+    return {
+        success: true,
+        wahl: {
+            id: 1,
+            name: "Bundestagswahl 2021",
+            date: new Date("2021-09-26"),
+            status: "ACTIVE"
+        } as Wahl,
+        wahlkreis: {
+            id: 3,
+            name: "Berlin-Mitte",
+            bundesland: {
+                id: 3,
+                name: "Berlin"
+            },
+            wahlberechtigte: 180000,
+            wahllokale: 120
+        } as Wahlkreis
+    };
 }

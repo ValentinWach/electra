@@ -133,7 +133,6 @@ class BaseWahlkreisApi:
 
             if not stimmanteil_results:
                 raise HTTPException(status_code=404, detail="No stimmanteil found")
-            print(stimmanteil_results)
 
             stimmanteile = []
             for result in stimmanteil_results:

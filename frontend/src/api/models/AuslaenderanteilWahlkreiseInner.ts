@@ -27,6 +27,12 @@ export interface AuslaenderanteilWahlkreiseInner {
     wahlkreisId: number;
     /**
      * 
+     * @type {string}
+     * @memberof AuslaenderanteilWahlkreiseInner
+     */
+    wahlkreisName: string;
+    /**
+     * 
      * @type {number}
      * @memberof AuslaenderanteilWahlkreiseInner
      */
@@ -36,7 +42,7 @@ export interface AuslaenderanteilWahlkreiseInner {
      * @type {number}
      * @memberof AuslaenderanteilWahlkreiseInner
      */
-    stimmen: number;
+    stimmanteil?: number;
 }
 
 /**
@@ -44,8 +50,8 @@ export interface AuslaenderanteilWahlkreiseInner {
  */
 export function instanceOfAuslaenderanteilWahlkreiseInner(value: object): value is AuslaenderanteilWahlkreiseInner {
     if (!('wahlkreisId' in value) || value['wahlkreisId'] === undefined) return false;
+    if (!('wahlkreisName' in value) || value['wahlkreisName'] === undefined) return false;
     if (!('auslaenderanteil' in value) || value['auslaenderanteil'] === undefined) return false;
-    if (!('stimmen' in value) || value['stimmen'] === undefined) return false;
     return true;
 }
 
@@ -60,8 +66,9 @@ export function AuslaenderanteilWahlkreiseInnerFromJSONTyped(json: any, ignoreDi
     return {
         
         'wahlkreisId': json['wahlkreis_id'],
+        'wahlkreisName': json['wahlkreis_name'],
         'auslaenderanteil': json['auslaenderanteil'],
-        'stimmen': json['stimmen'],
+        'stimmanteil': json['stimmanteil'] == null ? undefined : json['stimmanteil'],
     };
 }
 
@@ -77,8 +84,9 @@ export function AuslaenderanteilWahlkreiseInnerToJSONTyped(value?: Auslaenderant
     return {
         
         'wahlkreis_id': value['wahlkreisId'],
+        'wahlkreis_name': value['wahlkreisName'],
         'auslaenderanteil': value['auslaenderanteil'],
-        'stimmen': value['stimmen'],
+        'stimmanteil': value['stimmanteil'],
     };
 }
 

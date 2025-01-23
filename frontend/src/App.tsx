@@ -16,6 +16,7 @@ import Authentication from './pages/vote/Authentication.tsx';
 import HeaderC from './components/page-elements/Vote/HeaderC.tsx';
 import Wahlentscheidung from './pages/vote/Wahlentscheidung.tsx';
 import Stimmabgabe from './pages/vote/Stimmabgabe.tsx';
+import { VoteProvider } from './context/VoteContext.tsx';
 
 function AppContent() {
     const { isLoading } = useElection();
@@ -25,10 +26,10 @@ function AppContent() {
         return <FullPageLoadingC />;
     }
     return (
-        <CalcOnAggregateProvider>
-            <Router>
-                <Routes>
-                    <Route path={resultPrefix + "/*"} element={
+        <Router>
+            <Routes>
+                <Route path={resultPrefix + "/*"} element={
+                    <CalcOnAggregateProvider>
                         <div className={"flex flex-row h-screen bg-gray-50"}>
                             <Sidebar />
                             <main className={"flex-grow p-10 flex flex-col items-center overflow-auto bg-gray-50"}>
@@ -43,8 +44,10 @@ function AppContent() {
                                 </Routes>
                             </main>
                         </div>
-                    } />
-                    <Route path={votePrefix + "/*"} element={
+                    </CalcOnAggregateProvider>
+                } />
+                <Route path={votePrefix + "/*"} element={
+                    <VoteProvider>
                         <div className={"h-screen w-screen flex flex-col justify-center bg-gray-50"}>
                             <HeaderC />
                             <main className={"flex-grow p-10 flex flex-col items-center overflow-auto bg-gray-50"}>
@@ -55,10 +58,10 @@ function AppContent() {
                                 </Routes>
                             </main>
                         </div>
-                    } />
-                </Routes>
-            </Router>
-        </CalcOnAggregateProvider>
+                    </VoteProvider>
+                } />
+            </Routes>
+        </Router>
     );
 }
 

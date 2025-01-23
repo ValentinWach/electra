@@ -1,3 +1,25 @@
+Metadata-Version: 2.2
+Name: backend
+Version: 0.1.0
+Summary: Backend server for the election system
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+Requires-Dist: aiofiles==23.1.0
+Requires-Dist: aniso8601==7.0.0
+Requires-Dist: async-exit-stack==1.0.1
+Requires-Dist: async-generator==1.10
+Requires-Dist: fastapi[all]>=0.115.6
+Requires-Dist: greenlet==3.1.1
+Requires-Dist: numpy==2.1.3
+Requires-Dist: pandas==2.2.3
+Requires-Dist: psycopg2==2.9.10
+Requires-Dist: python-dateutil==2.9.0.post0
+Requires-Dist: python-dotenv>=1.0.1
+Requires-Dist: pytz==2024.2
+Requires-Dist: sqlalchemy==2.0.36
+Requires-Dist: typing-extensions==4.12.2
+Requires-Dist: uvicorn>=0.34.0
+
 # Backend Server
 
 This is the backend server for the election system, built with FastAPI.
@@ -32,7 +54,7 @@ Copy `.env.example` to `.env` and update the values as needed.
 
 4. Run the server:
 ```bash
-uvicorn src.openapi_server.main:app --host 0.0.0.0 --port 8000
+uvicorn src.openapi_server.main:app --host 0.0.0.0 --port 8080
 ```
 
 The API documentation will be available at:
