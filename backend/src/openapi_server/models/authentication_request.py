@@ -32,7 +32,7 @@ class AuthenticationRequest(BaseModel):
     Authentication request
     """ # noqa: E501
     token: StrictStr = Field(description="Authentication token")
-    id_number: StrictStr = Field(description="ID number")
+    idNumber: StrictStr = Field(description="ID number")
     __properties: ClassVar[List[str]] = ["token"]
 
     model_config = {

@@ -97,7 +97,7 @@ class BaseAdminApi:
             self.store_hashes(db, wahlid, wahlkreisid, hash_values)
 
         return [
-            {"id_number": data["id_number"], "token": data["random_string"]}
+            {"idNumber": data["id_number"], "token": data["random_string"]}
             for data in result
         ]
 

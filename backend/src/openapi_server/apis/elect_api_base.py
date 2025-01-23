@@ -100,7 +100,7 @@ class BaseElectApi:
     async def authenticate(self, authentication_request: AuthenticationRequest):
         try:
             token_value = authentication_request.token
-            id_number = authentication_request.id_number
+            id_number = authentication_request.idNumber
 
             token_data, hash_value = await self.validate_data(token_value, id_number)
 
@@ -229,7 +229,7 @@ class BaseElectApi:
     async def vote(self, vote_request: VoteRequest):
         try:
             token_value = vote_request.token
-            id_number = vote_request.id_number
+            id_number = vote_request.idNumber
             token_data, hash_value = await self.validate_data(token_value, id_number)
 
             wahl_id, date, wahlkreis_id, wahlkreis_name, bundesland_id, name, voted = token_data
