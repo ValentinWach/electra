@@ -1,4 +1,4 @@
-import {MapContainer, GeoJSON} from 'react-leaflet';
+import {MapContainer, GeoJSON, useMap} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {LatLngExpression} from 'leaflet';
 import geoData from '../../../assets/WahlkreisGeo.json';
@@ -6,13 +6,27 @@ import {GeoJsonObject, Feature} from 'geojson';
 import L from 'leaflet';
 import {useEffect, useState} from "react";
 import {fetchWinningPartiesWahlkreise} from "../../../apiServices.ts";
-import {WinningParties} from "../../../api/index.ts";
+import {WinningParties} from "../../../api";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {getPartyColor} from "../../../utils/GetPartyColor.tsx";
 import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
 import {DropdownData} from "../../../models/DropDownData.ts";
 import './WahlkreisMapC.css';
 import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
+
+function BoundsFitter({ geoData }: { geoData: GeoJsonObject }) {
+    const map = useMap();
+    
+    useEffect(() => {
+        const bounds = L.geoJSON(geoData).getBounds();
+        map.fitBounds(bounds, {
+            padding: [20, 20]
+        });
+    }, [map, geoData]);
+    
+    return null;
+}
+
 export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number) => void} ) {
     let mapDD: DropdownData = {
         label: undefined,
@@ -94,10 +108,13 @@ export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number)
     return (
         <ContentTileC dropDownContent={mapDD} dropDownFunction={setStimmenType} doubleSize={true}
                     header={"Wahlkreiskarte"} loading={showLoader}>
-            <MapContainer center={center} zoomControl={true} doubleClickZoom={true} scrollWheelZoom={false} zoom={6.5}
+            <MapContainer center={center} zoomControl={true} doubleClickZoom={true} scrollWheelZoom={true} zoom={6.5}
                           style={{height: '90vh', width: '100%', zIndex: '10'}}>
                 {typedGeoData && winningParties && (
-                    <GeoJSON data={typedGeoData} style={getStyle} onEachFeature={onEachFeature}/>
+                    <>
+                        <GeoJSON data={typedGeoData} style={getStyle} onEachFeature={onEachFeature}/>
+                        <BoundsFitter geoData={typedGeoData} />
+                    </>
                 )}
             </MapContainer>
         </ContentTileC>
