@@ -25,6 +25,12 @@ export interface AuthenticationRequest {
      * @memberof AuthenticationRequest
      */
     token: string;
+    /**
+     * ID number
+     * @type {string}
+     * @memberof AuthenticationRequest
+     */
+    idNumber: string;
 }
 
 /**
@@ -32,6 +38,7 @@ export interface AuthenticationRequest {
  */
 export function instanceOfAuthenticationRequest(value: object): value is AuthenticationRequest {
     if (!('token' in value) || value['token'] === undefined) return false;
+    if (!('idNumber' in value) || value['idNumber'] === undefined) return false;
     return true;
 }
 
@@ -46,6 +53,7 @@ export function AuthenticationRequestFromJSONTyped(json: any, ignoreDiscriminato
     return {
         
         'token': json['token'],
+        'idNumber': json['idNumber'],
     };
 }
 
@@ -61,6 +69,7 @@ export function AuthenticationRequestToJSONTyped(value?: AuthenticationRequest |
     return {
         
         'token': value['token'],
+        'idNumber': value['idNumber'],
     };
 }
 

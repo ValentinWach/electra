@@ -29,7 +29,9 @@ export default function ForeignerShareC({parteien} : {parteien: Partei[]}) {
                 const foreignersData: ChartDataXYR = {
                     labels: data.wahlkreise.map(w => `WK ${w.wahlkreisId}: (TODO: Name)`),
                     datasets: [{
-                        data: data.wahlkreise.filter(w => w.stimmen > 0).map(w => ({x: w.auslaenderanteil, y: w.stimmen, r: 2})),
+                        data: data.wahlkreise
+                            .filter(w => w.stimmanteil !== undefined && w.stimmanteil > 0)
+                            .map(w => ({x: w.auslaenderanteil, y: w.stimmanteil!, r: 2})),
                         backgroundColor: [getPartyColor(parteien.find(p => p.id === selectedParteiId)?.shortname ?? '')],
                     }]
                 }

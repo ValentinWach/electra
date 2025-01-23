@@ -14,7 +14,7 @@ export default function StimmabgabeC() {
     const navigate = useNavigate();
     const [showFinalWarning, setShowFinalWarning] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
-    const { wahlkreis, selectedDirectCandidate, selectedParty, token, resetVoting } = useVote();
+    const { wahlkreis, selectedDirectCandidate, selectedParty, token, idNumber, resetVoting } = useVote();
     const [submitVoteError, setSubmitVoteError] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
@@ -26,7 +26,7 @@ export default function StimmabgabeC() {
 
     const vote = async () => {
         setSubmitting(true);
-        const success = await submitVote(token ?? "", selectedDirectCandidate?.id ?? null, selectedParty?.partei.id ?? null);
+        const success = await submitVote(token ?? "", idNumber ?? "", selectedDirectCandidate?.id ?? null, selectedParty?.partei.id ?? null);
         if (success) {
             setShowSuccess(true);
             setShowFinalWarning(false);

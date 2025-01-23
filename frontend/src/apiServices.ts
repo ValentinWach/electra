@@ -309,11 +309,12 @@ export async function fetchCompetingParties(wahlid: number, wahlkreisid: number)
     });
 }
 
-export async function authenticateVoter(token: string): Promise<{ wahl: Wahl, wahlkreis: Wahlkreis, authenticated: true } | { wahl: null, wahlkreis: null, authenticated: false }> {
+export async function authenticateVoter(token: string, idNumber: string): Promise<{ wahl: Wahl, wahlkreis: Wahlkreis, authenticated: true } | { wahl: null, wahlkreis: null, authenticated: false }> {
     try {
         const electApi = new ElectApi();
+
         const voter = await electApi.authenticate({
-            authenticationRequest: { token }
+            authenticationRequest: { token, idNumber}
         });
         const { wahl, wahlkreis } = voter;
         console.log('Fetched Voter:', voter);
@@ -327,12 +328,13 @@ export async function authenticateVoter(token: string): Promise<{ wahl: Wahl, wa
     }
 }
 
-export async function submitVote(token: string, directCandidateId?: number | null, partyId?: number | null): Promise<boolean> {
+export async function submitVote(token: string, idNumber: string, directCandidateId?: number | null, partyId?: number | null): Promise<boolean> {
     const electApi = new ElectApi();
     try {
         await electApi.vote({
             voteRequest: {
                 token,
+                idNumber,
                 directCandidateId: directCandidateId ?? undefined,
                 partyId: partyId ?? undefined
             }

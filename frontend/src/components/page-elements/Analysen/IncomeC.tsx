@@ -30,7 +30,9 @@ export default function IncomeC({parteien} : {parteien: Partei[]}) {
                 const incomeData: ChartDataXYR = {
                     labels: data.wahlkreise.map(w => `WK ${w.wahlkreisId}: (TODO: Name)`),
                     datasets: [{
-                        data: data.wahlkreise.filter(w => w.stimmen > 0).map(w => ({x: w.einkommen, y: w.stimmen, r: 2})),
+                        data: data.wahlkreise
+                            .filter(w => w.stimmanteil !== undefined && w.stimmanteil > 0)
+                            .map(w => ({x: w.einkommen, y: w.stimmanteil!, r: 2})),
                         backgroundColor: [getPartyColor(parteien.find(p => p.id === selectedParteiId)?.shortname ?? '')],
                     }]
                 }

@@ -223,8 +223,8 @@ paths:
     get:
       operationId: getClosestWinners
       parameters:
-          - $ref: '#/components/parameters/wahlid'
-          - $ref: '#/components/parameters/parteiid'
+        - $ref: '#/components/parameters/wahlid'
+        - $ref: '#/components/parameters/parteiid'
       tags:
         - Global
       responses:
@@ -232,8 +232,8 @@ paths:
           description: Returning the closest winners of the election
           content:
             application/json:
-                schema:
-                  $ref: '#/components/schemas/ClosestWinners'
+              schema:
+                $ref: '#/components/schemas/ClosestWinners'
 
 
 
@@ -363,21 +363,30 @@ paths:
   /admin/generate/generatetoken/{wahlid}/{wahlkreisid}:
     post:
       operationId: generateToken
+      tags:
+        - Admin
       parameters:
         - $ref: '#/components/parameters/wahlid'
         - $ref: '#/components/parameters/wahlkreisid'
-        - in: query
-          name: amount
-          required: true
-          schema:
-            type: object
-            properties:
-              amount:
-                type: number
-            required:
-              - amount
-      tags:
-        - Admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Generate Token
+              description: generates Tokens
+              required:
+                - amount
+                - idNumbers
+              properties:
+                amount:
+                  type: number
+                idNumbers:
+                  type: array
+                  items:
+                    type: string
+
       responses:
         '200':
           description: Returning the generated token
@@ -387,8 +396,14 @@ paths:
                 type: array
                 title: tokens
                 items:
-                  type: string
-                  title: token
+                  type: object
+                  properties:
+                    idNumber:
+                      type: string
+                      title: id\_number
+                    token:
+                      type: string
+                      title: token
   
   
   /elect/authenticate:
@@ -406,10 +421,14 @@ paths:
               description: Authentication request
               required:
                 - token
+                - idNumber
               properties:
                 token:
                   type: string
                   description: Authentication token
+                idNumber:
+                  type: string
+                  description: ID number
 
       responses:
         '200':
@@ -442,6 +461,9 @@ paths:
             schema:
               type: object
               title: vote-request
+              required:
+                - token
+                - idNumber
               properties:
                 token:
                   type: string
@@ -452,6 +474,10 @@ paths:
                 partyId:
                   type: integer
                   description: Party ID
+                idNumber:
+                  type: string
+                  description: ID number
+
       responses:
         '200':
           description: Vote successfully cast
@@ -459,6 +485,7 @@ paths:
           description: Invalid request, e.g. the partyid or directCandidateId is not valid for the tokens wahlkreis
         '401':
           description: Invalid authentication token
+
   /admin/batch-vote:
     post:
       operationId: batchVote

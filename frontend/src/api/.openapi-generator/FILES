@@ -16,7 +16,8 @@ models/ClosestWinners.ts
 models/Direktkandidaten.ts
 models/Einkommen.ts
 models/EinkommenWahlkreiseInner.ts
-models/GenerateTokenAmountParameter.ts
+models/GenerateToken.ts
+models/GenerateToken200ResponseInner.ts
 models/OverviewWahlkreis.ts
 models/Partei.ts
 models/SeatDistribution.ts

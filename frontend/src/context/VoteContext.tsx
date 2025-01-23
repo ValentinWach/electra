@@ -5,6 +5,7 @@ import { fetchCompetingParties } from '../apiServices';
 
 interface VoteContextType {
     token: string | undefined;
+    idNumber: string | undefined;
     wahl: Wahl | undefined;
     wahlkreis: Wahlkreis | undefined;
     parties: WahlzettelParteien | undefined;
@@ -15,7 +16,7 @@ interface VoteContextType {
     setSelectedDirectCandidate: (candidate: Abgeordneter | null) => void;
     setSelectedParty: (party: WahlzettelParteiWrapper | null) => void;
     resetVoting: () => void;
-    initialize: (token: string, wahlId: number, wahlkreisId: number, wahl?: Wahl, wahlkreis?: Wahlkreis) => Promise<void>;
+    initialize: (token: string, idNumber: string, wahlId: number, wahlkreisId: number, wahl?: Wahl, wahlkreis?: Wahlkreis) => Promise<void>;
 }
 
 const VoteContext = createContext<VoteContextType | undefined>(undefined);
@@ -25,12 +26,14 @@ export const VoteProvider = ({ children }: { children: ReactNode }) => {
     // Initialize on page reload
     useEffect(() => {
         const storedToken = sessionStorage.getItem('token');
+        const storedIdNumber = sessionStorage.getItem('idNumber');
         const storedWahlId = sessionStorage.getItem('wahlId');
         const storedWahlkreisId = sessionStorage.getItem('wahlkreisId');
         
-        if (storedToken && storedWahlId && storedWahlkreisId) {
+        if (storedToken && storedIdNumber && storedWahlId && storedWahlkreisId) {
             initialize(
                 storedToken,
+                storedIdNumber,
                 parseInt(storedWahlId),
                 parseInt(storedWahlkreisId)
             ).catch(console.error);
@@ -38,20 +41,23 @@ export const VoteProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     //If you pass in wahl and wahlkreis, it will not fetch them from the server. Better for performance.
-    const initialize = async (token: string, wahlId: number, wahlkreisId: number, wahl?: Wahl, wahlkreis?: Wahlkreis) => {
+    const initialize = async (token: string, idNumber: string, wahlId: number, wahlkreisId: number, wahl?: Wahl, wahlkreis?: Wahlkreis) => {
         try {
             const [direktkandidaten, parties] = await Promise.all([
                 fetchDirektkandidaten(wahlId, wahlkreisId),
                 fetchCompetingParties(wahlId, wahlkreisId),
             ]);
             if(wahl === undefined || wahlkreis === undefined) {
-                const response = await authenticateVoter(token);
-                wahl = response.wahl;
-                wahlkreis = response.wahlkreis;
+                const response = await authenticateVoter(token, idNumber);
+                if(response.authenticated) {
+                    wahl = response.wahl;
+                    wahlkreis = response.wahlkreis;
+                }
             }
             setState(prevState => ({
                 ...prevState,
                 token,
+                idNumber,
                 wahl,
                 wahlkreis,
                 parties,
@@ -68,6 +74,7 @@ export const VoteProvider = ({ children }: { children: ReactNode }) => {
 
     const [state, setState] = useState<Omit<VoteContextType, 'setSelectedDirectCandidate' | 'setSelectedParty' | 'resetVoting'>>({
         token: undefined,
+        idNumber: undefined,
         wahl: undefined,
         wahlkreis: undefined,
         parties: undefined,
@@ -95,6 +102,7 @@ export const VoteProvider = ({ children }: { children: ReactNode }) => {
     const resetVoting = () => {
         setState({
             token: undefined,
+            idNumber: undefined,
             wahl: undefined,
             wahlkreis: undefined,
             parties: undefined,

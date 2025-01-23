@@ -15,17 +15,24 @@
 
 import * as runtime from '../runtime';
 import type {
-  GenerateTokenAmountParameter,
+  GenerateToken,
+  GenerateToken200ResponseInner,
 } from '../models/index';
 import {
-    GenerateTokenAmountParameterFromJSON,
-    GenerateTokenAmountParameterToJSON,
+    GenerateTokenFromJSON,
+    GenerateTokenToJSON,
+    GenerateToken200ResponseInnerFromJSON,
+    GenerateToken200ResponseInnerToJSON,
 } from '../models/index';
+
+export interface BatchVoteRequest {
+    file?: Blob;
+}
 
 export interface GenerateTokenRequest {
     wahlid: number;
     wahlkreisid: number;
-    amount: GenerateTokenAmountParameter;
+    generateToken: GenerateToken;
 }
 
 /**
@@ -34,8 +41,54 @@ export interface GenerateTokenRequest {
 export class AdminApi extends runtime.BaseAPI {
 
     /**
+     * Accepts a CSV file for batch voting.
      */
-    async generateTokenRaw(requestParameters: GenerateTokenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+    async batchVoteRaw(requestParameters: BatchVoteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const consumes: runtime.Consume[] = [
+            { contentType: 'multipart/form-data' },
+        ];
+        // @ts-ignore: canConsumeForm may be unused
+        const canConsumeForm = runtime.canConsumeForm(consumes);
+
+        let formParams: { append(param: string, value: any): any };
+        let useForm = false;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
+        if (useForm) {
+            formParams = new FormData();
+        } else {
+            formParams = new URLSearchParams();
+        }
+
+        if (requestParameters['file'] != null) {
+            formParams.append('file', requestParameters['file'] as any);
+        }
+
+        const response = await this.request({
+            path: `/admin/batch-vote`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: formParams,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Accepts a CSV file for batch voting.
+     */
+    async batchVote(requestParameters: BatchVoteRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.batchVoteRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     */
+    async generateTokenRaw(requestParameters: GenerateTokenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<GenerateToken200ResponseInner>>> {
         if (requestParameters['wahlid'] == null) {
             throw new runtime.RequiredError(
                 'wahlid',
@@ -50,34 +103,33 @@ export class AdminApi extends runtime.BaseAPI {
             );
         }
 
-        if (requestParameters['amount'] == null) {
+        if (requestParameters['generateToken'] == null) {
             throw new runtime.RequiredError(
-                'amount',
-                'Required parameter "amount" was null or undefined when calling generateToken().'
+                'generateToken',
+                'Required parameter "generateToken" was null or undefined when calling generateToken().'
             );
         }
 
         const queryParameters: any = {};
 
-        if (requestParameters['amount'] != null) {
-            queryParameters['amount'] = requestParameters['amount'];
-        }
-
         const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
             path: `/admin/generate/generatetoken/{wahlid}/{wahlkreisid}`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))).replace(`{${"wahlkreisid"}}`, encodeURIComponent(String(requestParameters['wahlkreisid']))),
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
+            body: GenerateTokenToJSON(requestParameters['generateToken']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse<any>(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(GenerateToken200ResponseInnerFromJSON));
     }
 
     /**
      */
-    async generateToken(requestParameters: GenerateTokenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
+    async generateToken(requestParameters: GenerateTokenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<GenerateToken200ResponseInner>> {
         const response = await this.generateTokenRaw(requestParameters, initOverrides);
         return await response.value();
     }

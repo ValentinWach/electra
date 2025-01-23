@@ -11,7 +11,7 @@ export default function Authentication() {
     const [authentificationError, setAuthentificationError] = useState<boolean>(false);
     const navigate = useNavigate();
 
-    const handleAuthenticate = async (token: string) => {
+    const handleAuthenticate = async (token: string, idNumber: string) => {
         setIsAuthenticating(true);
         if (authentificationError) {
             console.log("Authentification error already");
@@ -19,13 +19,14 @@ export default function Authentication() {
             await new Promise(resolve => setTimeout(resolve, 100));
         }
         try {
-            const response = await authenticateVoter(token);
+            const response = await authenticateVoter(token, idNumber);
             if (response.authenticated) {
                 setAuthentificationError(false);
                 sessionStorage.setItem("token", token);
+                sessionStorage.setItem("idNumber", idNumber);
                 sessionStorage.setItem("wahlId", response.wahl.id.toString());
                 sessionStorage.setItem("wahlkreisId", response.wahlkreis.id.toString());
-                await initialize(token, response.wahl.id, response.wahlkreis.id, response.wahl, response.wahlkreis);
+                await initialize(token, idNumber, response.wahl.id, response.wahlkreis.id, response.wahl, response.wahlkreis);
                 navigate(`${votePrefix}/wahlentscheidung`);
             }
             else {

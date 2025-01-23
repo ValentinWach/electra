@@ -4,7 +4,7 @@ import { AlertType, AlertData } from '../../../models/AlertData'
 import { useState } from 'react';
 import ProgressLoaderFullWidthC from '../_shared/ProgressLoaderFullWidthC';
 
-export default function AuthenticationC({ authentificationError, isAuthenticating, onAuthenticate }: { authentificationError: boolean, isAuthenticating: boolean, onAuthenticate: (token: string) => void }) {
+export default function AuthenticationC({ authentificationError, isAuthenticating, onAuthenticate }: { authentificationError: boolean, isAuthenticating: boolean, onAuthenticate: (token: string, idNumber: string) => void }) {
     const [token, setToken] = useState<string>("");
     const [identification, setIdentification] = useState<string>("");
     const [validationErrors, setValidationErrors] = useState<{ token?: string, identification?: string }>({});
@@ -27,10 +27,13 @@ export default function AuthenticationC({ authentificationError, isAuthenticatin
         if (!token.trim()) {
             errors.token = "Wahltoken ist erforderlich";
         }
+        if (!identification.trim()) {
+            errors.identification = "Ausweisnummer ist erforderlich";
+        }
         setValidationErrors(errors);
 
         if (Object.keys(errors).length === 0) {
-            onAuthenticate(token);
+            onAuthenticate(token, identification);
         }
     }
 
@@ -51,7 +54,7 @@ export default function AuthenticationC({ authentificationError, isAuthenticatin
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
                     <div className="w-full bg-white shadow rounded-lg px-1">
                         {isAuthenticating && <ProgressLoaderFullWidthC />}
-                        <div className="bg-white px-6 py-12">
+                        <div className="bg-white mx-3 px-6 py-12">
                             <AlertC alertData={infoData} />
                             {authentificationError && <AlertC alertData={authentificationErrorData} />}
                             <div className="space-y-6">

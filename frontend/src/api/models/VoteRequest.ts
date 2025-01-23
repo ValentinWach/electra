@@ -24,7 +24,7 @@ export interface VoteRequest {
      * @type {string}
      * @memberof VoteRequest
      */
-    token?: string;
+    token: string;
     /**
      * Direct Candidate ID
      * @type {number}
@@ -37,12 +37,20 @@ export interface VoteRequest {
      * @memberof VoteRequest
      */
     partyId?: number;
+    /**
+     * ID number
+     * @type {string}
+     * @memberof VoteRequest
+     */
+    idNumber: string;
 }
 
 /**
  * Check if a given object implements the VoteRequest interface.
  */
 export function instanceOfVoteRequest(value: object): value is VoteRequest {
+    if (!('token' in value) || value['token'] === undefined) return false;
+    if (!('idNumber' in value) || value['idNumber'] === undefined) return false;
     return true;
 }
 
@@ -56,9 +64,10 @@ export function VoteRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean
     }
     return {
         
-        'token': json['token'] == null ? undefined : json['token'],
+        'token': json['token'],
         'directCandidateId': json['directCandidateId'] == null ? undefined : json['directCandidateId'],
         'partyId': json['partyId'] == null ? undefined : json['partyId'],
+        'idNumber': json['idNumber'],
     };
 }
 
@@ -76,6 +85,7 @@ export function VoteRequestToJSONTyped(value?: VoteRequest | null, ignoreDiscrim
         'token': value['token'],
         'directCandidateId': value['directCandidateId'],
         'partyId': value['partyId'],
+        'idNumber': value['idNumber'],
     };
 }
 
