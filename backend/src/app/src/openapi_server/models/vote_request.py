@@ -20,22 +20,21 @@ import json
 
 
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List
-from openapi_server.models.bundesland import Bundesland
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 try:
     from typing import Self
 except ImportError:
     from typing_extensions import Self
 
-class Wahlkreis(BaseModel):
+class VoteRequest(BaseModel):
     """
-    Wahlkreis
+    VoteRequest
     """ # noqa: E501
-    id: StrictInt
-    name: StrictStr
-    bundesland: Bundesland
-    __properties: ClassVar[List[str]] = ["id", "name", "bundesland"]
+    token: Optional[StrictStr] = Field(default=None, description="Authentication token")
+    direct_candidate_id: Optional[StrictInt] = Field(default=None, description="Direct Candidate ID", alias="directCandidateId")
+    party_id: Optional[StrictInt] = Field(default=None, description="Party ID", alias="partyId")
+    __properties: ClassVar[List[str]] = ["token", "directCandidateId", "partyId"]
 
     model_config = {
         "populate_by_name": True,
@@ -55,7 +54,7 @@ class Wahlkreis(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of Wahlkreis from a JSON string"""
+        """Create an instance of VoteRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -74,14 +73,11 @@ class Wahlkreis(BaseModel):
             },
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of bundesland
-        if self.bundesland:
-            _dict['bundesland'] = self.bundesland.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of Wahlkreis from a dict"""
+        """Create an instance of VoteRequest from a dict"""
         if obj is None:
             return None
 
@@ -89,10 +85,9 @@ class Wahlkreis(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "name": obj.get("name"),
-            "bundesland": [Bundesland.from_dict(_item) for _item in
-                                  obj.get("bundesland")] if obj.get("bundesland") is not None else None,
+            "token": obj.get("token"),
+            "directCandidateId": obj.get("directCandidateId"),
+            "partyId": obj.get("partyId")
         })
         return _obj
 

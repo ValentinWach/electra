@@ -20,6 +20,8 @@ from openapi_server.apis.general_api import router as GeneralApiRouter
 from openapi_server.apis.global_api import router as GlobalApiRouter
 from openapi_server.apis.wahlkreis_api import router as WahlkreisApiRouter
 from openapi_server.apis.elect_api import router as ElectApiRouter
+from openapi_server.apis.admin_api import router as AdminApiRouter
+
 
 
 # Create FastAPI app
@@ -47,3 +49,4 @@ app.include_router(GeneralApiRouter)
 app.include_router(GlobalApiRouter)
 app.include_router(WahlkreisApiRouter)
 app.include_router(ElectApiRouter)
+app.include_router(AdminApiRouter)

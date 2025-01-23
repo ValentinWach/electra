@@ -29,9 +29,9 @@ try:
 except ImportError:
     from typing_extensions import Self
 
-class ParteiWahlzettelParteienInner(BaseModel):
+class WahlzettelParteiWrapper(BaseModel):
     """
-    ParteiWahlzettelParteienInner
+    WahlzettelParteiWrapper
     """ # noqa: E501
     partei: Partei
     topfive: List[Abgeordneter]
@@ -55,7 +55,7 @@ class ParteiWahlzettelParteienInner(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of ParteiWahlzettelParteienInner from a JSON string"""
+        """Create an instance of WahlzettelParteiWrapper from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -88,7 +88,7 @@ class ParteiWahlzettelParteienInner(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of ParteiWahlzettelParteienInner from a dict"""
+        """Create an instance of WahlzettelParteiWrapper from a dict"""
         if obj is None:
             return None
 

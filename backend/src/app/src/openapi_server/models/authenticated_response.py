@@ -20,22 +20,22 @@ import json
 
 
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List
-from openapi_server.models.bundesland import Bundesland
+from openapi_server.models.wahl import Wahl
+from openapi_server.models.wahlkreis import Wahlkreis
 try:
     from typing import Self
 except ImportError:
     from typing_extensions import Self
 
-class Wahlkreis(BaseModel):
+class AuthenticatedResponse(BaseModel):
     """
-    Wahlkreis
+    AuthenticatedResponse
     """ # noqa: E501
-    id: StrictInt
-    name: StrictStr
-    bundesland: Bundesland
-    __properties: ClassVar[List[str]] = ["id", "name", "bundesland"]
+    wahl: Wahl
+    wahlkreis: Wahlkreis
+    __properties: ClassVar[List[str]] = ["wahl", "wahlkreis"]
 
     model_config = {
         "populate_by_name": True,
@@ -55,7 +55,7 @@ class Wahlkreis(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of Wahlkreis from a JSON string"""
+        """Create an instance of AuthenticatedResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -74,14 +74,17 @@ class Wahlkreis(BaseModel):
             },
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of bundesland
-        if self.bundesland:
-            _dict['bundesland'] = self.bundesland.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of wahl
+        if self.wahl:
+            _dict['wahl'] = self.wahl.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of wahlkreis
+        if self.wahlkreis:
+            _dict['wahlkreis'] = self.wahlkreis.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of Wahlkreis from a dict"""
+        """Create an instance of AuthenticatedResponse from a dict"""
         if obj is None:
             return None
 
@@ -89,10 +92,8 @@ class Wahlkreis(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "name": obj.get("name"),
-            "bundesland": [Bundesland.from_dict(_item) for _item in
-                                  obj.get("bundesland")] if obj.get("bundesland") is not None else None,
+            "wahl": Wahl.from_dict(obj.get("wahl")) if obj.get("wahl") is not None else None,
+            "wahlkreis": Wahlkreis.from_dict(obj.get("wahlkreis")) if obj.get("wahlkreis") is not None else None
         })
         return _obj
 

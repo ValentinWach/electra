@@ -126,7 +126,7 @@ class BaseGlobalApi:
                             ''')
                 query_results = db.execute(query, {"wahlid": wahlId}).fetchall()
             if not query_results:
-                raise HTTPException(status_code=404, detail="No elections found")
+                raise HTTPException(status_code=404, detail="No sitzverteilung found")
             total_seats = 0
             distribution = []
 
@@ -175,7 +175,7 @@ class BaseGlobalApi:
                 ).fetchall()
 
             if not stimmanteil_results:
-                raise HTTPException(status_code=404, detail="No winners found")
+                raise HTTPException(status_code=404, detail="No stimmanteil found")
 
             stimmanteile = []
             for result in stimmanteil_results:
@@ -212,7 +212,7 @@ class BaseGlobalApi:
                 ).fetchall()
 
                 if not ueberhang_results:
-                    raise HTTPException(status_code=404, detail="No winners found")
+                    raise HTTPException(status_code=404, detail="No ueberhang found")
 
                 ueberhang = Ueberhang(bundeslaender=[])
                 for result in ueberhang_results:

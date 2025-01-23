@@ -175,9 +175,9 @@ class Token(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     # Relations
-    wahl = relationship('Wahl', back_populates='token')
+    wahl = relationship('Wahl')
     wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)
-    wahlkreis = relationship('Wahlkreis', back_populates='token')
+    wahlkreis = relationship('Wahlkreis')
     wahlkreis_id = Column(Integer, ForeignKey('wahlkreise.id'), nullable=False)
 
     voted = Column(Boolean, nullable=False)

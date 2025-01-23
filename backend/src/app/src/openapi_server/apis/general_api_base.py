@@ -1,6 +1,6 @@
 # coding: utf-8
 from cgitb import text
-from http.client import HTTPException
+from fastapi import HTTPException
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 
 from typing import List

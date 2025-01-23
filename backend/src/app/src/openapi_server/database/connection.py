@@ -13,4 +13,4 @@ if not DATABASE_URL:
 
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-#Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
