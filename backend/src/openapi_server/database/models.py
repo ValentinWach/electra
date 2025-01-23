@@ -58,6 +58,18 @@ class Erststimme(Base):
     def __repr__(self):
         return f"<Erststimme(id={self.id}), wahlkreiskandidatur_id={self.wahlkreiskandidatur_id}>"
 
+class ErststimmeTest(Base):
+    __tablename__ = 'erststimmen_test'
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # Relations
+    wahlkreiskandidatur = relationship('Wahlkreiskandidatur')
+    wahlkreiskandidatur_id = Column(Integer, ForeignKey('wahlkreiskandidaturen.id'), nullable=False)
+
+    def __repr__(self):
+        return f"<Erststimme(id={self.id}), wahlkreiskandidatur_id={self.wahlkreiskandidatur_id}>"
+
 class Zweitstimme(Base):
     __tablename__ = 'zweitstimmen'
 
@@ -70,6 +82,22 @@ class Zweitstimme(Base):
     partei = relationship('Partei', back_populates='zweitstimmen')
     wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)
     wahl = relationship('Wahl', back_populates='zweitstimmen')
+
+    def __repr__(self):
+        return f"<Zweitstimme(id={self.id}, wahlkreis_id={self.wahlkreis_id}, partei_id={self.partei_id})>"
+
+class ZweitstimmeTest(Base):
+    __tablename__ = 'zweitstimmen_test'
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # Relations
+    wahlkreis_id = Column(Integer, ForeignKey('wahlkreise.id'), nullable=False)
+    wahlkreis = relationship('Wahlkreis')
+    partei_id = Column(Integer, ForeignKey('parteien.id'), nullable=False)
+    partei = relationship('Partei')
+    wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)
+    wahl = relationship('Wahl')
 
     def __repr__(self):
         return f"<Zweitstimme(id={self.id}, wahlkreis_id={self.wahlkreis_id}, partei_id={self.partei_id})>"

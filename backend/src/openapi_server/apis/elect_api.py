@@ -95,7 +95,6 @@ async def get_competing_parties(
 async def vote(
     vote_request: VoteRequest = Body(None, description=""),
 ) -> None:
-    if not BaseElectApi.subclasses:
-        raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseElectApi.subclasses[0]().vote(vote_request)
+    elect_api = BaseElectApi()
+    return await elect_api.vote(vote_request)
 

@@ -5,7 +5,9 @@ from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 
 from pydantic import StrictInt
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
+from openapi_server.database.models import ErststimmeTest, ZweitstimmeTest, Token
 from openapi_server.models.bundesland import Bundesland
 from openapi_server.models.abgeordneter import Abgeordneter
 
@@ -29,51 +31,90 @@ class BaseElectApi:
         super().__init_subclass__(**kwargs)
         BaseElectApi.subclasses = BaseElectApi.subclasses + (cls,)
 
-    async def authenticate(
-            self,
-            authentication_request: AuthenticationRequest,
-    ) -> AuthenticatedResponse:
-        try:
-            token_value = authentication_request.token
+    async def validate_votes(self, wahl_id, wahlkreis_id, vote_request):
 
-            with db_session() as db:
-                query = text("""
-                    SELECT w.id, w.date, wk.id, wk.name, b.id, b.name, t.voted
-                    FROM token t
-                    INNER JOIN wahlen w ON t.wahl_id = w.id
-                    INNER JOIN wahlkreise wk ON t.wahlkreis_id = wk.id
-                    INNER JOIN bundeslaender b on b.id = wk.bundesland_id
-                    WHERE t.token = :token_value
+        if not vote_request.direct_candidate_id and not vote_request.party_id:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid request: Both direct candidate ID and party ID are missing.",
+            )
+
+        with db_session() as db:
+            if vote_request.direct_candidate_id:
+                direktkandidat_validity_query = text("""
+                    SELECT 1 FROM wahlkreiskandidaturen WHERE wahl_id = :wahlid AND wahlkreis_id = :wahlkreisid AND id = :direct_candidate_id LIMIT 1
                 """)
 
-                result = db.execute(query, {"token_value": token_value}).fetchone()
-
-                if not result or result.voted == True:
+                direktkandidat_validity_result = db.execute(direktkandidat_validity_query, {"direct_candidate_id": vote_request.direct_candidate_id, "wahlid": wahl_id, "wahlkreisid": wahlkreis_id}).fetchone()
+                if not direktkandidat_validity_result:
                     raise HTTPException(
-                        status_code=401, detail="Invalid authentication token"
+                        status_code=400,
+                        detail="Invalid request: the direct candidate ID is not valid for the tokens wahlkreis"
                     )
-                wahl_id, date, wahlkreis_id, wahlkreis_name, bundesland_id, name, voted = result
 
-                bundesland = Bundesland(
+
+            if vote_request.party_id:
+                partei_validity_query = text("""
+                                SELECT 1 FROM listenkandidaturen l JOIN wahlkreise w ON l.bundesland_id = w.bundesland_id WHERE l.wahl_id = :wahlid AND l.partei_id = :partyid AND w.id = :wahlkreisid LIMIT 1;
+                            """)
+
+                partei_validity_result = db.execute(partei_validity_query,
+                                                            {"partyid": vote_request.party_id,
+                                                             "wahlid": wahl_id, "wahlkreisid": wahlkreis_id}).fetchone()
+                if not partei_validity_result:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Invalid request: the party ID is not valid for the tokens wahlkreis"
+                    )
+
+
+            return vote_request.direct_candidate_id is not None, vote_request.party_id is not None
+
+    async def validate_token(self, token_value):
+        with db_session() as db:
+            token_validity_query = text("""
+                SELECT w.id, w.date, wk.id, wk.name, b.id, b.name, t.voted
+                FROM token t
+                INNER JOIN wahlen w ON t.wahl_id = w.id
+                INNER JOIN wahlkreise wk ON t.wahlkreis_id = wk.id
+                INNER JOIN bundeslaender b on b.id = wk.bundesland_id
+                WHERE t.token = :token_value
+            """)
+
+            token_validity_result = db.execute(token_validity_query, {"token_value": token_value}).fetchone()
+
+            if not token_validity_result or token_validity_result.voted == True:
+                raise HTTPException(
+                    status_code=401, detail="Invalid authentication token"
+                )
+
+            return token_validity_result
+
+    async def authenticate(self, authentication_request: AuthenticationRequest):
+        try:
+            token_value = authentication_request.token
+            token_data = await self.validate_token(token_value)
+
+            wahl_id, date, wahlkreis_id, wahlkreis_name, bundesland_id, name, voted = token_data
+
+            wahl = Wahl(
+                id=wahl_id,
+                var_date=date
+            )
+
+            wahlkreis = Wahlkreis(
+                id=wahlkreis_id,
+                name=wahlkreis_name,
+                bundesland=Bundesland(
                     id=bundesland_id,
                     name=name
                 )
+            )
 
-                wahl = Wahl(
-                    id=wahl_id,
-                    var_date=date
-                )
-
-                wahlkreis = Wahlkreis(
-                    id=wahlkreis_id,
-                    name=name,
-                    bundesland=bundesland
-                )
-
-                return AuthenticatedResponse(
-                    wahl=wahl,
-                    wahlkreis=wahlkreis,
-                )
+            return AuthenticatedResponse(
+                wahl=wahl,
+                wahlkreis=wahlkreis,
+            )
         except HTTPException as http_ex:
             raise http_ex
         except Exception as e:
@@ -176,30 +217,34 @@ class BaseElectApi:
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
-    async def vote(
-            self,
-            vote_request: VoteRequest,
-    ) -> None:
+    async def vote(self, vote_request: VoteRequest):
         try:
             token_value = vote_request.token
+            token_data = await self.validate_token(token_value)
+
+            wahl_id, date, wahlkreis_id, wahlkreis_name, bundesland_id, name, voted = token_data
+
+            direktkandidat_valid, partei_valid = await self.validate_votes(wahl_id, wahlkreis_id, vote_request)
 
             with db_session() as db:
-                query = text("""
-                    SELECT w.id, w.date, wk.id, wk.name, b.id, b.name, t.voted
-                    FROM token t
-                    INNER JOIN wahlen w ON t.wahl_id = w.id
-                    INNER JOIN wahlkreise wk ON t.wahlkreis_id = wk.id
-                    INNER JOIN bundeslaender b on b.id = wk.bundesland_id
-                    WHERE t.token = :token_value
-                """)
+                if direktkandidat_valid:
+                    erststimme = ErststimmeTest(wahlkreiskandidatur_id=vote_request.direct_candidate_id)
+                    db.add(erststimme)
+                if partei_valid:
+                    zweitstimme = ZweitstimmeTest(wahl_id=wahl_id, wahlkreis_id=wahlkreis_id, partei_id=vote_request.party_id)
+                    db.add(zweitstimme)
+                token = db.query(Token).filter(Token.token == token_value).first()
+                if token:
+                    token.voted = True
+                    db.add(token)
+                db.commit()
 
-                result = db.execute(query, {"token_value": token_value}).fetchone()
-
-                if not result or result.voted == True:
-                    raise HTTPException(
-                        status_code=401, detail="Invalid authentication token"
-                    )
-
+        except SQLAlchemyError as db_ex:
+            db.rollback()
+            raise HTTPException(
+                status_code=500,
+                detail=f"Database operation failed: {str(db_ex)}"
+            )
         except HTTPException as http_ex:
             raise http_ex
         except Exception as e:
