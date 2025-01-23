@@ -209,7 +209,7 @@ class Token(Base):
     wahlkreis_id = Column(Integer, ForeignKey('wahlkreise.id'), nullable=False)
 
     voted = Column(Boolean, nullable=False)
-    token = Column(String, nullable=False)
+    hash = Column(String, nullable=False)
 
     def __repr__(self):
         return (
@@ -217,7 +217,7 @@ class Token(Base):
             f"wahl_id={self.wahl_id}, "
             f"wahlkreis_id={self.wahlkreis_id}, "
             f"voted={self.voted}, "
-            f"token='{self.token}')>"
+            f"token='{self.hash}')>"
         )
 
 

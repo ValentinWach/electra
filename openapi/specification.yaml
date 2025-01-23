@@ -459,6 +459,28 @@ paths:
           description: Invalid request, e.g. the partyid or directCandidateId is not valid for the tokens wahlkreis
         '401':
           description: Invalid authentication token
+  /admin/batch-vote:
+    post:
+      operationId: batchVote
+      tags:
+        - Admin
+      summary: Accepts a CSV file for batch voting.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: A CSV file with the columns `wahl_id`, `wahlkreis_id`, `direktkandidat_id`, `partei_id`.
+      responses:
+        '200':
+          description: Batch voting successfully processed.
+        '400':
+          description: Invalid request, e.g., missing or invalid CSV file.
 
 components:
   parameters:

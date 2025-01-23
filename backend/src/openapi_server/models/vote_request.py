@@ -32,6 +32,7 @@ class VoteRequest(BaseModel):
     VoteRequest
     """ # noqa: E501
     token: Optional[StrictStr] = Field(default=None, description="Authentication token")
+    id_number: StrictStr = Field(description="ID number")
     direct_candidate_id: Optional[StrictInt] = Field(default=None, description="Direct Candidate ID", alias="directCandidateId")
     party_id: Optional[StrictInt] = Field(default=None, description="Party ID", alias="partyId")
     __properties: ClassVar[List[str]] = ["token", "directCandidateId", "partyId"]

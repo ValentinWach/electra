@@ -1,4 +1,6 @@
 # coding: utf-8
+
+import hashlib
 from collections import defaultdict
 from fastapi import HTTPException
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
@@ -70,30 +72,37 @@ class BaseElectApi:
 
             return vote_request.direct_candidate_id is not None, vote_request.party_id is not None
 
-    async def validate_token(self, token_value):
+    async def validate_data(self, token_value, id_number):
         with db_session() as db:
+
+            combined_string = token_value + id_number
+
+            hash_value = hashlib.sha256(combined_string.encode()).hexdigest()
+
             token_validity_query = text("""
                 SELECT w.id, w.date, wk.id, wk.name, b.id, b.name, t.voted
                 FROM token t
                 INNER JOIN wahlen w ON t.wahl_id = w.id
                 INNER JOIN wahlkreise wk ON t.wahlkreis_id = wk.id
                 INNER JOIN bundeslaender b on b.id = wk.bundesland_id
-                WHERE t.token = :token_value
+                WHERE t.hash = :hash_value
             """)
 
-            token_validity_result = db.execute(token_validity_query, {"token_value": token_value}).fetchone()
+            token_validity_result = db.execute(token_validity_query, {"hash_value": hash_value}).fetchone()
 
             if not token_validity_result or token_validity_result.voted == True:
                 raise HTTPException(
-                    status_code=401, detail="Invalid authentication token"
+                    status_code=401, detail="Invalid authentication token or ID number"
                 )
 
-            return token_validity_result
+            return token_validity_result, hash_value
 
     async def authenticate(self, authentication_request: AuthenticationRequest):
         try:
             token_value = authentication_request.token
-            token_data = await self.validate_token(token_value)
+            id_number = authentication_request.id_number
+
+            token_data, hash_value = await self.validate_data(token_value, id_number)
 
             wahl_id, date, wahlkreis_id, wahlkreis_name, bundesland_id, name, voted = token_data
 
@@ -220,7 +229,8 @@ class BaseElectApi:
     async def vote(self, vote_request: VoteRequest):
         try:
             token_value = vote_request.token
-            token_data = await self.validate_token(token_value)
+            id_number = vote_request.id_number
+            token_data, hash_value = await self.validate_data(token_value, id_number)
 
             wahl_id, date, wahlkreis_id, wahlkreis_name, bundesland_id, name, voted = token_data
 
@@ -237,7 +247,7 @@ class BaseElectApi:
                 if partei_valid:
                     zweitstimme = ZweitstimmeTest(wahl_id=wahl_id, wahlkreis_id=wahlkreis_id, partei_id=vote_request.party_id)
                     db.add(zweitstimme)
-                token = db.query(Token).filter(Token.token == token_value).first()
+                token = db.query(Token).filter(Token.hash == hash_value).first()
                 if token:
                     token.voted = True
                     db.add(token)
