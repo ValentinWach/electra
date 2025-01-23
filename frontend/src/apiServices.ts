@@ -1,7 +1,6 @@
-import {GeneralApi} from "./api/apis/GeneralApi";
-import {GlobalApi} from "./api/apis/GlobalApi";
-import {WahlkreisApi} from "./api/apis/WahlkreisApi";
-import {ElectApi, SeatDistribution, Wahl, Wahlkreis} from "./api";
+import { GeneralApi, GlobalApi, WahlkreisApi, ElectApi} from "./api";
+import {SeatDistribution, Wahl, Wahlkreis } from "./api";
+import * as runtime from './api/runtime';
 
 interface CacheEntry<T> {
     data: T;
@@ -19,13 +18,13 @@ function getCacheKey(functionName: string, ...params: any[]): string {
 function getFromCache<T>(key: string): T | undefined {
     const entry = cache.get(key);
     if (!entry) return undefined;
-    
+
     const now = Date.now();
     if (now - entry.timestamp > CACHE_DURATION) {
         cache.delete(key);
         return undefined;
     }
-    
+
     return entry.data;
 }
 
@@ -124,7 +123,7 @@ export async function fetchParteien(wahlid: number) {
     return withCache(cacheKey, async () => {
         try {
             const generalApi = new GeneralApi();
-            const parteien = await generalApi.getParteien({wahlid});
+            const parteien = await generalApi.getParteien({ wahlid });
             console.log('Fetched Parteien:', parteien);
             return parteien;
         } catch (error) {
@@ -152,7 +151,7 @@ export async function fetchStimmanteile(wahlid: number) {
 export async function fetchStimmanteileWahlkreis(wahlid: number, wahlkreisid: number, generateFromAggregate: boolean = true) {
     try {
         const wahlkreisApi = new WahlkreisApi();
-        const stimmanteile = await wahlkreisApi.getStimmanteilWahlkreis({wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate});
+        const stimmanteile = await wahlkreisApi.getStimmanteilWahlkreis({ wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate });
         console.log('Fetched Stimmanteile:', stimmanteile);
         console.log('Used aggregate: ', generateFromAggregate);
         return stimmanteile;
@@ -167,7 +166,7 @@ export async function fetchWinningPartiesWahlkreis(wahlid: number, wahlkreisid: 
     return withCache(cacheKey, async () => {
         try {
             const wahlkreisApi = new WahlkreisApi();
-            const winningParties = await wahlkreisApi.getWinningPartiesWahlkreis({wahlid, wahlkreisid});
+            const winningParties = await wahlkreisApi.getWinningPartiesWahlkreis({ wahlid, wahlkreisid });
             console.log('Fetched Winning Parties:', winningParties);
             return winningParties;
         } catch (error) {
@@ -182,7 +181,7 @@ export async function fetchWinningPartiesWahlkreise(wahlid: number) {
     return withCache(cacheKey, async () => {
         try {
             const wahlkreisApi = new WahlkreisApi();
-            const winningParties = await wahlkreisApi.getWinningPartiesWahlkreise({wahlid});
+            const winningParties = await wahlkreisApi.getWinningPartiesWahlkreise({ wahlid });
             console.log('Fetched Winning Parties:', winningParties);
             return winningParties;
         } catch (error) {
@@ -195,7 +194,7 @@ export async function fetchWinningPartiesWahlkreise(wahlid: number) {
 export async function fetchWahlkreisOverview(wahlid: number, wahlkreisid: number, generateFromAggregate: boolean = true) {
     try {
         const wahlkreisApi = new WahlkreisApi();
-        const wahlkreisOverview = await wahlkreisApi.getOverviewWahlkreis({wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate});
+        const wahlkreisOverview = await wahlkreisApi.getOverviewWahlkreis({ wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate });
         console.log('Fetched Wahlkreis Overview:', wahlkreisOverview);
         console.log('Used aggregate: ', generateFromAggregate);
         return wahlkreisOverview;
@@ -210,7 +209,7 @@ export async function fetchAbgeordnete(wahlid: number) {
     return withCache(cacheKey, async () => {
         try {
             const globalApi = new GlobalApi();
-            const abgeordnete = await globalApi.getAbgeordnete({wahlid});
+            const abgeordnete = await globalApi.getAbgeordnete({ wahlid });
             console.log('Fetched Abgeordnete:', abgeordnete);
             return abgeordnete;
         } catch (error) {
@@ -225,7 +224,7 @@ export async function fetchClosestWinners(wahlid: number, parteiid: number) {
     return withCache(cacheKey, async () => {
         try {
             const globalApi = new GlobalApi();
-            const closestWinners = await globalApi.getClosestWinners({wahlid, parteiid});
+            const closestWinners = await globalApi.getClosestWinners({ wahlid, parteiid });
             console.log('Fetched Closest Winners:', closestWinners);
             return closestWinners;
         } catch (error) {
@@ -240,7 +239,7 @@ export async function fetchUeberhangProBundesland(wahlid: number, parteiid: numb
     return withCache(cacheKey, async () => {
         try {
             const globalApi = new GlobalApi();
-            const ueberhang = await globalApi.getUeberhang({wahlid, parteiid});
+            const ueberhang = await globalApi.getUeberhang({ wahlid, parteiid });
             console.log('Fetched Ueberhang:', ueberhang);
             return ueberhang;
         } catch (error) {
@@ -255,7 +254,7 @@ export async function fetchForeignerShareAnalysis(wahlid: number, parteiid: numb
     return withCache(cacheKey, async () => {
         try {
             const wahlkreisApi = new WahlkreisApi();
-            const foreigners = await wahlkreisApi.getForeigners({wahlid, parteiid});
+            const foreigners = await wahlkreisApi.getForeigners({ wahlid, parteiid });
             console.log('Fetched Foreigner analysis:', foreigners);
             return foreigners;
         } catch (error) {
@@ -270,7 +269,7 @@ export async function fetchIncomeAnalysis(wahlid: number, parteiid: number) {
     return withCache(cacheKey, async () => {
         try {
             const wahlkreisApi = new WahlkreisApi();
-            const income = await wahlkreisApi.getIncome({wahlid, parteiid});
+            const income = await wahlkreisApi.getIncome({ wahlid, parteiid });
             console.log('Fetched Income analysis:', income);
             return income;
         } catch (error) {
@@ -285,7 +284,7 @@ export async function fetchDirektkandidaten(wahlid: number, wahlkreisid: number)
     return withCache(cacheKey, async () => {
         try {
             const electApi = new ElectApi();
-            const direktkandidaten = await electApi.getDirektkandidaten({wahlid, wahlkreisid});
+            const direktkandidaten = await electApi.getDirektkandidaten({ wahlid, wahlkreisid });
             console.log('Fetched Direktkandidaten:', direktkandidaten);
             return direktkandidaten;
         } catch (error) {
@@ -300,7 +299,7 @@ export async function fetchCompetingParties(wahlid: number, wahlkreisid: number)
     return withCache(cacheKey, async () => {
         try {
             const electApi = new ElectApi();
-            const competingParties = await electApi.getCompetingParties({wahlid, wahlkreisid});
+            const competingParties = await electApi.getCompetingParties({ wahlid, wahlkreisid });
             console.log('Fetched Competing Parties:', competingParties);
             return competingParties;
         } catch (error) {
@@ -310,25 +309,38 @@ export async function fetchCompetingParties(wahlid: number, wahlkreisid: number)
     });
 }
 
-export async function authenticateVoter(token: string) {
-    const cacheKey = getCacheKey('authenticateVoter', token);
-    return {
-        success: true,
-        wahl: {
-            id: 1,
-            name: "Bundestagswahl 2021",
-            date: new Date("2021-09-26"),
-            status: "ACTIVE"
-        } as Wahl,
-        wahlkreis: {
-            id: 3,
-            name: "Berlin-Mitte",
-            bundesland: {
-                id: 3,
-                name: "Berlin"
-            },
-            wahlberechtigte: 180000,
-            wahllokale: 120
-        } as Wahlkreis
-    };
+export async function authenticateVoter(token: string): Promise<{ wahl: Wahl, wahlkreis: Wahlkreis, authenticated: true } | { wahl: null, wahlkreis: null, authenticated: false }> {
+    try {
+        const electApi = new ElectApi();
+        const voter = await electApi.authenticate({
+            authenticationRequest: { token }
+        });
+        const { wahl, wahlkreis } = voter;
+        console.log('Fetched Voter:', voter);
+        return { wahl, wahlkreis, authenticated: true };
+    } catch (error) {
+        if (error instanceof runtime.ResponseError && error.response.status === 401) {
+            return { wahl: null, wahlkreis: null, authenticated: false };
+        }
+        console.error('Error fetching Voter:', error);
+        throw error;
+    }
+}
+
+export async function submitVote(token: string, directCandidateId?: number | null, partyId?: number | null): Promise<boolean> {
+    const electApi = new ElectApi();
+    try {
+        await electApi.vote({
+            voteRequest: {
+                token,
+                directCandidateId: directCandidateId ?? undefined,
+                partyId: partyId ?? undefined
+            }
+        });
+        console.log("Vote submitted successfully");
+        return true;
+    } catch (error) {
+        console.error('Error submitting vote.');
+        return false;
+    }
 }

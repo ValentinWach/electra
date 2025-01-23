@@ -33,6 +33,8 @@ export default function AlertC({ alertData }: { alertData: AlertData }) {
         switch (alertData.type) {
             case AlertType.warning:
                 return <ExclamationTriangleIcon aria-hidden="true" className="size-5 text-yellow-400" />;
+            case AlertType.error:
+                return <ExclamationCircleIcon aria-hidden="true" className="size-5 text-red-400" />;
             case AlertType.info:
             default:
                 return <InformationCircleIcon aria-hidden="true" className="size-5 text-blue-400" />;
@@ -40,14 +42,14 @@ export default function AlertC({ alertData }: { alertData: AlertData }) {
     })();
 
     return (
-        <div className={`rounded-md ${colorClasses.bg} p-4 mb-4`}>
+        <div className={`rounded-md ${colorClasses.bg} p-4 mb-4 w-full`}>
             <div className="flex">
                 <div className="shrink-0">
                     {icon}
                 </div>
                 <div className="ml-3">
                     {alertData.title && <h3 className={`font-medium ${colorClasses.text}`}>{alertData.title}</h3>}
-                    <div className={`mt-2 ${colorClasses.textLight}`}>
+                    <div className={`${alertData.title ? "mt-2" : ""} ${colorClasses.textLight}`}>
                         <p>
                             {alertData.message}
                         </p>

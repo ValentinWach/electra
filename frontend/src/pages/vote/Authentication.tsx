@@ -8,25 +8,36 @@ import { votePrefix } from "../../utils/Logout.tsx";
 export default function Authentication() {
     const { initialize } = useVote();
     const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
+    const [authentificationError, setAuthentificationError] = useState<boolean>(false);
     const navigate = useNavigate();
 
     const handleAuthenticate = async (token: string) => {
         setIsAuthenticating(true);
+        if (authentificationError) {
+            console.log("Authentification error already");
+            setAuthentificationError(false);
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
         try {
             const response = await authenticateVoter(token);
-            if (response.success) {
+            if (response.authenticated) {
+                setAuthentificationError(false);
                 sessionStorage.setItem("token", token);
                 sessionStorage.setItem("wahlId", response.wahl.id.toString());
                 sessionStorage.setItem("wahlkreisId", response.wahlkreis.id.toString());
                 await initialize(token, response.wahl.id, response.wahlkreis.id, response.wahl, response.wahlkreis);
                 navigate(`${votePrefix}/wahlentscheidung`);
             }
+            else {
+                setAuthentificationError(true);
+            }
         } catch (error) {
             console.error('Authentication failed:', error);
+            setAuthentificationError(true);
         } finally {
             setIsAuthenticating(false);
         }
     }
 
-    return <AuthenticationC isAuthenticating={isAuthenticating} onAuthenticate={handleAuthenticate} />;
+    return <AuthenticationC authentificationError={authentificationError} isAuthenticating={isAuthenticating} onAuthenticate={handleAuthenticate} />;
 }

@@ -1,5 +1,5 @@
 import { createElement } from "react";
-import SuccessDialogC from "../components/UI-element-components/SuccessDialogC";
+import ResultDialogC from "../components/UI-element-components/ResultDialogC";
 import { createRoot } from "react-dom/client";
 
 export const resultPrefix = "/ergebnisse";
@@ -11,14 +11,21 @@ export const handleTokenMissing = (resetVoting: () => void, navigate: (path: str
     navigate(`${votePrefix}/authentication`);
 };
 
-export const handleLogout = (resetVoting: () => void, navigate: (path: string) => void) => {
+export const handleLogout = (resetVoting: () => void, navigate: (path: string) => void, showDialog: boolean = true) => {
+    if (!showDialog) {
+        sessionStorage.clear();
+        resetVoting();
+        navigate(`${votePrefix}/authentication`);
+        return;
+    }
     const dialogContainer = document.createElement('div');
     document.body.appendChild(dialogContainer);
     const root = createRoot(dialogContainer);
     
-    root.render(createElement(SuccessDialogC, {
+    root.render(createElement(ResultDialogC, {
         title: "Abmeldung erfolgreich",
-        message: "Sie werden weitergeleitet"
+        message: "Sie werden weitergeleitet",
+        success: true
     }));
 
     setTimeout(() => {

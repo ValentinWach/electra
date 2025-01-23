@@ -4,8 +4,9 @@ import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/re
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import AlertC from './AlertC'
 import { AlertType } from '../../models/AlertData'
+import ProgressLoaderFullWidthC from '../page-elements/_shared/ProgressLoaderFullWidthC'
 
-export default function WarningDialogC({ title, message, confirmText, cancelText, onConfirm, onClose, warnMessage }: { title: string, message: string, confirmText: string, cancelText: string, onConfirm: () => void, onClose: () => void, warnMessage?: string }) {
+export default function WarningDialogC({ title, message, confirmText, cancelText, onConfirm, onClose, warnMessage, showLoader }: { title: string, message: string, confirmText: string, cancelText: string, onConfirm: () => void, onClose: () => void, warnMessage?: string, showLoader: boolean }) {
     const [open, setOpen] = useState(true)
 
     useEffect(() => {
@@ -27,7 +28,13 @@ export default function WarningDialogC({ title, message, confirmText, cancelText
                         transition
                         className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-lg data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95"
                     >
+                        {showLoader && (
+                            <div className='-mt-6'>
+                                <ProgressLoaderFullWidthC />
+                            </div>
+                        )}
                         <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+
                             <div className="sm:flex sm:items-start">
                                 {!warnMessage && (
                                     <div className="mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-yellow-100 sm:mx-0 sm:size-10">
@@ -35,7 +42,7 @@ export default function WarningDialogC({ title, message, confirmText, cancelText
                                     </div>
                                 )}
                                 <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                {warnMessage && (
+                                    {warnMessage && (
                                         <div className="mt-2">
                                             <AlertC alertData={{
                                                 message: warnMessage,

@@ -23,7 +23,7 @@ export default function WahlzettelC({ wahlkreis, directCandidates, parties, chec
                     >
                         Auswahl löschen
                     </button>}
-                    <h2 className="font-bold text-3xl pb-10 text-center w-[1000px]">{checkMode ? "Dies sind Ihre 2 Stimmen." : "Sie haben 2 Stimmen"} </h2>
+                    <h2 className="font-bold text-3xl pb-10 text-center w-[1000px]">{checkMode ? ( "Dies sind Ihre 2 Stimmen.") : "Sie haben 2 Stimmen"} </h2>
                     <h2 className="font-bold text-lg pb-10 text-center w-[1000px]">Ihr Wahlkreis: {wahlkreis.id} {wahlkreis.name}</h2>
                     <div className="flex flex-row items-start justify-start gap-10 bg-[#f5f5f0] pb-5">
                         <h2 className="font-bold text-lg text-center w-[500px]">Hier 1 Stimme für die Wahl eines/einer Wahlkreiseabgeordneten <br /> (Erststimme)</h2>
