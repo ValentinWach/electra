@@ -41,12 +41,12 @@ class BaseElectApi:
 
         with db_session() as db:
             if vote_request.direct_candidate_id:
-                direktkandidat_validity_query = text("""
-                    SELECT 1 FROM wahlkreiskandidaturen WHERE wahl_id = :wahlid AND wahlkreis_id = :wahlkreisid AND id = :direct_candidate_id LIMIT 1
+                direktkandidatur_id_query = text("""
+                    SELECT 1 FROM wahlkreiskandidaturen WHERE wahl_id = :wahlid AND wahlkreis_id = :wahlkreisid AND kandidat_id = :direct_candidate_id LIMIT 1
                 """)
 
-                direktkandidat_validity_result = db.execute(direktkandidat_validity_query, {"direct_candidate_id": vote_request.direct_candidate_id, "wahlid": wahl_id, "wahlkreisid": wahlkreis_id}).fetchone()
-                if not direktkandidat_validity_result:
+                direktkandidatur_id_query = db.execute(direktkandidatur_id_query, {"direct_candidate_id": vote_request.direct_candidate_id, "wahlid": wahl_id, "wahlkreisid": wahlkreis_id}).fetchone()
+                if not direktkandidatur_id_query:
                     raise HTTPException(
                         status_code=400,
                         detail="Invalid request: the direct candidate ID is not valid for the tokens wahlkreis"
@@ -228,7 +228,11 @@ class BaseElectApi:
 
             with db_session() as db:
                 if direktkandidat_valid:
-                    erststimme = ErststimmeTest(wahlkreiskandidatur_id=vote_request.direct_candidate_id)
+                    direktkandidatur_id_query = text("""
+                        SELECT id FROM wahlkreiskandidaturen WHERE wahl_id = :wahlid AND wahlkreis_id = :wahlkreisid AND kandidat_id = :direct_candidate_id LIMIT 1
+                    """)
+                    direktkandidatur_id = db.execute(direktkandidatur_id_query, {"direct_candidate_id": vote_request.direct_candidate_id, "wahlid": wahl_id, "wahlkreisid": wahlkreis_id}).fetchone()
+                    erststimme = ErststimmeTest(wahlkreiskandidatur_id=direktkandidatur_id.id)
                     db.add(erststimme)
                 if partei_valid:
                     zweitstimme = ZweitstimmeTest(wahl_id=wahl_id, wahlkreis_id=wahlkreis_id, partei_id=vote_request.party_id)
