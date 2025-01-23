@@ -4,13 +4,13 @@ import {
     fetchParteien,
     fetchUeberhangProBundesland
 } from "../../apiServices.ts";
-import { Partei } from "../../api/index.ts";
+import { Partei } from "../../api";
 import { useElection } from "../../context/ElectionContext.tsx";
 import BackBreadcrumbsC from "../../components/UI-element-components/BackBreadcrumbsC.tsx";
 import ClosestWinnersC from "../../components/page-elements/Parteien/ClosestWinnersC.tsx";
 import UeberhangC from "../../components/page-elements/Parteien/UeberhangC.tsx";
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { resultPrefix } from "../../utils/Constants.tsx";
+import { resultPrefix } from "../../utils/Logout.tsx";
 
 export default function ParteiDetail() {
     const { id } = useParams();

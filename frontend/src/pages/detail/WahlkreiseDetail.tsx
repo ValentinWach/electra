@@ -5,7 +5,7 @@ import {
     fetchWinningPartiesWahlkreis,
     fetchWahlkreisOverview
 } from "../../apiServices.ts";
-import { OverviewWahlkreis, Wahlkreis } from "../../api/index.ts";
+import { OverviewWahlkreis, Wahlkreis } from "../../api";
 import { useElection } from "../../context/ElectionContext.tsx";
 import ZweitstimmenanteilC from "../../components/page-elements/_shared/ZweitstimmenanteilC.tsx";
 import WinningPartiesC from "../../components/page-elements/Wahlkreise/WinningPartiesC.tsx";
@@ -17,7 +17,7 @@ import { useCalcOnAggregate } from "../../context/CalcOnAggregateContext.tsx";
 import DirektkandidatC from "../../components/page-elements/Wahlkreise/DirektkandidatC.tsx";
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { ChartDataNum } from "../../models/ChartData";
-import { resultPrefix } from "../../utils/Constants.tsx";
+import { resultPrefix } from "../../utils/Logout.tsx";
 
 export default function WahlkreiseDetail() {
     const { id } = useParams();

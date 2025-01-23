@@ -11,7 +11,7 @@ import FullPageLoadingC from './components/UI-element-components/FullPageLoading
 import { useMinLoadingTime } from './hooks/useMinLoadingTime';
 import WahlkreiseDetail from './pages/detail/WahlkreiseDetail.tsx';
 import ParteiDetail from './pages/detail/ParteiDetail.tsx';
-import { resultPrefix, votePrefix } from './utils/Constants.tsx';
+import { resultPrefix, votePrefix } from './utils/Logout.tsx';
 import Authentication from './pages/vote/Authentication.tsx';
 import HeaderC from './components/page-elements/Vote/HeaderC.tsx';
 import Wahlentscheidung from './pages/vote/Wahlentscheidung.tsx';

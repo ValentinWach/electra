@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { votePrefix } from "../../../utils/Constants";
+import { votePrefix } from "../../../utils/Logout";
 import WahlzettelC from "./WahlzettelC";
 import WarningDialogC from "../../UI-element-components/WarningDialogC";
 import AlertC from "../../UI-element-components/AlertC";

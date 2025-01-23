@@ -1,14 +1,22 @@
 import { useNavigate } from "react-router-dom";
 import WahlzettelC from "../../components/page-elements/Vote/WahlzettelC";
-import { votePrefix } from "../../utils/Constants";
+import { votePrefix, handleTokenMissing } from "../../utils/Logout";
 import { useVote } from "../../context/VoteContext";
+import { useEffect } from "react";
 
 export default function Wahlentscheidung() {
-    const { wahlkreis, parties, candidates, selectedDirectCandidate, selectedParty } = useVote();
+    const { wahlkreis, parties, candidates, selectedDirectCandidate, selectedParty, token, resetVoting } = useVote();
     const navigate = useNavigate();
     const handleGoToStimmabgabe = () => {
         navigate(`${votePrefix}/stimmabgabe`);
     };
+    useEffect(() => {
+        const storedToken = sessionStorage.getItem('token');
+        if(!token && !storedToken) {
+            handleTokenMissing(resetVoting, navigate);
+        }
+    }, [token])
+    
     return (
         <div className="flex flex-col justify-start items-end">
             <WahlzettelC wahlkreis={wahlkreis} directCandidates={candidates} parties={parties?.parteien} />

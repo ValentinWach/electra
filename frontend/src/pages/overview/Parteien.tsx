@@ -1,11 +1,11 @@
 import {useEffect, useState} from "react";
 import {fetchParteien} from "../../apiServices.ts";
-import {Partei} from "../../api/index.ts";
+import {Partei} from "../../api";
 import {useElection} from "../../context/ElectionContext.tsx";
 import BundestagsparteienC from "../../components/page-elements/Parteien/BundestagsparteienC.tsx";
 import AngetreteneParteienC from "../../components/page-elements/Parteien/AngetreteneParteienC.tsx";
 import { useNavigate } from 'react-router-dom';
-import { resultPrefix } from "../../utils/Constants.tsx";
+import { resultPrefix } from "../../utils/Logout.tsx";
 
 export default function Parteien() {
     const {selectedElection} = useElection();

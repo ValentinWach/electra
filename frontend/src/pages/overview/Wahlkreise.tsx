@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import {
     fetchWahlkreise} from "../../apiServices.ts";
-import { Wahlkreis } from "../../api/index.ts";
+import { Wahlkreis } from "../../api";
 import { useElection } from "../../context/ElectionContext.tsx";
 import WahlkreislisteC from "../../components/page-elements/Wahlkreise/WahlkreislisteC.tsx";
 import WahlkreisMapC from "../../components/page-elements/Wahlkreise/WahlkreisMapC.tsx";
 import { useNavigate } from 'react-router-dom';
-import { resultPrefix } from "../../utils/Constants.tsx";
+import { resultPrefix } from "../../utils/Logout.tsx";
 
 export default function Wahlkreise() {
 

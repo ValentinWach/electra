@@ -3,7 +3,7 @@ import { useVote } from "../../context/VoteContext.tsx";
 import { authenticateVoter } from "../../apiServices";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { votePrefix } from "../../utils/Constants.tsx";
+import { votePrefix } from "../../utils/Logout.tsx";
 
 export default function Authentication() {
     const { initialize } = useVote();
