@@ -9,6 +9,7 @@ import { AlertType } from "../../../models/AlertData";
 import ResultDialogC from "../../UI-element-components/ResultDialogC";
 import { useVote } from "../../../context/VoteContext";
 import { submitVote } from "../../../apiServices";
+import { Dialog, DialogBackdrop } from "@headlessui/react";
 
 export default function StimmabgabeC() {
     const navigate = useNavigate();
@@ -44,7 +45,15 @@ export default function StimmabgabeC() {
     return (
         <>
             <div className="relative">
-                <div className={`flex flex-col items-center ${showFinalWarning ? 'opacity-50' : ''}`}>
+                {showFinalWarning || showSuccess || submitVoteError ? (
+                    <Dialog open={true} onClose={() => {}} className="relative z-10">
+                        <DialogBackdrop
+                            transition
+                            className="fixed inset-0 bg-gray-500/75 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"
+                        />
+                    </Dialog>
+                ): null}
+                <div className={`flex flex-col items-center ${showFinalWarning || showSuccess || submitVoteError ? '' : ''}`}>
                     <AlertC alertData={alertData} />
                     <WahlzettelC
                         checkMode={true}
@@ -72,6 +81,7 @@ export default function StimmabgabeC() {
                 </div>
                 {showFinalWarning && (
                     <WarningDialogC
+                        useBackdrop={false}
                         onConfirm={() => { setSubmitting(true); vote(); }}
                         onClose={() => { if (!submitting) setShowFinalWarning(false); }}
                         title="Sind Sie sicher?"
@@ -85,10 +95,10 @@ export default function StimmabgabeC() {
                     />
                 )}
                 {showSuccess && (
-                    <ResultDialogC success={true} title="Wahl erfolgreich" message="Ihre Stimme wurde gespeichert. Sie werden jetzt abgemeldet." />
+                    <ResultDialogC success={true} useBackdrop={false} title="Wahl erfolgreich" message="Ihre Stimme wurde gespeichert. Sie werden jetzt abgemeldet." />
                 )}
                 {submitVoteError && (
-                    <ResultDialogC success={false} title="Fehler" message="Es ist ein Fehler aufgetreten. Bitte wenden Sie sich an den Wahlhelfer. Sie werden jetzt abgemeldet." />
+                    <ResultDialogC success={false} useBackdrop={false} title="Fehler" message="Es ist ein Fehler aufgetreten. Bitte wenden Sie sich an den Wahlhelfer. Sie werden jetzt abgemeldet." />
                 )}
             </div>
         </>

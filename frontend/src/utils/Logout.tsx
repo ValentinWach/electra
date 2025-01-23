@@ -11,7 +11,7 @@ export const handleTokenMissing = (resetVoting: () => void, navigate: (path: str
     navigate(`${votePrefix}/authentication`);
 };
 
-export const handleLogout = (resetVoting: () => void, navigate: (path: string) => void, showDialog: boolean = true) => {
+export const handleLogout = (resetVoting: () => void, navigate: (path: string) => void, showDialog: boolean = true, logoutBecauseOfSessionTimeout: boolean = false) => {
     if (!showDialog) {
         sessionStorage.clear();
         resetVoting();
@@ -21,12 +21,19 @@ export const handleLogout = (resetVoting: () => void, navigate: (path: string) =
     const dialogContainer = document.createElement('div');
     document.body.appendChild(dialogContainer);
     const root = createRoot(dialogContainer);
-    
-    root.render(createElement(ResultDialogC, {
-        title: "Abmeldung erfolgreich",
-        message: "Sie werden weitergeleitet",
-        success: true
-    }));
+    if(logoutBecauseOfSessionTimeout) {
+        root.render(createElement(ResultDialogC, {
+            title: "Sitzung abgelaufen",
+            message: "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+            success: false
+        }));
+    } else {
+        root.render(createElement(ResultDialogC, {
+            title: "Abmeldung erfolgreich",
+            message: "Sie werden weitergeleitet",
+            success: true
+        }));
+    }
 
     setTimeout(() => {
         sessionStorage.clear();
@@ -34,5 +41,5 @@ export const handleLogout = (resetVoting: () => void, navigate: (path: string) =
         root.unmount();
         document.body.removeChild(dialogContainer);
         navigate(`${votePrefix}/authentication`);
-    }, 1300);
+    }, logoutBecauseOfSessionTimeout ? 3000 : 1500);
 };

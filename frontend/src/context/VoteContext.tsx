@@ -2,6 +2,11 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 import { Abgeordneter, Wahlkreis, WahlzettelParteien, Wahl, WahlzettelParteiWrapper } from '../api';
 import { authenticateVoter, fetchDirektkandidaten} from '../apiServices';
 import { fetchCompetingParties } from '../apiServices';
+import { useNavigate } from 'react-router-dom';
+import { handleLogout } from '../utils/Logout';
+
+// Session timeout in milliseconds (10 minutes)
+const SESSION_TIMEOUT = 1000 * 60 * 10;
 
 interface VoteContextType {
     token: string | undefined;
@@ -22,25 +27,9 @@ interface VoteContextType {
 const VoteContext = createContext<VoteContextType | undefined>(undefined);
 
 export const VoteProvider = ({ children }: { children: ReactNode }) => {
+    const navigate = useNavigate();
+    let sessionTimeout: NodeJS.Timeout;
 
-    // Initialize on page reload
-    useEffect(() => {
-        const storedToken = sessionStorage.getItem('token');
-        const storedIdNumber = sessionStorage.getItem('idNumber');
-        const storedWahlId = sessionStorage.getItem('wahlId');
-        const storedWahlkreisId = sessionStorage.getItem('wahlkreisId');
-        
-        if (storedToken && storedIdNumber && storedWahlId && storedWahlkreisId) {
-            initialize(
-                storedToken,
-                storedIdNumber,
-                parseInt(storedWahlId),
-                parseInt(storedWahlkreisId)
-            ).catch(console.error);
-        }
-    }, []);
-
-    //If you pass in wahl and wahlkreis, it will not fetch them from the server. Better for performance.
     const initialize = async (token: string, idNumber: string, wahlId: number, wahlkreisId: number, wahl?: Wahl, wahlkreis?: Wahlkreis) => {
         try {
             const [direktkandidaten, parties] = await Promise.all([
@@ -84,6 +73,48 @@ export const VoteProvider = ({ children }: { children: ReactNode }) => {
         isVoting: false,
         initialize
     });
+
+    // Initialize on page reload
+    useEffect(() => {
+        const storedToken = sessionStorage.getItem('token');
+        const storedIdNumber = sessionStorage.getItem('idNumber');
+        const storedWahlId = sessionStorage.getItem('wahlId');
+        const storedWahlkreisId = sessionStorage.getItem('wahlkreisId');
+        
+        if (storedToken && storedIdNumber && storedWahlId && storedWahlkreisId) {
+            initialize(
+                storedToken,
+                storedIdNumber,
+                parseInt(storedWahlId),
+                parseInt(storedWahlkreisId)
+            ).catch(console.error);
+        }
+
+        // Cleanup function
+        return () => {
+            if (sessionTimeout) {
+                clearTimeout(sessionTimeout);
+            }
+        };
+    }, []);
+
+    // Reset session timeout on any state change
+    useEffect(() => {
+        if (state.token) {
+            if (sessionTimeout) {
+                clearTimeout(sessionTimeout);
+            }
+            sessionTimeout = setTimeout(() => {
+                handleLogout(resetVoting, navigate, true, true);
+            }, SESSION_TIMEOUT);
+        }
+
+        return () => {
+            if (sessionTimeout) {
+                clearTimeout(sessionTimeout);
+            }
+        };
+    }, [state]);
 
     const setSelectedDirectCandidate = (candidate: Abgeordneter | null) => {
         setState(prevState => ({
