@@ -37,7 +37,6 @@ export default function Wahlkreise() {
         }
     }
 
-
         return (
             <>
                 <WahlkreislisteC showWahlkreisDetails={showWahlkreisDetails} />
