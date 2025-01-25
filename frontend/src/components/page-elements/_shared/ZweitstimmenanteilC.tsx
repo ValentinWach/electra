@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Stimmanteil, Wahl} from "../../../api/index.ts";
+import {Stimmanteil, Wahl} from "../../../api";
 import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {getPartyColor} from "../../../utils/GetPartyColor.tsx";
@@ -86,8 +86,8 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
                 const comparedMap = new Map(comparedData.map(item => [item.party.id, item]));
                 const stimmanteilWithDifference = stimmanteil?.map(item => {
                     const comparedItem = comparedMap.get(item.party.id) || {share: 0, absolute: 0};
-                    const shareDifference = Math.round((comparedItem.share - item.share) * 10) / 10;
-                    const absoluteDifference = comparedItem.absolute - item.absolute;
+                    const shareDifference = Math.round((item.share - comparedItem.share) * 10) / 10;
+                    const absoluteDifference = item.absolute - comparedItem.absolute;
                     return {
                         ...item,
                         share: shareDifference,
