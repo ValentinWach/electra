@@ -31,16 +31,16 @@ FROM candidate_votes cv
          JOIN max_votes mv ON cv.wahlkreis_id = mv.wahlkreis_id AND cv.wahl_id = mv.wahl_id AND cv.votes = mv.max_votes;
 
 CREATE MATERIALIZED VIEW bundestag_parties AS
-WITH total_stimmen as (SELECT wahl_id, count(*) as total_stimmen
-                       FROM zweitstimmen
-                       GROUP BY wahl_id),
+WITH total_stimmen as (SELECT wahlen_id, SUM(stimmen_sum) as total_stimmen
+                       FROM zweitstimmen_partei
+                       GROUP BY wahlen_id),
      three_wahlkreis_parties as (SELECT partei_id, wahl_id
                                  FROM wahlkreis_winners
                                  GROUP BY partei_id, wahl_id
                                  HAVING count(*) >= 3)
-SELECT parteien_id, wahlen_id
+SELECT parteien_id, zp.wahlen_id
 FROM zweitstimmen_partei zp
-         join total_stimmen ts on zp.wahlen_id = ts.wahl_id
+         join total_stimmen ts on zp.wahlen_id = ts.wahlen_id
 WHERE parteien_id = 37
    or ((stimmen_sum * 1.00) / (total_stimmen)) > 0.05
    or parteien_id in (SELECT partei_id FROM three_wahlkreis_parties twp WHERE zp.wahlen_id = twp.wahl_id);

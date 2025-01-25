@@ -187,7 +187,7 @@ paths:
         - Wahlkreis
       responses:
         '200':
-          description: Returning the winning parties of the election per wahlkreis
+          description: Returning the winning parties of the election
           content:
             application/json:
               schema:
