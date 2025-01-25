@@ -203,7 +203,7 @@ class BaseGlobalApi:
             with db_session() as db:
                 ueberhang_query = text('''
                             SELECT b.*, sk.drohender_ueberhang 
-                            FROM uv_2_sitzkontingente_landeslisten_erhoeht_basis sk 
+                            FROM mindestsitzanspruch_partei_bundesland sk 
                             JOIN bundeslaender b ON b.id = sk.bundesland_id 
                             WHERE wahl_id = :wahlId AND partei_id = :parteiId
                             ''')

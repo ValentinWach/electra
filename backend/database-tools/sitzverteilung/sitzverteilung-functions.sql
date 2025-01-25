@@ -37,7 +37,7 @@ BEGIN
                 0 as sitze_berechnet,
                 ma.mindestsitzzahlen as max_sitze_mindestsitze
             FROM ov_2_sitzkontingente_bundesweit_erhoeht nw
-            JOIN uv_2_sitzkontingente_landeslisten_erhoeht_basis ma
+            JOIN mindestsitzanspruch_partei_bundesland ma
                 ON nw.wahl_id = ma.wahl_id 
                 AND nw.partei_id = ma.partei_id
             JOIN zweitstimmen_bundesland_partei zbp 
