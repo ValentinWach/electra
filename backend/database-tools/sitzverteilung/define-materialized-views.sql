@@ -46,14 +46,15 @@ WHERE parteien_id = 37
    or parteien_id in (SELECT partei_id FROM three_wahlkreis_parties twp WHERE zp.wahlen_id = twp.wahl_id);
 
 --Depends on dynamic statement and can thus not be a materialized view
-CREATE TABLE uv_sitzkontingente_parteien_bundestag AS
+CREATE TABLE uv_1_sitzkontingente_landeslisten AS
 SELECT wahl_id, bundesland_id, partei_id, sitze
 FROM calculate_seats_per_party_per_bundesland_and_election();
 
 --Depends on dynamic statement and can thus not be a materialized view
-CREATE TABLE ov_sitzkontingente_erhoehung AS
+CREATE TABLE ov_2_sitzkontingente_bundesweit_erhoeht AS
 SELECT wahl_id, partei_id, stimmen_sum, mindestsitzanspruch, verbleibender_ueberhang, sitze_nach_erhoehung from calculate_seats_per_party_per_election_nationwide();
 
 --Depends on dynamic statement and can thus not be a materialized view
-CREATE TABLE uv_landeslisten_erhoeht AS
-SELECT calc.wahl_id, calc.bundesland_id, calc.partei_id, calc.landeslistensitze, calc.stimmen_sum, calc.mindestsitzanspruch, calc.sitze_final as sum FROM calculate_increased_seats_per_party_per_bundesland_and_election() calc;
+CREATE TABLE uv_2_sitzkontingente_landeslisten_erhoeht AS
+SELECT calc.wahl_id, calc.bundesland_id, calc.partei_id, calc.landeslistensitze, calc.stimmen_sum, calc.mindestsitzanspruch, calc.sitze_final as sum
+FROM calculate_increased_seats_per_party_per_bundesland_and_election() calc;

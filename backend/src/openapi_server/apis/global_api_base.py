@@ -119,10 +119,10 @@ class BaseGlobalApi:
         try:
             with db_session() as db:
                 query = text('''
-                                SELECT parteien."shortName", name, partei_id, ov_sitzkontingente_erhoehung.sitze_nach_erhoehung, stimmen_sum 
-                                FROM ov_sitzkontingente_erhoehung
-                                JOIN parteien ON ov_sitzkontingente_erhoehung.partei_id = parteien.id
-                                WHERE ov_sitzkontingente_erhoehung.wahl_id = :wahlid
+                                SELECT parteien."shortName", name, partei_id, ov_2_sitzkontingente_bundesweit_erhoeht.sitze_nach_erhoehung, stimmen_sum 
+                                FROM ov_2_sitzkontingente_bundesweit_erhoeht
+                                JOIN parteien ON ov_2_sitzkontingente_bundesweit_erhoeht.partei_id = parteien.id
+                                WHERE ov_2_sitzkontingente_bundesweit_erhoeht.wahl_id = :wahlid
                             ''')
                 query_results = db.execute(query, {"wahlid": wahlId}).fetchall()
             if not query_results:
@@ -203,7 +203,7 @@ class BaseGlobalApi:
             with db_session() as db:
                 ueberhang_query = text('''
                             SELECT b.*, sk.drohender_ueberhang 
-                            FROM uv_mindestsitzanspruch_bundestag sk 
+                            FROM uv_2_sitzkontingente_landeslisten_erhoeht_basis sk 
                             JOIN bundeslaender b ON b.id = sk.bundesland_id 
                             WHERE wahl_id = :wahlId AND partei_id = :parteiId
                             ''')

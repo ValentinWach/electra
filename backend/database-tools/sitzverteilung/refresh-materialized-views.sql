@@ -7,19 +7,19 @@ REFRESH MATERIALIZED VIEW bundestag_parties;
 
 
 --Depends on dynamic statement and can thus not be a materialized view
-TRUNCATE TABLE uv_sitzkontingente_parteien_bundestag;
-INSERT INTO uv_sitzkontingente_parteien_bundestag (wahl_id, bundesland_id, partei_id, sitze)
+TRUNCATE TABLE uv_1_sitzkontingente_landeslisten;
+INSERT INTO uv_1_sitzkontingente_landeslisten (wahl_id, bundesland_id, partei_id, sitze)
 SELECT wahl_id, bundesland_id, partei_id, sitze
 FROM calculate_seats_per_party_per_bundesland_and_election();
 
 --Depends on dynamic statement and can thus not be a materialized view
-TRUNCATE TABLE ov_sitzkontingente_erhoehung;
+TRUNCATE TABLE ov_2_sitzkontingente_bundesweit_erhoeht;
 
-INSERT INTO ov_sitzkontingente_erhoehung
+INSERT INTO ov_2_sitzkontingente_bundesweit_erhoeht
 SELECT wahl_id, partei_id, stimmen_sum, mindestsitzanspruch, verbleibender_ueberhang, sitze_nach_erhoehung from calculate_seats_per_party_per_election_nationwide();
 
 --Depends on dynamic statement and can thus not be a materialized view
-TRUNCATE TABLE uv_landeslisten_erhoeht;
-INSERT INTO uv_landeslisten_erhoeht (wahl_id, bundesland_id, partei_id, landeslistensitze, stimmen_sum, mindestsitzanspruch, sum)
+TRUNCATE TABLE uv_2_sitzkontingente_landeslisten_erhoeht;
+INSERT INTO uv_2_sitzkontingente_landeslisten_erhoeht (wahl_id, bundesland_id, partei_id, landeslistensitze, stimmen_sum, mindestsitzanspruch, sum)
 SELECT calc.wahl_id, calc.bundesland_id, calc.partei_id, calc.landeslistensitze, calc.stimmen_sum, calc.mindestsitzanspruch, calc.sitze_final as sum FROM calculate_increased_seats_per_party_per_bundesland_and_election() calc;
 COMMIT;

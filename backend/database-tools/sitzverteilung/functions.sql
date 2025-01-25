@@ -17,12 +17,12 @@ DECLARE
 BEGIN
     FOR rec IN (
         SELECT DISTINCT nw.wahl_id, nw.partei_id
-        FROM ov_sitzkontingente_erhoehung nw
+        FROM ov_2_sitzkontingente_bundesweit_erhoeht nw
     ) LOOP
         temp_table_name := 'temp_table';
         counter := (
             SELECT sitze_nach_erhoehung
-            FROM ov_sitzkontingente_erhoehung nw
+            FROM ov_2_sitzkontingente_bundesweit_erhoeht nw
             WHERE nw.wahl_id = rec.wahl_id
               AND nw.partei_id = rec.partei_id
         );
@@ -36,8 +36,8 @@ BEGIN
                 ma.mindestsitzzahlen,
                 0 as sitze_berechnet,
                 ma.mindestsitzzahlen as max_sitze_mindestsitze
-            FROM ov_sitzkontingente_erhoehung nw
-            JOIN uv_mindestsitzanspruch_bundestag ma
+            FROM ov_2_sitzkontingente_bundesweit_erhoeht nw
+            JOIN uv_2_sitzkontingente_landeslisten_erhoeht_basis ma
                 ON nw.wahl_id = ma.wahl_id 
                 AND nw.partei_id = ma.partei_id
             JOIN zweitstimmen_bundesland_partei zbp 
@@ -81,7 +81,7 @@ BEGIN
                     FROM total_max_sitze
                     WHERE total_max_sitze > (
                         SELECT sitze_nach_erhoehung 
-                        FROM ov_sitzkontingente_erhoehung 
+                        FROM ov_2_sitzkontingente_bundesweit_erhoeht 
                         WHERE wahl_id = ' || rec.wahl_id || '
                           AND partei_id = ' || rec.partei_id || '
                     )
@@ -121,8 +121,8 @@ DECLARE
     rec RECORD;
 BEGIN
     FOR rec IN (
-        SELECT DISTINCT ovbe.wahl_id 
-        FROM ov_sitzkontingente_basis_erhoehung ovbe
+        SELECT DISTINCT w.id as wahl_id
+        FROM wahlen w
     ) LOOP
         EXECUTE 'CREATE TEMP TABLE temp_table_erhoeht AS
             SELECT 
@@ -132,7 +132,7 @@ BEGIN
                 ov.mindestsitzanspruch,
                 drohender_ueberhang AS verbleibender_ueberhang,
                 sitze AS sitze_nach_erhoehung
-            FROM ov_sitzkontingente_basis_erhoehung ov 
+            FROM ov_2_sitzkontingente_bundesweit_erhoeht_basis ov 
             WHERE ov.wahl_id = ' || rec.wahl_id;
 
         EXECUTE 'SELECT EXISTS (
@@ -156,7 +156,7 @@ BEGIN
                     quote_literal('partei_id') || ', ' ||
                     quote_literal('stimmen_sum') || ', ' ||
                     counter || ', ' || rec.wahl_id || ') sl ON wp.partei_id = sl.id
-                JOIN ov_sitzkontingente_basis_erhoehung basis ON basis.partei_id = sl.id
+                JOIN ov_2_sitzkontingente_bundesweit_erhoeht_basis basis ON basis.partei_id = sl.id
                 JOIN parteien p ON wp.partei_id = p.id
                 WHERE wp.wahl_id = ' || rec.wahl_id || '
                   AND basis.wahl_id = ' || rec.wahl_id;
@@ -233,8 +233,8 @@ BEGIN
                 quote_literal('parteien_id') || ', ' ||
                 quote_literal('stimmen_sum') || ', 
                 CAST((
-                    SELECT ov_sitzkontingente.slots 
-                    FROM ov_sitzkontingente 
+                    SELECT ov_1_sitzkontingente_bundesleander.slots 
+                    FROM ov_1_sitzkontingente_bundesleander 
                     WHERE bundeslaender_id = ' || rec.bundeslaender_id || '
                       AND wahl_id = ' || rec.wahlen_id || '
                 ) AS INT), ' || rec.wahlen_id || ') sl';
@@ -244,12 +244,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+
 CREATE OR REPLACE FUNCTION sainte_lague(
     table_name    TEXT,
     id_column     TEXT,
     value_column  TEXT,
-    totalSlots    INT,
-    wahl_id_init  INT
+    totalSlots    INTEGER,
+    wahl_id_init  INTEGER
 )
     RETURNS TABLE (
         id      INT,
@@ -264,12 +266,12 @@ BEGIN
         SELECT id, COUNT(*) as slots, wahl_id
         FROM (
             SELECT id, value, wahl_id
-            FROM sainte_lague_table(' ||
-                quote_literal(table_name) || ', ' ||
-                quote_literal(id_column) || ', ' ||
-                quote_literal(value_column) || ', ' ||
-                totalSlots || ', ' ||
-                wahl_id_init || ')
+            FROM public.sainte_lague_table(' ||
+                quote_literal(table_name) || '::text, ' ||
+                quote_literal(id_column) || '::text, ' ||
+                quote_literal(value_column) || '::text, ' ||
+                totalSlots || '::integer, ' ||
+                wahl_id_init || '::integer)
             ORDER BY value DESC
             LIMIT ' || totalSlots || '
         ) AS top_values
