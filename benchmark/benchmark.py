@@ -3,7 +3,12 @@ import random
 
 class ElectionSystemUser(HttpUser):
     # Set wait time between requests - will be randomized between 0.8*t and 1.2*t
-    wait_time = between(0.8, 1.2)  # Default 1 second, adjust t as needed
+    
+    #use 0.5, 1, 3 seconds
+    #users: 100, 1000, 10000
+    t = 15
+    wait_time = between(0.8*t, 1.2*t)
+    
     
     def get_random_ids(self):
         """Get random IDs for each request"""

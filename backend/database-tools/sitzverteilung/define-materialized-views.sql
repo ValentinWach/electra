@@ -48,16 +48,11 @@ WHERE parteien_id = 37
 --Depends on dynamic statement and can thus not be a materialized view
 CREATE TABLE uv_sitzkontingente_parteien_bundestag AS
 SELECT wahl_id, bundesland_id, partei_id, sitze
-FROM calculate_seats_per_party_per_bundesland_and_election(1)
-UNION
-SELECT wahl_id, bundesland_id, partei_id, sitze
-FROM calculate_seats_per_party_per_bundesland_and_election(2);
+FROM calculate_seats_per_party_per_bundesland_and_election();
 
 --Depends on dynamic statement and can thus not be a materialized view
 CREATE TABLE ov_sitzkontingente_erhoehung AS
-SELECT wahl_id, partei_id, stimmen_sum, mindestsitzanspruch, verbleibender_ueberhang, sitze_nach_erhoehung from calculate_seats_per_party_per_election_nationwide(1)
-UNION
-SELECT wahl_id, partei_id, stimmen_sum, mindestsitzanspruch, verbleibender_ueberhang, sitze_nach_erhoehung from calculate_seats_per_party_per_election_nationwide(2);
+SELECT wahl_id, partei_id, stimmen_sum, mindestsitzanspruch, verbleibender_ueberhang, sitze_nach_erhoehung from calculate_seats_per_party_per_election_nationwide();
 
 --Depends on dynamic statement and can thus not be a materialized view
 CREATE TABLE uv_landeslisten_erhoeht AS

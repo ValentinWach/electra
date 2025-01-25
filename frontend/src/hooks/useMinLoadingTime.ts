@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
  * @param minLoadingTime Minimum loading time in milliseconds (default: 500)
  * @returns A loading state that respects the minimum loading time
  */
-export function useMinLoadingTime(isLoading: boolean, minLoadingTime: number = 250): boolean {
+export function useMinLoadingTime(isLoading: boolean, minLoadingTime: number = 150): boolean {
     const [showLoader, setShowLoader] = useState(isLoading);
 
     useEffect(() => {
