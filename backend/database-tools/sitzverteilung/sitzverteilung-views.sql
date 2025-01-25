@@ -92,7 +92,7 @@ FROM wahlkreissitze_parteien
 GROUP BY wahl_id, partei_id;
 
 --Should be materialized because used in loop in function
-CREATE MATERIALIZED VIEW mindestsitzanspruch_partei_bundesland AS --Oberverteilung 2 Basis?
+CREATE MATERIALIZED VIEW mindestsitzanspruch_partei_bundesland AS
 SELECT sk.wahl_id, sk.bundesland_id, sk.partei_id, sk.sitze, wahlkreissitze, GREATEST(0, (coalesce(wahlkreissitze, 0) - sk.sitze)) as drohender_ueberhang, GREATEST(TRUNC((coalesce(wahlkreissitze, 0)::NUMERIC + sk.sitze::NUMERIC)/2 + 0.5), wahlkreissitze) as mindestsitzzahlen
 FROM uv_1_sitzkontingente_landeslisten sk join wahlkreissitze_parteien wp on wp.wahl_id = sk.wahl_id and wp.bundesland_id = sk.bundesland_id and wp.partei_id = sk.partei_id;
 
