@@ -40,51 +40,46 @@ SELECT sk.wahl_id, sk.bundesland_id, sk.partei_id, sk.sitze, wahlkreissitze, GRE
 FROM uv_1_sitzkontingente_landeslisten sk join wahlkreissitze_parteien wp on wp.wahl_id = sk.wahl_id and wp.bundesland_id = sk.bundesland_id and wp.partei_id = sk.partei_id;
 
 
-CREATE OR REPLACE VIEW sitze_nach_gewinnern_ohne_partei AS
-SELECT wahl_id, (598 - (SELECT count(*)
-FROM wahlkreis_winners ww join wahlkreiskandidaturen wk on ww.wahl_id = wk.wahl_id and ww.kandidat_id = wk.kandidat_id
-WHERE wk.partei_id IS NULL)) AS kandidaten_sum
-FROM wahlkreis_winners
-GROUP BY wahl_id;
-
 CREATE OR REPLACE VIEW ov_2_sitzkontingente_bundesweit_erhoeht_basis AS
 SELECT wahl_id, partei_id, GREATEST(sum(sitze), sum(mindestsitzzahlen)) as mindestsitzanspruch, sum(drohender_ueberhang) as drohender_ueberhang, zs.stimmen_sum, sum(sitze) as sitze
 FROM uv_2_sitzkontingente_landeslisten_erhoeht_basis msa join zweitstimmen_partei zs on zs.wahlen_id = msa.wahl_id and zs.parteien_id = msa.partei_id
 GROUP BY wahl_id, partei_id, zs.stimmen_sum;
 
-CREATE OR REPLACE VIEW wahlkreis_winners_bundesland AS
-SELECT ww.wahl_id, ww.partei_id, w.bundesland_id, COUNT(*) as sum FROM wahlkreis_winners ww JOIN wahlkreise w on ww.wahlkreis_id = w.id
-GROUP BY wahl_id, partei_id, bundesland_id;
-
-CREATE OR REPLACE VIEW listenabgeordnete_anzahl AS
-SELECT u.wahl_id, u.bundesland_id, u.partei_id, COALESCE(u.sum, 0) - COALESCE(wwb.sum, 0) AS difference
-FROM uv_2_sitzkontingente_landeslisten_erhoeht u
-LEFT JOIN wahlkreis_winners_bundesland wwb
-ON u.wahl_id = wwb.wahl_id AND u.partei_id = wwb.partei_id AND u.bundesland_id = wwb.bundesland_id;
-
-CREATE OR REPLACE VIEW unmatched_candidates AS
-SELECT kandidat_id, wahl_id, "listPosition", partei_id, bundesland_id
-FROM listenkandidaturen
-WHERE (kandidat_id, wahl_id) NOT IN (
-    SELECT kandidat_id, wahl_id
-    FROM wahlkreis_winners
-);
-
-CREATE OR REPLACE VIEW ranked_remaining_candidates AS
+CREATE OR REPLACE VIEW abgeordnete AS
+WITH wahlkreis_winners_bundesland AS (
+    SELECT ww.wahl_id, ww.partei_id, w.bundesland_id, COUNT(*) as sum 
+    FROM wahlkreis_winners ww 
+    JOIN wahlkreise w on ww.wahlkreis_id = w.id
+    GROUP BY wahl_id, partei_id, bundesland_id
+),
+listenabgeordnete_anzahl AS (
+    SELECT u.wahl_id, u.bundesland_id, u.partei_id, COALESCE(u.sum, 0) - COALESCE(wwb.sum, 0) AS difference
+    FROM uv_2_sitzkontingente_landeslisten_erhoeht u
+    LEFT JOIN wahlkreis_winners_bundesland wwb
+    ON u.wahl_id = wwb.wahl_id AND u.partei_id = wwb.partei_id AND u.bundesland_id = wwb.bundesland_id
+),
+unmatched_candidates AS (
+    SELECT kandidat_id, wahl_id, "listPosition", partei_id, bundesland_id
+    FROM listenkandidaturen
+    WHERE (kandidat_id, wahl_id) NOT IN (
+        SELECT kandidat_id, wahl_id
+        FROM wahlkreis_winners
+    )
+),
+ranked_remaining_candidates AS (
 SELECT uc.kandidat_id, uc.wahl_id, uc."listPosition", uc.partei_id, uc.bundesland_id, dv.difference,
         ROW_NUMBER() OVER (
             PARTITION BY uc.wahl_id, uc.partei_id, uc.bundesland_id
             ORDER BY uc."listPosition" ASC
         ) AS rank
 FROM unmatched_candidates uc
-JOIN listenabgeordnete_anzahl dv ON uc.wahl_id = dv.wahl_id AND uc.partei_id = dv.partei_id AND uc.bundesland_id = dv.bundesland_id;
-
-CREATE OR REPLACE VIEW listenabgeordnete AS
+JOIN listenabgeordnete_anzahl dv ON uc.wahl_id = dv.wahl_id AND uc.partei_id = dv.partei_id AND uc.bundesland_id = dv.bundesland_id
+),
+listenabgeordnete AS (
 SELECT *
 FROM ranked_remaining_candidates
-WHERE rank <= difference;
-
-CREATE OR REPLACE VIEW abgeordnete AS
+WHERE rank <= difference
+)
 SELECT wahl_id, kandidat_id, partei_id FROM listenabgeordnete
 UNION
 SELECT wahl_id, kandidat_id, partei_id FROM wahlkreis_winners;
