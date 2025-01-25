@@ -14,35 +14,35 @@ class ElectionSystemUser(HttpUser):
     @task(25)
     def q1_sitzverteilung(self):
         """Q1: Get seat distribution (25% of requests)"""
-        self.client.get(f"/results/{self.wahl_id}/sitzverteilung")
+        self.client.get(f"/results/{self.wahl_id}/sitzverteilung", name="Q1_Sitzverteilung")
     
     @task(10)
     def q2_abgeordnete(self):
         """Q2: Get all parliament members (10% of requests)"""
-        self.client.get(f"/results/{self.wahl_id}/abgeordnete")
+        self.client.get(f"/results/{self.wahl_id}/abgeordnete", name="Q2_Abgeordnete")
     
     @task(25)
     def q3_wahlkreis_overview(self):
         """Q3: Get wahlkreis overview (25% of requests)"""
         # Get basic overview
-        self.client.get(f"/results/{self.wahl_id}/overview/wahlkreis/{self.wahlkreis_id}")
+        self.client.get(f"/results/{self.wahl_id}/overview/wahlkreis/{self.wahlkreis_id}", name="Q3_Wahlkreisübersicht")
         # Get vote distribution
-        self.client.get(f"/results/{self.wahl_id}/stimmanteil/wahlkreis/{self.wahlkreis_id}")
+        self.client.get(f"/results/{self.wahl_id}/stimmanteil/wahlkreis/{self.wahlkreis_id}", name="Q3_Wahlkreisübersicht")
     
     @task(10)
     def q4_stimmkreissieger(self):
         """Q4: Get winning parties per wahlkreis (10% of requests)"""
-        self.client.get(f"/results/{self.wahl_id}/winningparties/wahlkreis/{self.wahlkreis_id}")
+        self.client.get(f"/results/{self.wahl_id}/winningparties/wahlkreis/{self.wahlkreis_id}", name="Q4_Stimmkreissieger")
     
     @task(10)
     def q5_ueberhangmandate(self):
         """Q5: Get surplus seats per party (10% of requests)"""
-        self.client.get(f"/results/{self.wahl_id}/ueberhang/{self.partei_id}")
+        self.client.get(f"/results/{self.wahl_id}/ueberhang/{self.partei_id}", name="Q5_Ueberhangmandate")
     
     @task(20)
     def q6_knappste_sieger(self):
         """Q6: Get closest winners for parties (20% of requests)"""
-        self.client.get(f"/results/{self.wahl_id}/{self.partei_id}/closestwinners")
+        self.client.get(f"/results/{self.wahl_id}/{self.partei_id}/closestwinners", name="Q6_Knappste_Sieger")
 
 # To run:
 # locust -f benchmark.py --host=http://localhost:8000
