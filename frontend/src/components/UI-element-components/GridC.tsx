@@ -104,7 +104,7 @@ export default function GridC({ gridData, usePagination = true, pageSize = 10, c
 
     const tableContent = (
         <>
-            <table className="table">
+            <table className={`table ${usePagination ? "" : "xl:table-auto xl:text-wrap"} table-fixed text-nowrap`}>
                 <thead>
                     <tr>
                         {gridData.columns.map(column => (
@@ -150,7 +150,7 @@ export default function GridC({ gridData, usePagination = true, pageSize = 10, c
     )
 
     return contentTileConfig ? (
-        <ContentTileC header={contentTileConfig.header} doubleSize={contentTileConfig.doubleSize} loading={loading}>
+        <ContentTileC header={contentTileConfig.header} xlWidth={contentTileConfig.xlWidth} loading={loading}>
             {tableContent}
         </ContentTileC>
     ) : tableContent;

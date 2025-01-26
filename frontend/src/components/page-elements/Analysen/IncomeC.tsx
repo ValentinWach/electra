@@ -28,11 +28,11 @@ export default function IncomeC({parteien} : {parteien: Partei[]}) {
 
                 const data = await fetchIncomeAnalysis(selectedElection?.id ?? 0, selectedParteiId ?? 0);
                 const incomeData: ChartDataXYR = {
-                    labels: data.wahlkreise.map(w => `WK ${w.wahlkreisId}: (TODO: Name)`),
+                    labels: data.wahlkreise.map(w => `WK ${w.wahlkreisId}: ${w.wahlkreisName}`),
                     datasets: [{
                         data: data.wahlkreise
                             .filter(w => w.stimmanteil !== undefined && w.stimmanteil > 0)
-                            .map(w => ({x: w.einkommen, y: w.stimmanteil!, r: 2})),
+                            .map(w => ({x: w.einkommen, y: w.stimmanteil!, r: 2.5})),
                         backgroundColor: [getPartyColor(parteien.find(p => p.id === selectedParteiId)?.shortname ?? '')],
                     }]
                 }

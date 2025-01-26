@@ -10,6 +10,7 @@ import GridC from '../../UI-element-components/GridC.tsx';
 import CheckboxC from '../../UI-element-components/CheckboxC.tsx';
 import type { ChartDataNum } from '../../../models/ChartData';
 import { useMinLoadingTime } from '../../../hooks/useMinLoadingTime.ts';
+import { formatNumberWithSpaces } from "../../../utils/FormatNumber.tsx";
 
 export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVotesDefault = false}: {
     fetchStimmanteile: (wahlId: number) => Promise<Stimmanteil[]>,
@@ -130,7 +131,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
     };
     
     return (
-            <ContentTileC loading={showLoader} dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={"Zweitstimmenanteile"}>
+            <ContentTileC  loading={showLoader} dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={"Zweitstimmenanteile"}>
                 {comparedElection ?
                     <BarchartC data={comparedData}></BarchartC>
                     :
@@ -145,20 +146,21 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
                             columns: [
                                 {id: 1, label: 'Kürzel', searchable: true},
                                 {id: 2, label: 'Partei', searchable: true}, 
-                                {id: 3, label: comparedElection ? "Differenz zum Vergleichszeitraum" : "Anzahl Zweitstimmen", searchable: false}
+                                {id: 3, label: "Anzahl Zweitstimmen", searchable: false},
+                                ...(comparedElection != null ? [{id: 4, label: "Differenz zum Vergleichszeitraum", searchable: false}] : [])
                             ],
                             rows: processStimmanteile(stimmanteil).map(partei => {
                                 const comparedValue = processStimmanteile(comparedStimmanteil).find(p => p.party.id === partei.party.id)?.absolute ?? 0;
-                                const comparedValueStr = !comparedElection ? 
-                                    partei.absolute.toString() :
-                                    `${comparedValue > 0 ? '+' : ''}${comparedValue}`;
+                                const comparedValueStr = comparedElection != null ? 
+                                    `${comparedValue > 0 ? '+' : ''}${formatNumberWithSpaces(comparedValue)}` :"";
                                     
                                 return {
                                     key: partei.party.id,
                                     values: [
                                         {column_id: 1, value: partei.party.shortname || '', badge: {color: getPartyColor(partei.party.shortname || '')}},
                                         {column_id: 2, value: partei.party.name || ''},
-                                        {column_id: 3, value: comparedValueStr}
+                                        {column_id: 3, value: formatNumberWithSpaces(partei.absolute)},
+                                        ...(comparedElection ? [{column_id: 4, value: comparedValue !== 0 ? comparedValueStr : ''}] : [])
                                     ]
                                 };
                             })

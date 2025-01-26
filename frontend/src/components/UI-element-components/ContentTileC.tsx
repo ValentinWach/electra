@@ -6,7 +6,7 @@ interface CharttileProps {
     children?: ReactNode;
 }
 
-export default function ContentTileC({ children, header, doubleSize: xlWidth, dropDownContent, loading = false, dropDownFunction }: CharttileProps & { header: string, doubleSize?: Boolean, dropDownContent?: DropdownData, dropDownFunction?: (id: number) => void } & { loading?: boolean }) {
+export default function ContentTileC({ children, header, xlWidth, dropDownContent, loading = false, dropDownFunction }: CharttileProps & { header: string, xlWidth?: Boolean, dropDownContent?: DropdownData, dropDownFunction?: (id: number) => void } & { loading?: boolean }) {
     xlWidth = xlWidth ?? false;
 
     const tableSkeletonRow = (index: number) => (

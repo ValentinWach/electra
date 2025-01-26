@@ -106,7 +106,7 @@ export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number)
     };
 
     return (
-        <ContentTileC dropDownContent={mapDD} dropDownFunction={setStimmenType} doubleSize={true}
+        <ContentTileC dropDownContent={mapDD} dropDownFunction={setStimmenType} xlWidth={true}
                     header={"Wahlkreiskarte"} loading={showLoader}>
             <MapContainer center={center} zoomControl={true} doubleClickZoom={true} scrollWheelZoom={true} zoom={6.5}
                           style={{height: '90vh', width: '100%', zIndex: '10'}}>

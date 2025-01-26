@@ -1,21 +1,11 @@
-Features - Unbeding: (/)
+Feat - unbedingt - 
 
 Design - Unbedingt:
-- (Bedingte) Responsiveness, alles im default etwas breiter
-[- Grid: Spaltenbreite automatisch anpassen (mal mit Zacha besprechen)]
-
-Refactoring-Unbedingt: (/)
-
 
 Features - Optional:
 - Prozentanteil in den winning Parties (auf der Karte) anzeigen?
-[- Hässliches Quadrat beim Klick auf Karte entfernen (vorsicht, schon ordentlich Zeit versenkt)]
-
-Design-Optional:
-[- Hovering Tabelle & Chart verbinden (Bereits Zeit und Promts verschwendet)]
 
 Refactoring-Optional
-- Weniger glitches, mehr smoothness
 - Beim "Ab hier auf einzelstimmen berechnen" versuchen APIs parallel zu laden (oder wird das schon gemacht)
 
 

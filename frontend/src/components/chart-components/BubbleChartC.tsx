@@ -26,16 +26,14 @@ export default function BubbleChartC(props: { data?: ChartDataXYR, xLabel?: stri
     const options = {
         scales: {
             x: {
-                beginAtZero: true,
-                min: props.xMin ?? undefined,
-                max: props.xMax ?? undefined,
+                min: props.xMin && props.xMax ? props.xMin - Math.round((props.xMax - props.xMin)  * 0.02) : undefined,
+                max: props.xMin && props.xMax ? props.xMax + Math.round((props.xMax - props.xMin)  * 0.02) : undefined,
                 title: props.xLabel ? {
                     display: true,
                     text: props.xLabel,
                 } : undefined,
             },
             y: {
-                beginAtZero: true,
                 title: props.xLabel ? {
                     display: true,
                     text: props.yLabel,
@@ -44,6 +42,13 @@ export default function BubbleChartC(props: { data?: ChartDataXYR, xLabel?: stri
         },
         maintainAspectRatio: false,
         plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function(context: any) {
+                        return `(${context.raw.x}, ${context.raw.y})`;
+                    }
+                }
+            },
             legend: {
                 position: 'bottom' as const,
                 display: false,

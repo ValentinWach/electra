@@ -27,11 +27,11 @@ export default function ForeignerShareC({parteien} : {parteien: Partei[]}) {
                 if (selectedParteiId === null) return;
                 const data = await fetchForeignerShareAnalysis(selectedElection?.id ?? 0, selectedParteiId ?? 0);
                 const foreignersData: ChartDataXYR = {
-                    labels: data.wahlkreise.map(w => `WK ${w.wahlkreisId}: (TODO: Name)`),
+                    labels: data.wahlkreise.map(w => `WK ${w.wahlkreisId}: ${w.wahlkreisName}`),
                     datasets: [{
                         data: data.wahlkreise
                             .filter(w => w.stimmanteil !== undefined && w.stimmanteil > 0)
-                            .map(w => ({x: w.auslaenderanteil, y: w.stimmanteil!, r: 2})),
+                            .map(w => ({x: w.auslaenderanteil, y: w.stimmanteil!, r: 2.5})),
                         backgroundColor: [getPartyColor(parteien.find(p => p.id === selectedParteiId)?.shortname ?? '')],
                     }]
                 }
