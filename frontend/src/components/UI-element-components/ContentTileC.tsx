@@ -33,10 +33,9 @@ export default function ContentTileC({ children, header, xlWidth, dropDownConten
         </div>
     );
     return (
-
         <div
             className={`${xlWidth ? "max-w-[1300px]" : "max-w-[1100px]"} sm:w-full xl:w-[90%] 2xl:w-3/4 drop-shadow-lg bg-white rounded-md p-8 flex items-center flex-col gap-3 text-left mt-8 mb-8`}>
-            <p className={"text-xl font-bold text-left text-gray-800"}>{header}</p>
+            <p className={"text-2xl font-bold text-left text-gray-800"}>{header}</p>
             <div className={"flex flex-row justify-center w-full gap-10"}>
                 {dropDownContent && dropDownFunction ? <DropdownC dropdownData={dropDownContent} dropDownFunction={dropDownFunction} /> : null}
             </div>
