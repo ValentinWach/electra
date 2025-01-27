@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { resultPrefix, votePrefix } from './utils/Logout.tsx';
 import { lazy, Suspense } from 'react';
 import FullPageLoadingC from './components/UI-element-components/FullPageLoadingC.tsx';
@@ -14,6 +14,8 @@ function App() {
                 <Routes>
                     <Route path={resultPrefix + "/*"} element={<ResultsApp />} />
                     <Route path={votePrefix + "/*"} element={<VoteApp />} />
+                    <Route path={votePrefix + "*"} element={<Navigate to={votePrefix + "/authentication"} replace />} />
+                    <Route path="*" element={<Navigate to={resultPrefix + "/uebersicht"} replace />} />
                 </Routes>
             </Suspense>
         </Router>
