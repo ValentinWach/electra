@@ -104,7 +104,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION calculate_seats_per_party_per_election_nationwide()
+CREATE OR REPLACE FUNCTION calculate_seats_per_party_per_election_nationwide(wahl_id_init INT)
     RETURNS TABLE (
         wahl_id                 INT,
         stimmen_sum            NUMERIC,
@@ -118,22 +118,49 @@ AS $$
 DECLARE
     counter INT := 598;
     condition_met BOOLEAN;
-    rec RECORD;
 BEGIN
-    FOR rec IN (
-        SELECT DISTINCT w.id as wahl_id
-        FROM wahlen w
-    ) LOOP
-        EXECUTE 'CREATE TEMP TABLE temp_table_erhoeht AS
+    EXECUTE 'CREATE TEMP TABLE temp_table_erhoeht AS
+        SELECT 
+            wahl_id,
+            stimmen_sum,
+            partei_id,
+            mindestsitzanspruch,
+            drohender_ueberhang AS verbleibender_ueberhang,
+            sitze AS sitze_nach_erhoehung
+        FROM ov_2_sitzkontingente_bundesweit_erhoeht_basis 
+        WHERE wahl_id = ' || wahl_id_init;
+
+    EXECUTE 'SELECT EXISTS (
+        SELECT 1
+        FROM temp_table_erhoeht
+        WHERE (verbleibender_ueberhang = 0 AND sitze_nach_erhoehung < mindestsitzanspruch)
+           OR (SELECT SUM(verbleibender_ueberhang) FROM temp_table_erhoeht) > 3
+    )' INTO condition_met;
+
+    WHILE condition_met LOOP
+        EXECUTE 'CREATE TEMP TABLE temp_table_erhoeht_helper AS
             SELECT 
-                ov.wahl_id,
-                ov.stimmen_sum,
-                ov.partei_id,
-                ov.mindestsitzanspruch,
-                drohender_ueberhang AS verbleibender_ueberhang,
-                sitze AS sitze_nach_erhoehung
-            FROM ov_2_sitzkontingente_bundesweit_erhoeht_basis ov 
-            WHERE ov.wahl_id = ' || rec.wahl_id;
+                ' || wahl_id_init || ' AS wahl_id,
+                basis.stimmen_sum,
+                sl.id AS partei_id,
+                basis.mindestsitzanspruch,
+                GREATEST(0, (COALESCE(basis.mindestsitzanspruch, 0) - sl.slots)) AS verbleibender_ueberhang,
+                sl.slots AS sitze_nach_erhoehung
+            FROM wahlkreissitze_parteien_bundesweit wp
+            JOIN sainte_lague(' || quote_literal('temp_table_erhoeht') || ', ' ||
+                quote_literal('partei_id') || ', ' ||
+                quote_literal('stimmen_sum') || ', ' ||
+                counter || ', ' || wahl_id_init || ') sl ON wp.partei_id = sl.id
+            JOIN ov_2_sitzkontingente_bundesweit_erhoeht_basis basis ON basis.partei_id = sl.id
+            JOIN parteien p ON wp.partei_id = p.id
+            WHERE wp.wahl_id = ' || wahl_id_init || '
+              AND basis.wahl_id = ' || wahl_id_init;
+
+        counter := counter + 1;
+
+        EXECUTE 'DROP TABLE temp_table_erhoeht';
+        EXECUTE 'CREATE TEMP TABLE temp_table_erhoeht AS TABLE temp_table_erhoeht_helper';
+        EXECUTE 'DROP TABLE temp_table_erhoeht_helper';
 
         EXECUTE 'SELECT EXISTS (
             SELECT 1
@@ -141,57 +168,24 @@ BEGIN
             WHERE (verbleibender_ueberhang = 0 AND sitze_nach_erhoehung < mindestsitzanspruch)
                OR (SELECT SUM(verbleibender_ueberhang) FROM temp_table_erhoeht) > 3
         )' INTO condition_met;
-
-        WHILE condition_met LOOP
-            EXECUTE 'CREATE TEMP TABLE temp_table_erhoeht_helper AS
-                SELECT 
-                    ' || rec.wahl_id || ' AS wahl_id,
-                    basis.stimmen_sum,
-                    sl.id AS partei_id,
-                    basis.mindestsitzanspruch,
-                    GREATEST(0, (COALESCE(basis.mindestsitzanspruch, 0) - sl.slots)) AS verbleibender_ueberhang,
-                    sl.slots AS sitze_nach_erhoehung
-                FROM wahlkreissitze_parteien_bundesweit wp
-                JOIN sainte_lague(' || quote_literal('temp_table_erhoeht') || ', ' ||
-                    quote_literal('partei_id') || ', ' ||
-                    quote_literal('stimmen_sum') || ', ' ||
-                    counter || ', ' || rec.wahl_id || ') sl ON wp.partei_id = sl.id
-                JOIN ov_2_sitzkontingente_bundesweit_erhoeht_basis basis ON basis.partei_id = sl.id
-                JOIN parteien p ON wp.partei_id = p.id
-                WHERE wp.wahl_id = ' || rec.wahl_id || '
-                  AND basis.wahl_id = ' || rec.wahl_id;
-
-            counter := counter + 1;
-
-            EXECUTE 'DROP TABLE temp_table_erhoeht';
-            EXECUTE 'CREATE TEMP TABLE temp_table_erhoeht AS TABLE temp_table_erhoeht_helper';
-            EXECUTE 'DROP TABLE temp_table_erhoeht_helper';
-
-            EXECUTE 'SELECT EXISTS (
-                SELECT 1
-                FROM temp_table_erhoeht
-                WHERE (verbleibender_ueberhang = 0 AND sitze_nach_erhoehung < mindestsitzanspruch)
-                   OR (SELECT SUM(verbleibender_ueberhang) FROM temp_table_erhoeht) > 3
-            )' INTO condition_met;
-        END LOOP;
-
-        RETURN QUERY EXECUTE '
-            WITH sum_sitze_cte AS (
-                SELECT (sum(sitze_nach_erhoehung) + sum(verbleibender_ueberhang)) as sum_sitze 
-                FROM temp_table_erhoeht
-            )
-            SELECT 
-                tte.wahl_id,
-                stimmen_sum,
-                partei_id,
-                mindestsitzanspruch,
-                verbleibender_ueberhang,
-                sitze_nach_erhoehung + verbleibender_ueberhang,
-                (SELECT max(sum_sitze) FROM sum_sitze_cte)
-            FROM temp_table_erhoeht tte';
-
-        EXECUTE 'DROP TABLE temp_table_erhoeht';
     END LOOP;
+
+    RETURN QUERY EXECUTE '
+        WITH sum_sitze_cte AS (
+            SELECT (sum(sitze_nach_erhoehung) + sum(verbleibender_ueberhang)) as sum_sitze 
+            FROM temp_table_erhoeht
+        )
+        SELECT 
+            tte.wahl_id,
+            stimmen_sum,
+            partei_id,
+            mindestsitzanspruch,
+            verbleibender_ueberhang,
+            sitze_nach_erhoehung + verbleibender_ueberhang,
+            (SELECT max(sum_sitze) FROM sum_sitze_cte)
+        FROM temp_table_erhoeht tte';
+
+    EXECUTE 'DROP TABLE temp_table_erhoeht';
 END;
 $$ LANGUAGE plpgsql;
 
@@ -243,8 +237,6 @@ BEGIN
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
-
-
 
 CREATE OR REPLACE FUNCTION sainte_lague(
     table_name    TEXT,

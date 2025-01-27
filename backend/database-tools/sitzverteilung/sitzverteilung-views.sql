@@ -105,7 +105,10 @@ GROUP BY wahl_id, partei_id, zs.stimmen_sum;
 
 --Depends on dynamic statement and can thus not be a materialized view
 CREATE TABLE ov_2_sitzkontingente_bundesweit_erhoeht AS
-SELECT wahl_id, partei_id, stimmen_sum, mindestsitzanspruch, verbleibender_ueberhang, sitze_nach_erhoehung from calculate_seats_per_party_per_election_nationwide();
+SELECT wahl_id, partei_id, stimmen_sum, mindestsitzanspruch, verbleibender_ueberhang, sitze_nach_erhoehung from calculate_seats_per_party_per_election_nationwide(1)
+UNION
+SELECT wahl_id, partei_id, stimmen_sum, mindestsitzanspruch, verbleibender_ueberhang, sitze_nach_erhoehung from calculate_seats_per_party_per_election_nationwide(2);
+
 
 --Depends on dynamic statement and can thus not be a materialized view
 CREATE TABLE uv_2_sitzkontingente_landeslisten_erhoeht AS
