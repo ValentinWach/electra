@@ -1,50 +1,59 @@
-import os
-
 import pandas as pd
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
 from pathlib import Path
-from dotenv import load_dotenv
 
-from backend.src.openapi_server.database.models import Kandidat
+def parse_candidates(session, Base, year):
+    script_dir = Path(__file__).parent.parent  # go up to database-tools directory
+    source_dir = script_dir / 'sourcefiles'
+    
+    df = pd.read_csv(source_dir / f'kandidaturen_{year}.csv', delimiter=';', keep_default_na=False)
+    filtered_df = df
 
-load_dotenv()
+    for index, row in filtered_df.iterrows():
+        full_name = f"{row['Titel']} {row['Nachname']}".strip() if 'Titel' in row and row['Titel'] else row['Nachname']
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise ValueError("No DATABASE_URL found in the environment variables")
-engine = create_engine(DATABASE_URL)
+        existing_kandidat = session.query(Base.classes.kandidaten).filter(
+            Base.classes.kandidaten.name == full_name,
+            Base.classes.kandidaten.firstname == row['Vornamen'],
+            Base.classes.kandidaten.yearOfBirth == row['Geburtsjahr']
+        ).first()
 
-Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        if existing_kandidat is not None:
+            print(f"Kandidat {existing_kandidat} already exists")
+        else:
+            kandidat = Base.classes.kandidaten(
+                name=full_name,
+                firstname=row['Vornamen'],
+                profession=row['Beruf'],
+                yearOfBirth=row['Geburtsjahr'],
+            )
 
+            session.add(kandidat)
+            session.commit()
 
-df = pd.read_csv(Path('sourcefiles', 'kandidaturen_2017.csv'), delimiter=';', keep_default_na=False)
+if __name__ == '__main__':
+    # This section only runs if script is called directly
+    import os
+    import argparse
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from dotenv import load_dotenv
+    from sqlalchemy.ext.automap import automap_base
 
-filtered_df = df
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--year', type=str, required=True, choices=['2017', '2021'])
+    args = parser.parse_args()
 
-db = Session()
+    load_dotenv()
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    if not DATABASE_URL:
+        raise ValueError("No DATABASE_URL found in the environment variables")
 
-for index, row in filtered_df.iterrows():
-
-    full_name = f"{row['Titel']} {row['Nachname']}".strip() if 'Titel' in row and row['Titel'] else row['Nachname']
-
-    existing_kandidat = db.query(Kandidat).filter(
-        Kandidat.name == full_name,
-        Kandidat.firstname == row['Vornamen'],
-        Kandidat.yearOfBirth == row['Geburtsjahr']
-    ).first()
-
-    if existing_kandidat is not None:
-        print(f"Kandidat {existing_kandidat} already exists")
-    else:
-        kandidat = Kandidat(
-            name=full_name,
-            firstname=row['Vornamen'],
-            profession=row['Beruf'],
-            yearOfBirth=row['Geburtsjahr'],
-        )
-
-        db.add(kandidat)
-        db.commit()
-db.close()
+    engine = create_engine(DATABASE_URL)
+    Base = automap_base()
+    Base.prepare(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    
+    parse_candidates(session, Base, args.year)
+    session.close()
 

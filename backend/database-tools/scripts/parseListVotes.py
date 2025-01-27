@@ -1,88 +1,100 @@
-from datetime import datetime
 import pandas as pd
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from pathlib import Path
-import os
-from backend.src.openapi_server.database.models import Wahl, Wahlkreis, Partei
-from dotenv import load_dotenv
+from datetime import datetime
 
-load_dotenv()
+def parse_list_votes(session, Base, year):
+    script_dir = Path(__file__).parent.parent  # go up to database-tools directory
+    source_dir = script_dir / 'sourcefiles'
+    
+    df = pd.read_csv(source_dir / f'kerg2_{year}.csv', delimiter=';')
+    filtered_df = df[(df['Stimme'] == 2) & (df['Gruppenart'] == 'Partei') & (df['Gebietsart'] == 'Wahlkreis')]
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise ValueError("No DATABASE_URL found in the environment variables")
+    foreign_keys = []
 
-engine = create_engine(DATABASE_URL)
-Session = sessionmaker(bind=engine)
+    rowCounter = 0
+    voteCounter = 0
+    for index, row in filtered_df.iterrows():
+        if(rowCounter % 1000 == 0):
+            print(rowCounter)
+        rowCounter += 1
 
-df = pd.read_csv(Path('sourcefiles', 'kerg2_2021.csv'), delimiter=';')
-filtered_df = df[(df['Stimme'] == 2) & (df['Gruppenart'] == 'Partei') & (df['Gebietsart'] == 'Wahlkreis')]
+        count = 0
+        if(pd.isna(row['Anzahl'])):
+            continue
+        else:
+            count = int(row['Anzahl'])
 
-session = Session()
+        date_str = row['Wahltag']
+        wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
 
-foreign_keys = []
+        wahl_id = session.query(
+            Base.classes.wahlen.id
+        ).filter_by(date=wahl_date).scalar()
 
-rowCounter = 0
-voteCounter = 0
-for index, row in filtered_df.iterrows():
-    if(rowCounter % 1000 == 0):
-        print(rowCounter)
-    rowCounter += 1
+        row['Gebietsname'] = 'Höxter – Gütersloh III – Lippe II' if row['Gebietsname'] == 'Höxter – Lippe II' else row['Gebietsname']
+        row['Gebietsname'] = 'Paderborn' if row['Gebietsname'] == 'Paderborn – Gütersloh III' else row['Gebietsname']
 
-    count = 0
-    if(pd.isna(row['Anzahl'])):
-        continue
-    else:
-        count = int(row['Anzahl'])
+        wahlkreis_id = session.query(
+            Base.classes.wahlkreise.id
+        ).filter_by(name=row['Gebietsname']).scalar()
 
-    date_str = row['Wahltag']
-    wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
+        row['Gruppenname'] = 'HEIMAT (2021: NPD)' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
+        row['Gruppenname'] = 'Wir Bürger (2021: LKR)' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
+        row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
 
-    wahl_id = session.query(
-        Wahl.id
-    ).filter_by(date=wahl_date).scalar()
+        partei_id = session.query(
+            Base.classes.parteien.id
+        ).filter_by(shortName=row['Gruppenname']).scalar()
 
-    row['Gebietsname'] = 'Höxter – Gütersloh III – Lippe II' if row['Gebietsname'] == 'Höxter – Lippe II' else row['Gebietsname']
-    row['Gebietsname'] = 'Paderborn' if row['Gebietsname'] == 'Paderborn – Gütersloh III' else row['Gebietsname']
+        if not wahl_id:
+            raise ValueError("Foreign key 'wahl_id' not found")
+        if not wahlkreis_id:
+            raise ValueError("Foreign key 'wahlkreis_id' not found")
+        if not partei_id:
+            raise ValueError("Foreign key 'partei_id' not found")
 
-    wahlkreis_id = session.query(
-        Wahlkreis.id
-    ).filter_by(name=row['Gebietsname']).scalar()
+        if wahl_id and wahlkreis_id and partei_id:
+            for _ in range(count):
+                foreign_keys.append((wahlkreis_id, partei_id, wahl_id))
+                voteCounter += 1
 
-    row['Gruppenname'] = 'HEIMAT (2021: NPD)' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
-    row['Gruppenname'] = 'Wir Bürger (2021: LKR)' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
-    row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
+    print(voteCounter)
 
-    partei_id = session.query(
-        Partei.id
-    ).filter_by(shortName=row['Gruppenname']).scalar()
+    bulk_df = pd.DataFrame(foreign_keys, columns=['wahlkreis_id', 'partei_id', 'wahl_id'])
+    temp_csv = source_dir / 'temp_zweitstimme.csv'
+    bulk_df.to_csv(temp_csv, index=False, header=False)
 
-    if not wahl_id:
-        raise ValueError("Foreign key 'wahl_id' not found")
-    if not wahlkreis_id:
-        raise ValueError("Foreign key 'wahlkreis_id' not found")
-    if not partei_id:
-        raise ValueError("Foreign key 'partei_id' not found")
+    with session.connection().connection.cursor() as cursor:
+        with open(temp_csv, 'r') as f:
+            cursor.copy_expert("COPY zweitstimmen (wahlkreis_id, partei_id, wahl_id) FROM stdin WITH CSV", f)
+    session.commit()
 
-    if wahl_id and wahlkreis_id and partei_id:
-        for _ in range(count):
-            foreign_keys.append((wahlkreis_id, partei_id, wahl_id))
-            voteCounter += 1
+    import os
+    os.remove(temp_csv)
 
-print(voteCounter)
-session.close()
+if __name__ == '__main__':
+    # This section only runs if script is called directly
+    import os
+    import argparse
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from dotenv import load_dotenv
+    from sqlalchemy.ext.automap import automap_base
 
-bulk_df = pd.DataFrame(foreign_keys, columns=['wahlkreis_id', 'partei_id', 'wahl_id'])
-temp_csv = Path('temp_zweitstimme.csv')
-bulk_df.to_csv(temp_csv, index=False, header=False)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--year', type=str, required=True, choices=['2017', '2021'])
+    args = parser.parse_args()
 
-with engine.connect() as conn:
-    with conn.begin():
-        raw_conn = conn.connection
-        with raw_conn.cursor() as cursor:
-            with open(temp_csv, 'r') as f:
-                cursor.copy_expert("COPY zweitstimmen (wahlkreis_id, partei_id, wahl_id) FROM stdin WITH CSV", f)
-    conn.commit()
+    load_dotenv()
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    if not DATABASE_URL:
+        raise ValueError("No DATABASE_URL found in the environment variables")
 
-os.remove(temp_csv)
+    engine = create_engine(DATABASE_URL)
+    Base = automap_base()
+    Base.prepare(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    
+    parse_list_votes(session, Base, args.year)
+    session.close()

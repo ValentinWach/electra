@@ -1,119 +1,129 @@
-from datetime import datetime
 import pandas as pd
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from pathlib import Path
-import os
-from backend.src.openapi_server.database.models import Wahl, Wahlkreis, Partei, Wahlkreiskandidatur, Kandidat
-from dotenv import load_dotenv
+from datetime import datetime
 
-load_dotenv()
+def parse_direct_votes(session, Base, year):
+    script_dir = Path(__file__).parent.parent  # go up to database-tools directory
+    source_dir = script_dir / 'sourcefiles'
+    
+    df = pd.read_csv(source_dir / f'kerg2_{year}.csv', delimiter=';')
+    filtered_df = df[(df['Stimme'] == 1) & ((df['Gruppenart'] == 'Partei') | (df['Gruppenart'] == 'Einzelbewerber/Wählergruppe')) & (df['Gebietsart'] == 'Wahlkreis')]
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise ValueError("No DATABASE_URL found in the environment variables")
+    wahlkreiskandidaturen_id = []
 
-engine = create_engine(DATABASE_URL)
-Session = sessionmaker(bind=engine)
+    voteCounter = 0
+    rowCounter = 0
+    for index, row in filtered_df.iterrows():
+        if(rowCounter % 1000 == 0):
+            print(rowCounter)
+        rowCounter += 1
 
-df = pd.read_csv(Path('sourcefiles', 'kerg2_2021.csv'), delimiter=';')
-filtered_df = df[(df['Stimme'] == 1) & ((df['Gruppenart'] == 'Partei') | (df['Gruppenart'] == 'Einzelbewerber/Wählergruppe')) & (df['Gebietsart'] == 'Wahlkreis')]
+        count = 0
+        if not pd.isna(row['Anzahl']):
+            count = int(row['Anzahl'])
+        else:
+            continue
 
-session = Session()
+        date_str = row['Wahltag']
+        wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
 
-wahlkreiskandidaturen_id = []
+        wahl_id = session.query(
+            Base.classes.wahlen.id
+        ).filter_by(date=wahl_date).scalar()
 
-voteCounter = 0
-rowCounter = 0
-for index, row in filtered_df.iterrows():
-    if(rowCounter % 1000 == 0):
-        print(rowCounter)
-    rowCounter += 1
+        row['Gebietsname'] = 'Höxter – Gütersloh III – Lippe II' if row['Gebietsname'] == 'Höxter – Lippe II' else row['Gebietsname']
+        row['Gebietsname'] = 'Paderborn' if row['Gebietsname'] == 'Paderborn – Gütersloh III' else row['Gebietsname']
 
-    count = 0
-    if not pd.isna(row['Anzahl']):
-        count = int(row['Anzahl'])
-    else:
-        continue
+        wahlkreis_id = session.query(
+            Base.classes.wahlkreise.id
+        ).filter_by(name=row['Gebietsname']).scalar()
 
+        row['Gruppenname'] = 'HEIMAT (2021: NPD)' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
+        row['Gruppenname'] = 'Wir Bürger (2021: LKR)' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
+        row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
 
-    date_str = row['Wahltag']
-    wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
-
-    wahl_id = session.query(
-        Wahl.id
-    ).filter_by(date=wahl_date).scalar()
-
-    row['Gebietsname'] = 'Höxter – Gütersloh III – Lippe II' if row['Gebietsname'] == 'Höxter – Lippe II' else row['Gebietsname']
-    row['Gebietsname'] = 'Paderborn' if row['Gebietsname'] == 'Paderborn – Gütersloh III' else row['Gebietsname']
-
-    wahlkreis_id = session.query(
-        Wahlkreis.id
-    ).filter_by(name=row['Gebietsname']).scalar()
-
-    row['Gruppenname'] = 'HEIMAT (2021: NPD)' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
-    row['Gruppenname'] = 'Wir Bürger (2021: LKR)' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
-    row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
-
-    if row['Gruppenname'].startswith('EB: '):
-        kandidat_id = session.query(
-            Kandidat.id
-        ).filter(
-            Kandidat.id.in_(
-                session.query(Wahlkreiskandidatur.kandidat_id).filter_by(
-                    wahlkreis_id=wahlkreis_id,
-                    wahl_id=wahl_id,
-                    partei_id=None
+        if row['Gruppenname'].startswith('EB: '):
+            kandidat_id = session.query(
+                Base.classes.kandidaten.id
+            ).filter(
+                Base.classes.kandidaten.id.in_(
+                    session.query(Base.classes.wahlkreiskandidaturen.kandidat_id).filter_by(
+                        wahlkreis_id=wahlkreis_id,
+                        wahl_id=wahl_id,
+                        partei_id=None
+                    )
                 )
-            )
-        ).filter(Kandidat.name.ilike(f"%{row['Gruppenname'].split(':')[1].strip()}%")).scalar()
+            ).filter(Base.classes.kandidaten.name.ilike(f"%{row['Gruppenname'].split(':')[1].strip()}%")).scalar()
 
-        wahlkreiskandidatur_id = session.query(
-            Wahlkreiskandidatur.id
-        ).filter_by(
-            wahlkreis_id=wahlkreis_id,
-            wahl_id=wahl_id,
-            kandidat_id=kandidat_id
-        ).scalar()
-    else:
-        partei_id = session.query(
-            Partei.id
-        ).filter_by(shortName=row['Gruppenname']).scalar()
-        wahlkreiskandidatur_id = session.query(
-            Wahlkreiskandidatur.id
-        ).filter_by(
-            wahlkreis_id=wahlkreis_id,
-            wahl_id=wahl_id,
-            partei_id=partei_id
-        ).scalar()
+            wahlkreiskandidatur_id = session.query(
+                Base.classes.wahlkreiskandidaturen.id
+            ).filter_by(
+                wahlkreis_id=wahlkreis_id,
+                wahl_id=wahl_id,
+                kandidat_id=kandidat_id
+            ).scalar()
+        else:
+            partei_id = session.query(
+                Base.classes.parteien.id
+            ).filter_by(shortName=row['Gruppenname']).scalar()
+            wahlkreiskandidatur_id = session.query(
+                Base.classes.wahlkreiskandidaturen.id
+            ).filter_by(
+                wahlkreis_id=wahlkreis_id,
+                wahl_id=wahl_id,
+                partei_id=partei_id
+            ).scalar()
 
-    if not wahl_id:
-        raise ValueError("Foreign key 'wahl_id' not found")
-    if not wahlkreis_id:
-        raise ValueError("Foreign key 'wahlkreis_id' not found")
-    if not partei_id:
-        raise ValueError("Foreign key 'partei_id' not found")
-    if not wahlkreiskandidatur_id:
-        raise ValueError("'wahlkreiskandidatur_id' not found")
-    if wahl_id and wahlkreis_id and partei_id and wahlkreiskandidatur_id:
-        for _ in range(count):
-            wahlkreiskandidaturen_id.append(wahlkreiskandidatur_id)
-            voteCounter += 1
-print(voteCounter)
+        if not wahl_id:
+            raise ValueError("Foreign key 'wahl_id' not found")
+        if not wahlkreis_id:
+            raise ValueError("Foreign key 'wahlkreis_id' not found")
+        if not partei_id:
+            raise ValueError("Foreign key 'partei_id' not found")
+        if not wahlkreiskandidatur_id:
+            raise ValueError("'wahlkreiskandidatur_id' not found")
+        if wahl_id and wahlkreis_id and partei_id and wahlkreiskandidatur_id:
+            for _ in range(count):
+                wahlkreiskandidaturen_id.append(wahlkreiskandidatur_id)
+                voteCounter += 1
+    print(voteCounter)
 
-session.close()
+    bulk_df = pd.DataFrame(wahlkreiskandidaturen_id, columns=['wahlkreiskandidatur_id'])
 
-bulk_df = pd.DataFrame(wahlkreiskandidaturen_id, columns=['wahlkreiskandidatur_id'])
+    temp_csv = source_dir / 'temp_erststimme.csv'
+    bulk_df.to_csv(temp_csv, index=False, header=False)
 
-temp_csv = Path('temp_erststimme.csv')
-bulk_df.to_csv(temp_csv, index=False, header=False)
+    with session.connection().connection.cursor() as cursor:
+        with open(temp_csv, 'r') as f:
+            cursor.copy_expert("COPY erststimmen (wahlkreiskandidatur_id) FROM stdin WITH CSV", f)
+    session.commit()
 
-with engine.connect() as conn:
-    with conn.begin():
-        raw_conn = conn.connection
-        with raw_conn.cursor() as cursor:
-            with open(temp_csv, 'r') as f:
-                cursor.copy_expert("COPY erststimmen (wahlkreiskandidatur_id) FROM stdin WITH CSV", f)
-    conn.commit()
+    import os
+    os.remove(temp_csv)
 
-os.remove(temp_csv)
+if __name__ == '__main__':
+    # This section only runs if script is called directly
+    import os
+    import argparse
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from dotenv import load_dotenv
+    from sqlalchemy.ext.automap import automap_base
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--year', type=str, required=True, choices=['2017', '2021'])
+    args = parser.parse_args()
+
+    load_dotenv()
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    if not DATABASE_URL:
+        raise ValueError("No DATABASE_URL found in the environment variables")
+
+    engine = create_engine(DATABASE_URL)
+    Base = automap_base()
+    Base.prepare(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    
+    parse_direct_votes(session, Base, args.year)
+    session.close()

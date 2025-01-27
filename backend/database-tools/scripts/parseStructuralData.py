@@ -1,71 +1,70 @@
 import pandas as pd
-import os
-
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
 from pathlib import Path
 
-from backend.src.openapi_server.database.models import Strukturdatum
+def parse_structural_data(session, Base):
+    script_dir = Path(__file__).parent.parent  # go up to database-tools directory
+    source_dir = script_dir / 'sourcefiles'
+    
+    skd17 = pd.read_csv(source_dir / 'strukturdaten_2017.csv', delimiter=';')
+    skd21 = pd.read_csv(source_dir / 'strukturdaten_2021.csv', delimiter=';')
+    wbt17 = pd.read_csv(source_dir / 'wahlbeteiligung_2017.csv', delimiter=',')
+    wbt21 = pd.read_csv(source_dir / 'wahlbeteiligung_2021.csv', delimiter=',')
 
-from dotenv import load_dotenv
+    filtered_skd17 = skd17[(skd17['Wahlkreis-Nr.'] < 900)]
+    filtered_skd21 = skd21[(skd21['Wahlkreis-Nr.'] < 900)]
 
-load_dotenv()
+    for index, row in filtered_skd17.iterrows():
+        wahlbeteiligung = wbt17[wbt17['WK_NR'] == row['Wahlkreis-Nr.']]['Wahlbeteiligung'].values[0].replace(",", ".")
+        strukturdatum = Base.classes.strukturdaten(
+            wahlkreis_id=row['Wahlkreis-Nr.'],
+            wahl_id=2,
+            einwohnerzahl=int(float(row['Bevlkerung am 31.12.2015 - Deutsche (in 1000)'].replace(",", ".")) * 1000),
+            wahlbeteiligung=wahlbeteiligung,
+            auslaenderanteil=float(row['Bevlkerung am 31.12.2015 - Auslnder (%)'].replace(",", ".")),
+            unternehmensdichte=float(row['Unternehmensregister 2014 - Unternehmen insgesamt (je 1000 Einwohner)'].replace(",", ".")),
+            einkommen=int(row['Verfgbares Einkommen der privaten Haushalte 2014 ( je Einwohner)']),
+        )
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise ValueError("No DATABASE_URL found in the environment variables")
+        print(strukturdatum)
+        session.add(strukturdatum)
 
-engine = create_engine(DATABASE_URL)
+    for index, row in filtered_skd21.iterrows():
+        wahlbeteiligung = wbt21[wbt21['Gebietsnummer'] == row['Wahlkreis-Nr.']]['Prozent'].values[0].replace(",", ".")
 
-Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        strukturdatum = Base.classes.strukturdaten(
+            wahlkreis_id=row['Wahlkreis-Nr.'],
+            wahl_id=1,
+            einwohnerzahl=int(float(row['Bevölkerung am 31.12.2019 - Deutsche (in 1000)'].replace(",", ".")) * 1000),
+            wahlbeteiligung=wahlbeteiligung,
+            auslaenderanteil=float(row['Bevölkerung am 31.12.2019 - Ausländer/-innen (%)'].replace(",", ".")),
+            unternehmensdichte=float(row['Unternehmensregister 2018 - Unternehmen insgesamt (je 1000 EW)'].replace(",", ".")),
+            einkommen=int(row['Verfügbares Einkommen der privaten Haushalte 2018 (EUR je EW)']),
+        )
 
-skd17 = pd.read_csv(Path('sourcefiles', 'strukturdaten_2017.csv'), delimiter=';')
-skd21 = pd.read_csv(Path('sourcefiles', 'strukturdaten_2021.csv'), delimiter=';')
-wbt17 = pd.read_csv(Path('sourcefiles', 'wahlbeteiligung_2017.csv'), delimiter=',')
-wbt21 = pd.read_csv(Path('sourcefiles', 'wahlbeteiligung_2021.csv'), delimiter=',')
+        print(strukturdatum)
+        session.add(strukturdatum)
 
-filtered_skd17 = skd17[(skd17['Wahlkreis-Nr.'] < 900)]
-filtered_skd21 = skd21[(skd21['Wahlkreis-Nr.'] < 900)]
+    session.commit()
 
-model = Session()
+if __name__ == '__main__':
+    # This section only runs if script is called directly
+    import os
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from dotenv import load_dotenv
+    from sqlalchemy.ext.automap import automap_base
 
-for index, row in filtered_skd17.iterrows():
+    load_dotenv()
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    if not DATABASE_URL:
+        raise ValueError("No DATABASE_URL found in the environment variables")
 
-    wahlbeteiligung = wbt17[wbt17['WK_NR'] == row['Wahlkreis-Nr.']]['Wahlbeteiligung'].values[0].replace(",", ".")
-    strukturdatum = Strukturdatum(
-        wahlkreis_id= row['Wahlkreis-Nr.'],
-        wahl_id=2,
-        einwohnerzahl= int(float(row['Bev�lkerung am 31.12.2015 - Deutsche (in 1000)'].replace(",", ".")) * 1000),
-        wahlbeteiligung=wahlbeteiligung,
-        auslaenderanteil=float(row['Bev�lkerung am 31.12.2015 - Ausl�nder (%)'].replace(",", ".")),
-        unternehmensdichte=float(row['Unternehmensregister 2014 - Unternehmen insgesamt (je 1000 Einwohner)'].replace(",", ".")),
-        einkommen=int(row['Verf�gbares Einkommen der privaten Haushalte 2014 (� je Einwohner)']),
-    )
-
-    print(strukturdatum)
-
-    model.add(strukturdatum)
-
-for index, row in filtered_skd21.iterrows():
-
-    wahlbeteiligung = wbt21[wbt21['Gebietsnummer'] == row['Wahlkreis-Nr.']]['Prozent'].values[0].replace(",", ".")
-
-    strukturdatum = Strukturdatum(
-        wahlkreis_id= row['Wahlkreis-Nr.'],
-        wahl_id=1,
-        einwohnerzahl= int(float(row['Bevölkerung am 31.12.2019 - Deutsche (in 1000)'].replace(",", ".")) * 1000),
-        wahlbeteiligung=wahlbeteiligung,
-        auslaenderanteil=float(row['Bevölkerung am 31.12.2019 - Ausländer/-innen (%)'].replace(",", ".")),
-        unternehmensdichte=float(row['Unternehmensregister 2018 - Unternehmen insgesamt (je 1000 EW)'].replace(",", ".")),
-        einkommen=int(row['Verfügbares Einkommen der privaten Haushalte 2018 (EUR je EW)']),
-    )
-
-
-    print(strukturdatum)
-
-    model.add(strukturdatum)
-
-model.commit()
-print("Commited")
-model.close()
+    engine = create_engine(DATABASE_URL)
+    Base = automap_base()
+    Base.prepare(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    
+    parse_structural_data(session, Base)
+    session.close()
 
