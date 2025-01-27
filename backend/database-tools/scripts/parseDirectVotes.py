@@ -4,21 +4,23 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from pathlib import Path
 import os
-from backend.src.app.src.openapi_server.database.models import Wahl, Wahlkreis, Partei, Wahlkreiskandidatur, Kandidat
+from backend.src.openapi_server.database.models import Wahl, Wahlkreis, Partei, Wahlkreiskandidatur, Kandidat
+from dotenv import load_dotenv
 
-# Database configuration
-DATABASE_URL = "postgresql://admin:admin@localhost:5432/postgres"
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("No DATABASE_URL found in the environment variables")
+
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
-# Load and filter data
-df = pd.read_csv(Path('sourcefiles', 'kerg2_2017.csv'), delimiter=';')
+df = pd.read_csv(Path('sourcefiles', 'kerg2_2021.csv'), delimiter=';')
 filtered_df = df[(df['Stimme'] == 1) & ((df['Gruppenart'] == 'Partei') | (df['Gruppenart'] == 'Einzelbewerber/Wählergruppe')) & (df['Gebietsart'] == 'Wahlkreis')]
 
-# Session starten
 session = Session()
 
-# Prepare data for bulk insert
 wahlkreiskandidaturen_id = []
 
 voteCounter = 0
@@ -35,11 +37,9 @@ for index, row in filtered_df.iterrows():
         continue
 
 
-    # Convert and cache date
     date_str = row['Wahltag']
     wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
 
-    # Use the session to fetch foreign key IDs
     wahl_id = session.query(
         Wahl.id
     ).filter_by(date=wahl_date).scalar()
@@ -55,7 +55,6 @@ for index, row in filtered_df.iterrows():
     row['Gruppenname'] = 'Wir Bürger (2021: LKR)' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
     row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
 
-    # Einzelbewerber?
     if row['Gruppenname'].startswith('EB: '):
         kandidat_id = session.query(
             Kandidat.id
@@ -67,7 +66,7 @@ for index, row in filtered_df.iterrows():
                     partei_id=None
                 )
             )
-        ).filter_by(name=row['Gruppenname'].split(":")[1].strip()).scalar()
+        ).filter(Kandidat.name.ilike(f"%{row['Gruppenname'].split(':')[1].strip()}%")).scalar()
 
         wahlkreiskandidatur_id = session.query(
             Wahlkreiskandidatur.id
@@ -96,23 +95,21 @@ for index, row in filtered_df.iterrows():
         raise ValueError("Foreign key 'partei_id' not found")
     if not wahlkreiskandidatur_id:
         raise ValueError("'wahlkreiskandidatur_id' not found")
-    # If all foreign keys are valid, append `count` rows
     if wahl_id and wahlkreis_id and partei_id and wahlkreiskandidatur_id:
         for _ in range(count):
             wahlkreiskandidaturen_id.append(wahlkreiskandidatur_id)
             voteCounter += 1
 print(voteCounter)
-# Close session after querying
+
 session.close()
 
 bulk_df = pd.DataFrame(wahlkreiskandidaturen_id, columns=['wahlkreiskandidatur_id'])
-# Write to a temporary CSV file
+
 temp_csv = Path('temp_erststimme.csv')
 bulk_df.to_csv(temp_csv, index=False, header=False)
 
 with engine.connect() as conn:
-    # Access the raw psycopg2 connection to use cursor
-    with conn.begin():  # Begin a transaction
+    with conn.begin():
         raw_conn = conn.connection
         with raw_conn.cursor() as cursor:
             with open(temp_csv, 'r') as f:

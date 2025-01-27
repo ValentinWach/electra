@@ -1,11 +1,19 @@
 import pandas as pd
+import os
+
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from pathlib import Path
 
-from backend.database_tools.database.models import Strukturdatum
+from backend.src.openapi_server.database.models import Strukturdatum
 
-DATABASE_URL = "postgresql://admin:admin@localhost:5432/Electra"
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("No DATABASE_URL found in the environment variables")
 
 engine = create_engine(DATABASE_URL)
 
@@ -19,15 +27,11 @@ wbt21 = pd.read_csv(Path('sourcefiles', 'wahlbeteiligung_2021.csv'), delimiter='
 filtered_skd17 = skd17[(skd17['Wahlkreis-Nr.'] < 900)]
 filtered_skd21 = skd21[(skd21['Wahlkreis-Nr.'] < 900)]
 
-# Session starten
 model = Session()
-
-# Für jedes gefilterte Tupel ein neues Objekt erstellen und in die Datenbank einfügen
 
 for index, row in filtered_skd17.iterrows():
 
     wahlbeteiligung = wbt17[wbt17['WK_NR'] == row['Wahlkreis-Nr.']]['Wahlbeteiligung'].values[0].replace(",", ".")
-    # Create a new Partei object
     strukturdatum = Strukturdatum(
         wahlkreis_id= row['Wahlkreis-Nr.'],
         wahl_id=2,
@@ -38,18 +42,14 @@ for index, row in filtered_skd17.iterrows():
         einkommen=int(row['Verf�gbares Einkommen der privaten Haushalte 2014 (� je Einwohner)']),
     )
 
-    # Relations
-
-    # Print for debugging (optional)
     print(strukturdatum)
 
-    # Add to session
     model.add(strukturdatum)
 
 for index, row in filtered_skd21.iterrows():
 
     wahlbeteiligung = wbt21[wbt21['Gebietsnummer'] == row['Wahlkreis-Nr.']]['Prozent'].values[0].replace(",", ".")
-    # Create a new Partei object
+
     strukturdatum = Strukturdatum(
         wahlkreis_id= row['Wahlkreis-Nr.'],
         wahl_id=1,
@@ -60,12 +60,9 @@ for index, row in filtered_skd21.iterrows():
         einkommen=int(row['Verfügbares Einkommen der privaten Haushalte 2018 (EUR je EW)']),
     )
 
-    # Relations
 
-    # Print for debugging (optional)
     print(strukturdatum)
 
-    # Add to session
     model.add(strukturdatum)
 
 model.commit()

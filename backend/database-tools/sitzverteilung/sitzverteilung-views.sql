@@ -56,7 +56,8 @@ WITH total_stimmen as (SELECT wahlen_id, SUM(stimmen_sum) as total_stimmen
 SELECT parteien_id, zp.wahlen_id
 FROM zweitstimmen_partei zp
          join total_stimmen ts on zp.wahlen_id = ts.wahlen_id
-WHERE parteien_id = 37
+         JOIN parteien p on zp.parteien_id = p.id
+WHERE p."shortName" = 'SSW'
    or ((stimmen_sum * 1.00) / (total_stimmen)) > 0.05
    or parteien_id in (SELECT partei_id FROM three_wahlkreis_parties twp WHERE zp.wahlen_id = twp.wahl_id);
 

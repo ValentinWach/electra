@@ -5,15 +5,27 @@ alte_daten = pd.read_csv("kandidaten_2017.csv", sep=";", header=None,
                          names=["Name, Vorname(n)", "Geburts_jahr", "Partei", "kandidiert im"])
 wahlkreise = pd.read_csv("strukturdaten_2021.csv", sep=";", usecols=["Land", "Wahlkreis-Nr.", "Wahlkreis-Name"])
 
-
-# Funktion zur Aufteilung von Name und Vorname
+# Funktion zur Aufteilung von Name, Titel und Vorname
 def split_name(name_vorname):
     if "," in name_vorname:
         parts = name_vorname.split(", ")
-        nachname = parts[0].replace("Dr. ", "").replace("Prof. ", "").replace("Prof. Dr. ", "").strip()
-        return parts[1], nachname
-    raise ValueError(f"Invalid name format: {name_vorname}")
+        nachname_with_title = parts[0].strip()
 
+        # Extract titles dynamically
+        valid_titles = ["Prof.", "Dr."]
+        titles = [title for title in valid_titles if title in nachname_with_title]
+
+        # Remove titles from Nachname
+        for title in titles:
+            nachname_with_title = nachname_with_title.replace(title, "").strip()
+
+        # Join the titles in a consistent order
+        titel = " ".join(sorted(titles, key=lambda t: valid_titles.index(t)))
+        nachname = nachname_with_title
+
+        return parts[1], nachname, titel
+
+    raise ValueError(f"Invalid name format: {name_vorname}")
 
 # Funktion zur Verarbeitung der Kandidaturen
 def process_kandidatur(kandidatur):
@@ -31,18 +43,16 @@ def process_kandidatur(kandidatur):
         raise ValueError(f"Kandidatur ist weder Land noch Wahlkreis {kandidatur}")
     return gebietsart, kennzeichen, nummer, listenplatz
 
-
 # Liste für die neuen Daten
 neue_daten = []
 
 # Iteriere durch alte Daten
-
 row_iterator = alte_daten.iterrows()
 next(row_iterator)
 try:
     while True:
         _, row = next(row_iterator)
-        vorname, nachname = split_name(row["Name, Vorname(n)"])
+        vorname, nachname, titel = split_name(row["Name, Vorname(n)"])
         geburtsjahr = row["Geburts_jahr"]
         partei = row["Partei"]
         kandidaturen = row["kandidiert im"].split("und")
@@ -61,8 +71,8 @@ try:
 
             gebietsart, kennzeichen, gebietsnummer, listenplatz = process_kandidatur(kandidatur)
             # Gebietsname anhand der Strukturdatei
-            gebietsname = kandidatur.split()[1] #Falls Land stimmt das
-            if gebietsnummer: #Falls Wahlkreis mis der Gebietsname aus der Strukturdatei kommen
+            gebietsname = kandidatur.split()[1]  # Falls Land, stimmt das
+            if gebietsnummer:  # Falls Wahlkreis muss der Gebietsname aus der Strukturdatei kommen
                 gebietsname = wahlkreise.loc[
                     wahlkreise["Wahlkreis-Nr."].astype(str) == gebietsnummer.lstrip("0"), "Wahlkreis-Name"].values
                 gebietsname = gebietsname[0] if len(gebietsname) > 0 else ""
@@ -80,7 +90,8 @@ try:
                 partei,
                 "",
                 listenplatz,
-                ""
+                "",
+                titel
             ])
 except StopIteration:
     print("completed")
@@ -89,7 +100,7 @@ except StopIteration:
 neue_daten_df = pd.DataFrame(neue_daten, columns=[
     "Wahlart", "Wahltag", "Nachname", "Vornamen", "Geburtsjahr",
     "Kennzeichen", "Gebietsart", "Gebietsnummer", "Gebietsname",
-    "Gruppenname", "GruppennameLang" , "Listenplatz", "Beruf"
+    "Gruppenname", "GruppennameLang" , "Listenplatz", "Beruf", "Titel"
 ])
 
 # In CSV speichern

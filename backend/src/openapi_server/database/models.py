@@ -31,7 +31,7 @@ class Wahlkreis(Base):
     strukturdaten = relationship('Strukturdatum', back_populates='wahlkreis')
 
     def __repr__(self):
-        return f"<Wahlkreis(id={self.id}, name={self.name} einwohnerzahl={self.einwohnerzahl} bundesland_id={self.bundesland_id})>"
+        return f"<Wahlkreis(id={self.id}, name={self.name} bundesland_id={self.bundesland_id})>"
 
 class Bundesland(Base):
     __tablename__ = 'bundeslaender'

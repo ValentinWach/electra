@@ -1,13 +1,21 @@
 import pandas as pd
+import os
+
+from dotenv import load_dotenv
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base
 from datetime import datetime
 from pathlib import Path
 
-from backend.src.app.src.openapi_server.database.models import Partei, Kandidat, Wahl, Wahlkreis, Wahlkreiskandidatur
+from backend.src.openapi_server.database.models import Partei, Kandidat, Wahl, Wahlkreis, Wahlkreiskandidatur
 
-DATABASE_URL = "postgresql://admin:admin@localhost:5432/postgres"
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("No DATABASE_URL found in the environment variables")
 
 engine = create_engine(DATABASE_URL)
 Base = declarative_base()
@@ -19,12 +27,12 @@ df = pd.read_csv(Path('sourcefiles', 'kandidaturen_2017.csv'), delimiter=';', ke
 filtered_df = df[(df['Kennzeichen'] == 'Kreiswahlvorschlag') | (df['Kennzeichen'] == 'anderer Kreiswahlvorschlag')]
 db = Session()
 
-# Für jedes gefilterte Tupel ein neues Objekt erstellen und in die Datenbank einfügen
-
 for index, row in filtered_df.iterrows():
 
+    full_name = f"{row['Titel']} {row['Nachname']}".strip() if 'Titel' in row and row['Titel'] else row['Nachname']
+
     kandidat = db.query(Kandidat).filter_by(
-        name=row['Nachname'],
+        name=full_name,
         firstname=row['Vornamen'],
         yearOfBirth=row['Geburtsjahr'],
     ).one()
@@ -33,8 +41,6 @@ for index, row in filtered_df.iterrows():
         name = row['Gebietsname'],
     ).one()
 
-    #print(row['Gruppenname'])
-    #print(row['GruppennameLang'])
     row['Gruppenname'] = 'HEIMAT (2021: NPD)' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
     row['GruppennameLang'] = 'Die Heimat (2021: Nationaldemokratische Partei Deutschlands)' if row['GruppennameLang'] == 'Nationaldemokratische Partei Deutschlands' else row['GruppennameLang']
     row['Gruppenname'] = 'Wir Bürger (2021: LKR)' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
@@ -42,7 +48,7 @@ for index, row in filtered_df.iterrows():
     row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
     row['GruppennameLang'] = 'Partei für schulmedizinische Verjüngungsforschung (2021: Partei für Gesundheitsforschung)' if row['GruppennameLang'] == 'Partei für Gesundheitsforschung' else row['GruppennameLang']
 
-    date_str = row['Wahltag']  # Assuming this is in 'DD.MM.YYYY' format, like '26.09.2021'
+    date_str = row['Wahltag']
     wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
     wahl = db.query(Wahl).filter_by(
         date=wahl_date,
@@ -51,7 +57,6 @@ for index, row in filtered_df.iterrows():
     if not (row['Gruppenname'].startswith("EB: ")):
         partei_query = db.query(Partei).filter_by(
             shortName=row['Gruppenname'],
-            #name=row['GruppennameLang']
         ).all()
         if len(partei_query) > 1:
             print(
@@ -61,22 +66,19 @@ for index, row in filtered_df.iterrows():
         partei = partei_query[0] if partei_query else None
 
         wahlkreiskandidatur = Wahlkreiskandidatur(
-            kandidat_id=kandidat.id,  # Assuming 'Gruppenschluessel' is the id column
-            wahlkreis_id=wahlkreis.id,  # Adjust according to actual column name for 'name'
+            kandidat_id=kandidat.id,
+            wahlkreis_id=wahlkreis.id,
             partei_id=partei.id,
             wahl_id=wahl.id,
         )
     else:
         wahlkreiskandidatur = Wahlkreiskandidatur(
-            kandidat_id=kandidat.id,  # Assuming 'Gruppenschluessel' is the id column
-            wahlkreis_id=wahlkreis.id,  # Adjust according to actual column name for 'name'
+            kandidat_id=kandidat.id,
+            wahlkreis_id=wahlkreis.id,
             partei_id=None,
             wahl_id=wahl.id,
         )
-    # Print for debugging (optional)
-    #print(wahlkreiskandidatur)
 
-    # Add to session
     db.add(wahlkreiskandidatur)
 
 db.commit()
