@@ -1,8 +1,10 @@
 import pandas as pd
 from pathlib import Path
+from openapi_server.database.models import Bundesland, Wahlkreis  # Import the actual model classes
+
 
 def parse_wahlkreise(session, Base):
-    script_dir = Path(__file__).parent.parent  # go up to database-tools directory
+    script_dir = Path(__file__).parent  # go up to database-tools directory
     source_dir = script_dir / 'sourcefiles'
     
     df = pd.read_csv(source_dir / 'strukturdaten_2021.csv', delimiter=';')
@@ -10,11 +12,11 @@ def parse_wahlkreise(session, Base):
 
     for index, row in filtered_df.iterrows():
         corrected_name = row['Wahlkreis-Name']
-        bundesland = session.query(Base.classes.bundeslaender).filter_by(
+        bundesland = session.query(Bundesland).filter_by(
             name = row['Land'],
         ).one()
 
-        wahlkreis = Base.classes.wahlkreise(
+        wahlkreis = Wahlkreis(
             id= row['Wahlkreis-Nr.'],
             name=corrected_name,
             bundesland_id=bundesland.id

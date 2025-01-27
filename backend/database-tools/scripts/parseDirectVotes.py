@@ -1,9 +1,10 @@
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
+from openapi_server.database.models import Wahl, Wahlkreis, Partei, Wahlkreiskandidatur, Kandidat
 
 def parse_direct_votes(session, Base, year):
-    script_dir = Path(__file__).parent.parent  # go up to database-tools directory
+    script_dir = Path(__file__).parent  # go up to database-tools directory
     source_dir = script_dir / 'sourcefiles'
     
     df = pd.read_csv(source_dir / f'kerg2_{year}.csv', delimiter=';')
@@ -28,14 +29,14 @@ def parse_direct_votes(session, Base, year):
         wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
 
         wahl_id = session.query(
-            Base.classes.wahlen.id
+            Wahl.id
         ).filter_by(date=wahl_date).scalar()
 
         row['Gebietsname'] = 'Höxter – Gütersloh III – Lippe II' if row['Gebietsname'] == 'Höxter – Lippe II' else row['Gebietsname']
         row['Gebietsname'] = 'Paderborn' if row['Gebietsname'] == 'Paderborn – Gütersloh III' else row['Gebietsname']
 
         wahlkreis_id = session.query(
-            Base.classes.wahlkreise.id
+            Wahlkreis.id
         ).filter_by(name=row['Gebietsname']).scalar()
 
         row['Gruppenname'] = 'HEIMAT (2021: NPD)' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
@@ -44,19 +45,19 @@ def parse_direct_votes(session, Base, year):
 
         if row['Gruppenname'].startswith('EB: '):
             kandidat_id = session.query(
-                Base.classes.kandidaten.id
+                Kandidat.id
             ).filter(
-                Base.classes.kandidaten.id.in_(
-                    session.query(Base.classes.wahlkreiskandidaturen.kandidat_id).filter_by(
+                Kandidat.id.in_(
+                    session.query(Wahlkreiskandidatur.kandidat_id).filter_by(
                         wahlkreis_id=wahlkreis_id,
                         wahl_id=wahl_id,
                         partei_id=None
                     )
                 )
-            ).filter(Base.classes.kandidaten.name.ilike(f"%{row['Gruppenname'].split(':')[1].strip()}%")).scalar()
+            ).filter(Kandidat.name.ilike(f"%{row['Gruppenname'].split(':')[1].strip()}%")).scalar()
 
             wahlkreiskandidatur_id = session.query(
-                Base.classes.wahlkreiskandidaturen.id
+                Wahlkreiskandidatur.id
             ).filter_by(
                 wahlkreis_id=wahlkreis_id,
                 wahl_id=wahl_id,
@@ -64,10 +65,10 @@ def parse_direct_votes(session, Base, year):
             ).scalar()
         else:
             partei_id = session.query(
-                Base.classes.parteien.id
+                Partei.id
             ).filter_by(shortName=row['Gruppenname']).scalar()
             wahlkreiskandidatur_id = session.query(
-                Base.classes.wahlkreiskandidaturen.id
+                Wahlkreiskandidatur.id
             ).filter_by(
                 wahlkreis_id=wahlkreis_id,
                 wahl_id=wahl_id,

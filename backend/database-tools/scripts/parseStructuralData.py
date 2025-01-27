@@ -1,8 +1,9 @@
 import pandas as pd
 from pathlib import Path
+from openapi_server.database.models import Strukturdatum
 
 def parse_structural_data(session, Base):
-    script_dir = Path(__file__).parent.parent  # go up to database-tools directory
+    script_dir = Path(__file__).parent  # go up to database-tools directory
     source_dir = script_dir / 'sourcefiles'
     
     skd17 = pd.read_csv(source_dir / 'strukturdaten_2017.csv', delimiter=';')
@@ -15,7 +16,7 @@ def parse_structural_data(session, Base):
 
     for index, row in filtered_skd17.iterrows():
         wahlbeteiligung = wbt17[wbt17['WK_NR'] == row['Wahlkreis-Nr.']]['Wahlbeteiligung'].values[0].replace(",", ".")
-        strukturdatum = Base.classes.strukturdaten(
+        strukturdatum = Strukturdatum(
             wahlkreis_id=row['Wahlkreis-Nr.'],
             wahl_id=2,
             einwohnerzahl=int(float(row['Bevlkerung am 31.12.2015 - Deutsche (in 1000)'].replace(",", ".")) * 1000),
@@ -31,7 +32,7 @@ def parse_structural_data(session, Base):
     for index, row in filtered_skd21.iterrows():
         wahlbeteiligung = wbt21[wbt21['Gebietsnummer'] == row['Wahlkreis-Nr.']]['Prozent'].values[0].replace(",", ".")
 
-        strukturdatum = Base.classes.strukturdaten(
+        strukturdatum = Strukturdaten(
             wahlkreis_id=row['Wahlkreis-Nr.'],
             wahl_id=1,
             einwohnerzahl=int(float(row['Bevölkerung am 31.12.2019 - Deutsche (in 1000)'].replace(",", ".")) * 1000),

@@ -1,9 +1,10 @@
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
+from openapi_server.database.models import Wahl, Wahlkreis, Partei
 
 def parse_list_votes(session, Base, year):
-    script_dir = Path(__file__).parent.parent  # go up to database-tools directory
+    script_dir = Path(__file__).parent  # go up to database-tools directory
     source_dir = script_dir / 'sourcefiles'
     
     df = pd.read_csv(source_dir / f'kerg2_{year}.csv', delimiter=';')
@@ -27,24 +28,24 @@ def parse_list_votes(session, Base, year):
         date_str = row['Wahltag']
         wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
 
-        wahl_id = session.query(
-            Base.classes.wahlen.id
-        ).filter_by(date=wahl_date).scalar()
+        wahl_id = session.query(Wahl.id).filter_by(
+            date=wahl_date
+        ).scalar()
 
         row['Gebietsname'] = 'Höxter – Gütersloh III – Lippe II' if row['Gebietsname'] == 'Höxter – Lippe II' else row['Gebietsname']
         row['Gebietsname'] = 'Paderborn' if row['Gebietsname'] == 'Paderborn – Gütersloh III' else row['Gebietsname']
 
-        wahlkreis_id = session.query(
-            Base.classes.wahlkreise.id
-        ).filter_by(name=row['Gebietsname']).scalar()
+        wahlkreis_id = session.query(Wahlkreis.id).filter_by(
+            name=row['Gebietsname']
+        ).scalar()
 
         row['Gruppenname'] = 'HEIMAT (2021: NPD)' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
         row['Gruppenname'] = 'Wir Bürger (2021: LKR)' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
         row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
 
-        partei_id = session.query(
-            Base.classes.parteien.id
-        ).filter_by(shortName=row['Gruppenname']).scalar()
+        partei_id = session.query(Partei.id).filter_by(
+            shortName=row['Gruppenname']
+        ).scalar()
 
         if not wahl_id:
             raise ValueError("Foreign key 'wahl_id' not found")

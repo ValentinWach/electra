@@ -1,9 +1,10 @@
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
+from openapi_server.database.models import Kandidat, Wahlkreis, Partei, Wahl, Wahlkreiskandidatur
 
 def parse_directcandidacies(session, Base, year):
-    script_dir = Path(__file__).parent.parent  # go up to database-tools directory
+    script_dir = Path(__file__).parent  # go up to database-tools directory
     source_dir = script_dir / 'sourcefiles'
     
     df = pd.read_csv(source_dir / f'kandidaturen_{year}.csv', delimiter=';', keep_default_na=False)
@@ -12,13 +13,13 @@ def parse_directcandidacies(session, Base, year):
     for index, row in filtered_df.iterrows():
         full_name = f"{row['Titel']} {row['Nachname']}".strip() if 'Titel' in row and row['Titel'] else row['Nachname']
 
-        kandidat = session.query(Base.classes.kandidaten).filter_by(
+        kandidat = session.query(Kandidat).filter_by(
             name=full_name,
             firstname=row['Vornamen'],
             yearOfBirth=row['Geburtsjahr'],
         ).one()
 
-        wahlkreis = session.query(Base.classes.wahlkreise).filter_by(
+        wahlkreis = session.query(Wahlkreis).filter_by(
             name = row['Gebietsname'],
         ).one()
 
@@ -31,29 +32,23 @@ def parse_directcandidacies(session, Base, year):
 
         date_str = row['Wahltag']
         wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
-        wahl = session.query(Base.classes.wahlen).filter_by(
+        wahl = session.query(Wahl).filter_by(
             date=wahl_date,
         ).one()
 
         if not (row['Gruppenname'].startswith("EB: ")):
-            partei_query = session.query(Base.classes.parteien).filter_by(
+            partei = session.query(Partei).filter_by(
                 shortName=row['Gruppenname'],
-            ).all()
-            if len(partei_query) > 1:
-                print(
-                    f"WARNING: Multiple results found for Partei with shortName={row['Gruppenname']} and name={row['GruppennameLang']}")
-            elif len(partei_query) == 0:
-                raise ValueError(f"Partei not found with shortName={row['Gruppenname']} and name={row['GruppennameLang']}")
-            partei = partei_query[0] if partei_query else None
-
-            wahlkreiskandidatur = Base.classes.wahlkreiskandidaturen(
+            ).first()
+            
+            wahlkreiskandidatur = Wahlkreiskandidatur(
                 kandidat_id=kandidat.id,
                 wahlkreis_id=wahlkreis.id,
                 partei_id=partei.id,
                 wahl_id=wahl.id,
             )
         else:
-            wahlkreiskandidatur = Base.classes.wahlkreiskandidaturen(
+            wahlkreiskandidatur = Wahlkreiskandidatur(
                 kandidat_id=kandidat.id,
                 wahlkreis_id=wahlkreis.id,
                 partei_id=None,

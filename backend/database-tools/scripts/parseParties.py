@@ -1,8 +1,9 @@
 import pandas as pd
 from pathlib import Path
+from openapi_server.database.models import Partei
 
 def parse_parties(session, Base, year):
-    script_dir = Path(__file__).parent.parent  # go up to database-tools directory
+    script_dir = Path(__file__).parent  # go up to database-tools directory
     source_dir = script_dir / 'sourcefiles'
     
     df = pd.read_csv(source_dir / f'parteien_{year}.csv', delimiter=';', keep_default_na=False)
@@ -10,11 +11,11 @@ def parse_parties(session, Base, year):
 
     for index, row in filtered_df.iterrows():
         if not row['Gruppenname_kurz'].startswith('EB: '):
-            partei_query = session.query(Base.classes.parteien).filter_by(
+            partei_query = session.query(Partei).filter_by(
                 shortName=row['Gruppenname_kurz'],
             ).all()
             if(len(partei_query) == 0):
-                partei = Base.classes.parteien(
+                partei = Partei(
                     type=row['Gruppenart_XML'],
                     name=row['Gruppenname_lang'],
                     shortName=row['Gruppenname_kurz'],
