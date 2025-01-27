@@ -23,12 +23,12 @@ def parse_directcandidacies(session, Base, year):
             name = row['Gebietsname'],
         ).one()
 
-        row['Gruppenname'] = 'HEIMAT (2021: NPD)' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
-        row['GruppennameLang'] = 'Die Heimat (2021: Nationaldemokratische Partei Deutschlands)' if row['GruppennameLang'] == 'Nationaldemokratische Partei Deutschlands' else row['GruppennameLang']
-        row['Gruppenname'] = 'Wir Bürger (2021: LKR)' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
-        row['GruppennameLang'] = 'Wir Bürger (2021: Liberal-Konservative Reformer)' if row['GruppennameLang'] == 'Liberal-Konservative Reformer' else row['GruppennameLang']
-        row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
-        row['GruppennameLang'] = 'Partei für schulmedizinische Verjüngungsforschung (2021: Partei für Gesundheitsforschung)' if row['GruppennameLang'] == 'Partei für Gesundheitsforschung' else row['GruppennameLang']
+        row['Gruppenname'] = 'HEIMAT' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
+        row['GruppennameLang'] = 'Die Heimat' if row['GruppennameLang'] == 'Nationaldemokratische Partei Deutschlands' else row['GruppennameLang']
+        row['Gruppenname'] = 'Wir Bürger' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
+        row['GruppennameLang'] = 'Wir Bürger' if row['GruppennameLang'] == 'Liberal-Konservative Reformer' else row['GruppennameLang']
+        row['Gruppenname'] = 'Verjüngungsforschung' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
+        row['GruppennameLang'] = 'Partei für schulmedizinische Verjüngungsforschung' if row['GruppennameLang'] == 'Partei für Gesundheitsforschung' else row['GruppennameLang']
 
         date_str = row['Wahltag']
         wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()

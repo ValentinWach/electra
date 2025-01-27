@@ -23,9 +23,9 @@ def parse_listcandidacies(session, Base, year):
             name = row['Gebietsname'],
         ).one()
 
-        row['Gruppenname'] = 'HEIMAT (2021: NPD)' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
-        row['Gruppenname'] = 'Wir Bürger (2021: LKR)' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
-        row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
+        row['Gruppenname'] = 'HEIMAT' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
+        row['Gruppenname'] = 'Wir Bürger' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
+        row['Gruppenname'] = 'Verjüngungsforschung' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
 
         partei = session.query(Partei).filter_by(
             shortName = row['Gruppenname'],

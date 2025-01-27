@@ -39,9 +39,9 @@ def parse_direct_votes(session, Base, year):
             Wahlkreis.id
         ).filter_by(name=row['Gebietsname']).scalar()
 
-        row['Gruppenname'] = 'HEIMAT (2021: NPD)' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
-        row['Gruppenname'] = 'Wir Bürger (2021: LKR)' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
-        row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
+        row['Gruppenname'] = 'HEIMAT' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
+        row['Gruppenname'] = 'Wir Bürger' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
+        row['Gruppenname'] = 'Verjüngungsforschung' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
 
         if row['Gruppenname'].startswith('EB: '):
             kandidat_id = session.query(
@@ -90,7 +90,6 @@ def parse_direct_votes(session, Base, year):
     print(voteCounter)
 
     bulk_df = pd.DataFrame(wahlkreiskandidaturen_id, columns=['wahlkreiskandidatur_id'])
-
     temp_csv = source_dir / 'temp_erststimme.csv'
     bulk_df.to_csv(temp_csv, index=False, header=False)
 

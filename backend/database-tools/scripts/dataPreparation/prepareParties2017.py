@@ -6,9 +6,9 @@ filtered_df = df[(df['Gruppenart'] == 'Partei') | (df['Gruppenart'] == 'Einzelbe
 neue_daten = []
 for index, row in filtered_df.iterrows():
 
-    row['Gruppenname'] = 'HEIMAT (2021: NPD)' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
-    row['Gruppenname'] = 'Wir Bürger (2021: LKR)' if row['Gruppenname'] == 'LKR' else row['Gruppenname'] #Scheint aber in der 2017 Datei nicht vorzukommen?
-    row['Gruppenname'] = 'Verjüngungsforschung (2021: Gesundheitsforschung)' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
+    row['Gruppenname'] = 'HEIMAT' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
+    row['Gruppenname'] = 'Wir Bürger' if row['Gruppenname'] == 'LKR' else row['Gruppenname'] #Scheint aber in der 2017 Datei nicht vorzukommen?
+    row['Gruppenname'] = 'Verjüngungsforschung' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
 
     Gruppenart_XML = {
         "Einzelbewerber/Wählergruppe": "EINZELBEWERBER",

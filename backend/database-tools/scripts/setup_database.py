@@ -33,6 +33,21 @@ Base.metadata.drop_all(bind=engine)
 # Create all tables from models
 Base.metadata.create_all(bind=engine)
 
+# Disable all constraints and indexes before data import
+print("Disabling constraints and indexes...")
+with Session().connection().connection.cursor() as cursor:
+    # Erststimmen
+    cursor.execute("ALTER TABLE erststimmen DROP CONSTRAINT erststimmen_wahlkreiskandidatur_id_fkey")
+    cursor.execute("DROP INDEX IF EXISTS ix_erststimmen_wahlkreiskandidatur_id")
+    
+    # Zweitstimmen
+    cursor.execute("ALTER TABLE zweitstimmen DROP CONSTRAINT zweitstimmen_wahlkreis_id_fkey")
+    cursor.execute("ALTER TABLE zweitstimmen DROP CONSTRAINT zweitstimmen_partei_id_fkey")
+    cursor.execute("ALTER TABLE zweitstimmen DROP CONSTRAINT zweitstimmen_wahl_id_fkey")
+    cursor.execute("DROP INDEX IF EXISTS ix_zweitstimmen_wahlkreis_id")
+    cursor.execute("DROP INDEX IF EXISTS ix_zweitstimmen_partei_id")
+    cursor.execute("DROP INDEX IF EXISTS ix_zweitstimmen_wahl_id")
+
 # Create temporary table for einwohner_pro_bundesland
 metadata = MetaData()
 einwohner_pro_bundesland_temp = Table(
@@ -129,6 +144,41 @@ parse_list_votes(session, Base, '2017')
 
 print("\nRunning parseStructuralData...")
 parse_structural_data(session, Base)
+
+# Re-enable all constraints and rebuild indexes after data import
+print("Rebuilding constraints and indexes...")
+with Session().connection().connection.cursor() as cursor:
+    # Erststimmen
+    cursor.execute("""
+        ALTER TABLE erststimmen 
+        ADD CONSTRAINT erststimmen_wahlkreiskandidatur_id_fkey 
+        FOREIGN KEY (wahlkreiskandidatur_id) 
+        REFERENCES wahlkreiskandidaturen(id)
+    """)
+    cursor.execute("CREATE INDEX ix_erststimmen_wahlkreiskandidatur_id ON erststimmen(wahlkreiskandidatur_id)")
+    
+    # Zweitstimmen
+    cursor.execute("""
+        ALTER TABLE zweitstimmen 
+        ADD CONSTRAINT zweitstimmen_wahlkreis_id_fkey 
+        FOREIGN KEY (wahlkreis_id) 
+        REFERENCES wahlkreise(id)
+    """)
+    cursor.execute("""
+        ALTER TABLE zweitstimmen 
+        ADD CONSTRAINT zweitstimmen_partei_id_fkey 
+        FOREIGN KEY (partei_id) 
+        REFERENCES parteien(id)
+    """)
+    cursor.execute("""
+        ALTER TABLE zweitstimmen 
+        ADD CONSTRAINT zweitstimmen_wahl_id_fkey 
+        FOREIGN KEY (wahl_id) 
+        REFERENCES wahlen(id)
+    """)
+    cursor.execute("CREATE INDEX ix_zweitstimmen_wahlkreis_id ON zweitstimmen(wahlkreis_id)")
+    cursor.execute("CREATE INDEX ix_zweitstimmen_partei_id ON zweitstimmen(partei_id)")
+    cursor.execute("CREATE INDEX ix_zweitstimmen_wahl_id ON zweitstimmen(wahl_id)")
 
 session.close()
 print("\nDatabase setup completed successfully!") 

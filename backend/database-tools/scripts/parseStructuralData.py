@@ -19,11 +19,11 @@ def parse_structural_data(session, Base):
         strukturdatum = Strukturdatum(
             wahlkreis_id=row['Wahlkreis-Nr.'],
             wahl_id=2,
-            einwohnerzahl=int(float(row['Bevlkerung am 31.12.2015 - Deutsche (in 1000)'].replace(",", ".")) * 1000),
+            einwohnerzahl=int(float(row['Bevölkerung am 31.12.2015 - Deutsche (in 1000)'].replace(",", ".")) * 1000),
             wahlbeteiligung=wahlbeteiligung,
-            auslaenderanteil=float(row['Bevlkerung am 31.12.2015 - Auslnder (%)'].replace(",", ".")),
+            auslaenderanteil=float(row['Bevölkerung am 31.12.2015 - Ausländer (%)'].replace(",", ".")),
             unternehmensdichte=float(row['Unternehmensregister 2014 - Unternehmen insgesamt (je 1000 Einwohner)'].replace(",", ".")),
-            einkommen=int(row['Verfgbares Einkommen der privaten Haushalte 2014 ( je Einwohner)']),
+            einkommen=int(row['Verfügbares Einkommen der privaten Haushalte 2014 (EUR je Einwohner)']),
         )
 
         print(strukturdatum)
@@ -32,7 +32,7 @@ def parse_structural_data(session, Base):
     for index, row in filtered_skd21.iterrows():
         wahlbeteiligung = wbt21[wbt21['Gebietsnummer'] == row['Wahlkreis-Nr.']]['Prozent'].values[0].replace(",", ".")
 
-        strukturdatum = Strukturdaten(
+        strukturdatum = Strukturdatum(
             wahlkreis_id=row['Wahlkreis-Nr.'],
             wahl_id=1,
             einwohnerzahl=int(float(row['Bevölkerung am 31.12.2019 - Deutsche (in 1000)'].replace(",", ".")) * 1000),
