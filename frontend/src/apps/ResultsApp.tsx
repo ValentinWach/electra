@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { ElectionProvider, useElection } from "../context/ElectionContext";
 import { CalcOnAggregateProvider } from "../context/CalcOnAggregateContext";
 import Sidebar from '../components/SidebarC';
@@ -11,6 +11,7 @@ import WahlkreiseDetail from '../pages/detail/WahlkreiseDetail';
 import ParteiDetail from '../pages/detail/ParteiDetail';
 import { useMinLoadingTime } from '../hooks/useMinLoadingTime';
 import FullPageLoadingC from '../components/UI-element-components/FullPageLoadingC';
+import { resultPrefix } from '../utils/Logout';
 
 function ResultsContent() {
     const { isLoading } = useElection();
@@ -33,6 +34,7 @@ function ResultsContent() {
                         <Route path="parteien" element={<Parteien />} />
                         <Route path="parteien/:id" element={<ParteiDetail />} />
                         <Route path="analysen" element={<Analysen />} />
+                        <Route path="/*" element={<Navigate to={resultPrefix + "/uebersicht"} replace />} />
                     </Routes>
                 </main>
             </div>

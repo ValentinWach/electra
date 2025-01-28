@@ -4,6 +4,8 @@ import HeaderC from '../components/page-elements/Vote/HeaderC';
 import Authentication from '../pages/vote/Authentication';
 import Wahlentscheidung from '../pages/vote/Wahlentscheidung';
 import Stimmabgabe from '../pages/vote/Stimmabgabe';
+import { votePrefix } from '../utils/Logout.tsx';
+import { Navigate } from 'react-router-dom';
 
 export default function VoteApp() {
     return (
@@ -15,6 +17,7 @@ export default function VoteApp() {
                         <Route path="authentication" element={<Authentication />} />
                         <Route path="wahlentscheidung" element={<Wahlentscheidung />} />
                         <Route path="stimmabgabe" element={<Stimmabgabe />} />
+                        <Route path="/*" element={<Navigate to={votePrefix + "/authentication"} replace />} />
                     </Routes>
                 </main>
             </div>

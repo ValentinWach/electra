@@ -14,7 +14,6 @@ function App() {
                 <Routes>
                     <Route path={resultPrefix + "/*"} element={<ResultsApp />} />
                     <Route path={votePrefix + "/*"} element={<VoteApp />} />
-                    <Route path={votePrefix + "*"} element={<Navigate to={votePrefix + "/authentication"} replace />} />
                     <Route path="*" element={<Navigate to={resultPrefix + "/uebersicht"} replace />} />
                 </Routes>
             </Suspense>
