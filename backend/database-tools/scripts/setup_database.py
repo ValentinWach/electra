@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 from pathlib import Path
 from sqlalchemy.ext.automap import automap_base
+#from openapi_server.database.models import Bundesland, einwohner_pro_bundesland_temp
 
 # Change to the script's directory
 os.chdir(Path(__file__).parent)
@@ -33,31 +34,16 @@ Base.metadata.drop_all(bind=engine)
 # Create all tables from models
 Base.metadata.create_all(bind=engine)
 
-# Disable all constraints and indexes before data import
-print("Disabling constraints and indexes...")
-with Session().connection().connection.cursor() as cursor:
-    # Erststimmen
-    cursor.execute("ALTER TABLE erststimmen DROP CONSTRAINT erststimmen_wahlkreiskandidatur_id_fkey")
-    cursor.execute("DROP INDEX IF EXISTS ix_erststimmen_wahlkreiskandidatur_id")
-    
-    # Zweitstimmen
-    cursor.execute("ALTER TABLE zweitstimmen DROP CONSTRAINT zweitstimmen_wahlkreis_id_fkey")
-    cursor.execute("ALTER TABLE zweitstimmen DROP CONSTRAINT zweitstimmen_partei_id_fkey")
-    cursor.execute("ALTER TABLE zweitstimmen DROP CONSTRAINT zweitstimmen_wahl_id_fkey")
-    cursor.execute("DROP INDEX IF EXISTS ix_zweitstimmen_wahlkreis_id")
-    cursor.execute("DROP INDEX IF EXISTS ix_zweitstimmen_partei_id")
-    cursor.execute("DROP INDEX IF EXISTS ix_zweitstimmen_wahl_id")
-
 # Create temporary table for einwohner_pro_bundesland
-metadata = MetaData()
-einwohner_pro_bundesland_temp = Table(
-    'einwohner_pro_bundesland_temp',
-    metadata,
-    Column('bundesland_id', Integer),
-    Column('einwohnerzahl', Integer),
-    Column('wahl_id', Integer)
-)
-metadata.create_all(bind=engine)
+#metadata = MetaData()
+#einwohner_pro_bundesland_temp = Table(
+#    'einwohner_pro_bundesland_temp',
+#    metadata,
+#    Column('bundesland_id', Integer),
+#    Column('einwohnerzahl', Integer),
+#    Column('wahl_id', Integer)
+#)
+#metadata.create_all(bind=engine)
 
 # Create a single session for all operations
 session = Session()
@@ -104,11 +90,12 @@ einwohner_data = [
 ]
 
 for bundesland_id, einwohnerzahl, wahl_id in einwohner_data:
-    einwohner_pro_bundesland_temp.insert().values(
+    einwohner = einwohner_pro_bundesland_temp(
         bundesland_id=bundesland_id,
         einwohnerzahl=einwohnerzahl,
         wahl_id=wahl_id
     )
+    session.add(einwohner)
 
 session.commit()
 
@@ -144,41 +131,6 @@ parse_list_votes(session, Base, '2017')
 
 print("\nRunning parseStructuralData...")
 parse_structural_data(session, Base)
-
-# Re-enable all constraints and rebuild indexes after data import
-print("Rebuilding constraints and indexes...")
-with Session().connection().connection.cursor() as cursor:
-    # Erststimmen
-    cursor.execute("""
-        ALTER TABLE erststimmen 
-        ADD CONSTRAINT erststimmen_wahlkreiskandidatur_id_fkey 
-        FOREIGN KEY (wahlkreiskandidatur_id) 
-        REFERENCES wahlkreiskandidaturen(id)
-    """)
-    cursor.execute("CREATE INDEX ix_erststimmen_wahlkreiskandidatur_id ON erststimmen(wahlkreiskandidatur_id)")
-    
-    # Zweitstimmen
-    cursor.execute("""
-        ALTER TABLE zweitstimmen 
-        ADD CONSTRAINT zweitstimmen_wahlkreis_id_fkey 
-        FOREIGN KEY (wahlkreis_id) 
-        REFERENCES wahlkreise(id)
-    """)
-    cursor.execute("""
-        ALTER TABLE zweitstimmen 
-        ADD CONSTRAINT zweitstimmen_partei_id_fkey 
-        FOREIGN KEY (partei_id) 
-        REFERENCES parteien(id)
-    """)
-    cursor.execute("""
-        ALTER TABLE zweitstimmen 
-        ADD CONSTRAINT zweitstimmen_wahl_id_fkey 
-        FOREIGN KEY (wahl_id) 
-        REFERENCES wahlen(id)
-    """)
-    cursor.execute("CREATE INDEX ix_zweitstimmen_wahlkreis_id ON zweitstimmen(wahlkreis_id)")
-    cursor.execute("CREATE INDEX ix_zweitstimmen_partei_id ON zweitstimmen(partei_id)")
-    cursor.execute("CREATE INDEX ix_zweitstimmen_wahl_id ON zweitstimmen(wahl_id)")
 
 session.close()
 print("\nDatabase setup completed successfully!") 

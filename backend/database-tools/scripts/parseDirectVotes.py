@@ -39,9 +39,9 @@ def parse_direct_votes(session, Base, year):
             Wahlkreis.id
         ).filter_by(name=row['Gebietsname']).scalar()
 
-        row['Gruppenname'] = 'HEIMAT' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
-        row['Gruppenname'] = 'Wir Bürger' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
-        row['Gruppenname'] = 'Verjüngungsforschung' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
+        row['Gruppenname'] = 'HEIMAT' if row['Gruppenname'] == 'NPD' or row['Gruppenname'] == 'HEIMAT (2021: NPD)' else row['Gruppenname']
+        row['Gruppenname'] = 'Wir Bürger' if row['Gruppenname'] == 'LKR' or row['Gruppenname'] == 'Wir Bürger (2021: LKR)' else row['Gruppenname']
+        row['Gruppenname'] = 'Verjüngungsforschung' if row['Gruppenname'] == 'Gesundheitsforschung' or row['Gruppenname'] == 'Verjüngungsforschung (2021: Gesundheitsforschung)' else row['Gruppenname']
 
         if row['Gruppenname'].startswith('EB: '):
             kandidat_id = session.query(
@@ -80,9 +80,9 @@ def parse_direct_votes(session, Base, year):
         if not wahlkreis_id:
             raise ValueError("Foreign key 'wahlkreis_id' not found")
         if not partei_id:
-            raise ValueError("Foreign key 'partei_id' not found")
+            raise ValueError("Foreign key 'partei_id' for " + row['Gruppenname'] + " not found")
         if not wahlkreiskandidatur_id:
-            raise ValueError("'wahlkreiskandidatur_id' not found")
+            raise ValueError("'wahlkreiskandidatur_id' for not found")
         if wahl_id and wahlkreis_id and partei_id and wahlkreiskandidatur_id:
             for _ in range(count):
                 wahlkreiskandidaturen_id.append(wahlkreiskandidatur_id)
@@ -94,8 +94,23 @@ def parse_direct_votes(session, Base, year):
     bulk_df.to_csv(temp_csv, index=False, header=False)
 
     with session.connection().connection.cursor() as cursor:
+        # Disable constraint and index before import
+        cursor.execute("ALTER TABLE erststimmen DROP CONSTRAINT IF EXISTS erststimmen_wahlkreiskandidatur_id_fkey")
+        cursor.execute("DROP INDEX IF EXISTS ix_erststimmen_wahlkreiskandidatur_id")
+        
+        # Do the bulk import
         with open(temp_csv, 'r') as f:
             cursor.copy_expert("COPY erststimmen (wahlkreiskandidatur_id) FROM stdin WITH CSV", f)
+            
+        # Re-enable constraint and index after import
+        cursor.execute("""
+            ALTER TABLE erststimmen 
+            ADD CONSTRAINT erststimmen_wahlkreiskandidatur_id_fkey 
+            FOREIGN KEY (wahlkreiskandidatur_id) 
+            REFERENCES wahlkreiskandidaturen(id)
+        """)
+        cursor.execute("CREATE INDEX ix_erststimmen_wahlkreiskandidatur_id ON erststimmen(wahlkreiskandidatur_id)")
+    
     session.commit()
 
     import os

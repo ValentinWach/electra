@@ -39,9 +39,9 @@ def parse_list_votes(session, Base, year):
             name=row['Gebietsname']
         ).scalar()
 
-        row['Gruppenname'] = 'HEIMAT' if row['Gruppenname'] == 'NPD' else row['Gruppenname']
-        row['Gruppenname'] = 'Wir Bürger' if row['Gruppenname'] == 'LKR' else row['Gruppenname']
-        row['Gruppenname'] = 'Verjüngungsforschung' if row['Gruppenname'] == 'Gesundheitsforschung' else row['Gruppenname']
+        row['Gruppenname'] = 'HEIMAT' if row['Gruppenname'] == 'NPD' or row['Gruppenname'] == 'HEIMAT (2021: NPD)' else row['Gruppenname']
+        row['Gruppenname'] = 'Wir Bürger' if row['Gruppenname'] == 'LKR' or row['Gruppenname'] == 'Wir Bürger (2021: LKR)' else row['Gruppenname']
+        row['Gruppenname'] = 'Verjüngungsforschung' if row['Gruppenname'] == 'Gesundheitsforschung' or row['Gruppenname'] == 'Verjüngungsforschung (2021: Gesundheitsforschung)' else row['Gruppenname']
 
         partei_id = session.query(Partei.id).filter_by(
             shortName=row['Gruppenname']
@@ -66,8 +66,41 @@ def parse_list_votes(session, Base, year):
     bulk_df.to_csv(temp_csv, index=False, header=False)
 
     with session.connection().connection.cursor() as cursor:
+        # Disable constraints and indexes before import
+        cursor.execute("ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_wahlkreis_id_fkey")
+        cursor.execute("ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_partei_id_fkey")
+        cursor.execute("ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_wahl_id_fkey")
+        cursor.execute("DROP INDEX IF EXISTS ix_zweitstimmen_wahlkreis_id")
+        cursor.execute("DROP INDEX IF EXISTS ix_zweitstimmen_partei_id")
+        cursor.execute("DROP INDEX IF EXISTS ix_zweitstimmen_wahl_id")
+        
+        # Do the bulk import
         with open(temp_csv, 'r') as f:
             cursor.copy_expert("COPY zweitstimmen (wahlkreis_id, partei_id, wahl_id) FROM stdin WITH CSV", f)
+            
+        # Re-enable constraints and indexes after import
+        cursor.execute("""
+            ALTER TABLE zweitstimmen 
+            ADD CONSTRAINT zweitstimmen_wahlkreis_id_fkey 
+            FOREIGN KEY (wahlkreis_id) 
+            REFERENCES wahlkreise(id)
+        """)
+        cursor.execute("""
+            ALTER TABLE zweitstimmen 
+            ADD CONSTRAINT zweitstimmen_partei_id_fkey 
+            FOREIGN KEY (partei_id) 
+            REFERENCES parteien(id)
+        """)
+        cursor.execute("""
+            ALTER TABLE zweitstimmen 
+            ADD CONSTRAINT zweitstimmen_wahl_id_fkey 
+            FOREIGN KEY (wahl_id) 
+            REFERENCES wahlen(id)
+        """)
+        cursor.execute("CREATE INDEX ix_zweitstimmen_wahlkreis_id ON zweitstimmen(wahlkreis_id)")
+        cursor.execute("CREATE INDEX ix_zweitstimmen_partei_id ON zweitstimmen(partei_id)")
+        cursor.execute("CREATE INDEX ix_zweitstimmen_wahl_id ON zweitstimmen(wahl_id)")
+    
     session.commit()
 
     import os

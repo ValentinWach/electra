@@ -109,7 +109,7 @@ class Partei(Base):
     id = Column(Integer, primary_key=True, index=True)
     type = Column(String, nullable=False)
     name = Column(String, nullable=True)
-    shortName = Column(String, nullable=False)
+    shortName = Column(String, nullable=False, index=True)
 
     # Relations
     wahlkreiskandidaturen = relationship('Wahlkreiskandidatur', back_populates='partei')

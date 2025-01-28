@@ -11,10 +11,21 @@ def parse_parties(session, Base, year):
 
     for index, row in filtered_df.iterrows():
         if not row['Gruppenname_kurz'].startswith('EB: '):
+            row['Gruppenname_kurz'] = 'HEIMAT' if row['Gruppenname_kurz'] == 'HEIMAT (2021: NPD)' else row['Gruppenname_kurz']
+            row['Gruppenname_kurz'] = 'Wir Bürger' if row['Gruppenname_kurz'] == 'Wir Bürger (2021: LKR)' else row['Gruppenname_kurz']
+            row['Gruppenname_kurz'] = 'Verjüngungsforschung' if row['Gruppenname_kurz'] == 'Verjüngungsforschung (2021: Gesundheitsforschung)' else row['Gruppenname_kurz']
+            
+            row['Gruppenname_lang'] = 'Partei für schulmedizinische Verjüngungsforschung' if row['Gruppenname_lang'] == 'Partei für schulmedizinische Verjüngungsforschung (2021: Partei für Gesundheitsforschung)' else row['Gruppenname_lang']
+            row['Gruppenname_lang'] = 'Die Heimat' if row['Gruppenname_lang'] == 'Die Heimat (2021: Nationaldemokratische Partei Deutschlands)' else row['Gruppenname_lang']
+            row['Gruppenname_lang'] = 'Wir Bürger' if row['Gruppenname_lang'] == 'Wir Bürger (2021: Liberal-Konservative Reformer)' else row['Gruppenname_lang']
+            
             partei_query = session.query(Partei).filter_by(
                 shortName=row['Gruppenname_kurz'],
             ).all()
+            
             if(len(partei_query) == 0):
+
+
                 partei = Partei(
                     type=row['Gruppenart_XML'],
                     name=row['Gruppenname_lang'],
