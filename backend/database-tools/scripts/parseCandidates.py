@@ -19,7 +19,8 @@ def parse_candidates(session, Base, year):
         ).first()
 
         if existing_kandidat is not None:
-            print(f"Kandidat {existing_kandidat} already exists")
+            #print(f"Kandidat {existing_kandidat} already exists")
+            pass
         else:
             kandidat = Kandidat(
                 name=full_name,

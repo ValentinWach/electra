@@ -22,7 +22,7 @@ def parse_wahlkreise(session, Base):
             bundesland_id=bundesland.id
         )
 
-        print(wahlkreis)
+        #print(wahlkreis)
         session.add(wahlkreis)
 
     session.commit()

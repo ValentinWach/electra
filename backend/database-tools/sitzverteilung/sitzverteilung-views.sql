@@ -69,10 +69,10 @@ where stimmen_sum > 0;
 
 CREATE OR REPLACE VIEW ov_1_sitzkontingente_bundesleander as
 SELECT sl.id as bundeslaender_id, sl.slots, sl.wahl_id
-FROM sainte_lague('einwohner_pro_bundesland_temp', 'bundeslaender_id', 'einwohnerzahl', 598, 1) sl
+FROM sainte_lague('einwohner_pro_bundesland', 'bundeslaender_id', 'einwohnerzahl', 598, 1) sl
 UNION ALL
 SELECT sl2.id as bundeslaender_id, sl2.slots, sl2.wahl_id
-FROM sainte_lague('einwohner_pro_bundesland_temp', 'bundeslaender_id', 'einwohnerzahl', 598, 2) sl2;
+FROM sainte_lague('einwohner_pro_bundesland', 'bundeslaender_id', 'einwohnerzahl', 598, 2) sl2;
 
 --Depends on dynamic statement and can thus not be a materialized view
 CREATE TABLE uv_1_sitzkontingente_landeslisten AS

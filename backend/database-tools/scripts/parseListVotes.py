@@ -2,9 +2,10 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime
 from openapi_server.database.models import Wahl, Wahlkreis, Partei
+from io import StringIO
 
 def parse_list_votes(session, Base, year):
-    script_dir = Path(__file__).parent  # go up to database-tools directory
+    script_dir = Path(__file__).parent
     source_dir = script_dir / 'sourcefiles'
     
     df = pd.read_csv(source_dir / f'kerg2_{year}.csv', delimiter=';')
@@ -61,50 +62,18 @@ def parse_list_votes(session, Base, year):
 
     print(voteCounter)
 
+    print("Creating CSV in memory...")
+    # Create in-memory buffer
+    output = StringIO()
     bulk_df = pd.DataFrame(foreign_keys, columns=['wahlkreis_id', 'partei_id', 'wahl_id'])
-    temp_csv = source_dir / 'temp_zweitstimme.csv'
-    bulk_df.to_csv(temp_csv, index=False, header=False)
+    bulk_df.to_csv(output, index=False, header=False)
+    output.seek(0)  # Move cursor to start of buffer
 
+    print("Streaming CSV to database...")
     with session.connection().connection.cursor() as cursor:
-        # Disable constraints and indexes before import
-        cursor.execute("ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_wahlkreis_id_fkey")
-        cursor.execute("ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_partei_id_fkey")
-        cursor.execute("ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_wahl_id_fkey")
-        cursor.execute("DROP INDEX IF EXISTS ix_zweitstimmen_wahlkreis_id")
-        cursor.execute("DROP INDEX IF EXISTS ix_zweitstimmen_partei_id")
-        cursor.execute("DROP INDEX IF EXISTS ix_zweitstimmen_wahl_id")
-        
-        # Do the bulk import
-        with open(temp_csv, 'r') as f:
-            cursor.copy_expert("COPY zweitstimmen (wahlkreis_id, partei_id, wahl_id) FROM stdin WITH CSV", f)
-            
-        # Re-enable constraints and indexes after import
-        cursor.execute("""
-            ALTER TABLE zweitstimmen 
-            ADD CONSTRAINT zweitstimmen_wahlkreis_id_fkey 
-            FOREIGN KEY (wahlkreis_id) 
-            REFERENCES wahlkreise(id)
-        """)
-        cursor.execute("""
-            ALTER TABLE zweitstimmen 
-            ADD CONSTRAINT zweitstimmen_partei_id_fkey 
-            FOREIGN KEY (partei_id) 
-            REFERENCES parteien(id)
-        """)
-        cursor.execute("""
-            ALTER TABLE zweitstimmen 
-            ADD CONSTRAINT zweitstimmen_wahl_id_fkey 
-            FOREIGN KEY (wahl_id) 
-            REFERENCES wahlen(id)
-        """)
-        cursor.execute("CREATE INDEX ix_zweitstimmen_wahlkreis_id ON zweitstimmen(wahlkreis_id)")
-        cursor.execute("CREATE INDEX ix_zweitstimmen_partei_id ON zweitstimmen(partei_id)")
-        cursor.execute("CREATE INDEX ix_zweitstimmen_wahl_id ON zweitstimmen(wahl_id)")
+        cursor.copy_expert("COPY zweitstimmen (wahlkreis_id, partei_id, wahl_id) FROM stdin WITH CSV", output)
     
     session.commit()
-
-    import os
-    os.remove(temp_csv)
 
 if __name__ == '__main__':
     # This section only runs if script is called directly

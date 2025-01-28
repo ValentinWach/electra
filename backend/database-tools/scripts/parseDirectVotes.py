@@ -2,9 +2,10 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime
 from openapi_server.database.models import Wahl, Wahlkreis, Partei, Wahlkreiskandidatur, Kandidat
+from io import StringIO
 
 def parse_direct_votes(session, Base, year):
-    script_dir = Path(__file__).parent  # go up to database-tools directory
+    script_dir = Path(__file__).parent
     source_dir = script_dir / 'sourcefiles'
     
     df = pd.read_csv(source_dir / f'kerg2_{year}.csv', delimiter=';')
@@ -14,6 +15,7 @@ def parse_direct_votes(session, Base, year):
 
     voteCounter = 0
     rowCounter = 0
+    print("Processing votes...")
     for index, row in filtered_df.iterrows():
         if(rowCounter % 1000 == 0):
             print(rowCounter)
@@ -89,32 +91,18 @@ def parse_direct_votes(session, Base, year):
                 voteCounter += 1
     print(voteCounter)
 
+    print("Creating CSV in memory...")
+    # Create in-memory buffer
+    output = StringIO()
     bulk_df = pd.DataFrame(wahlkreiskandidaturen_id, columns=['wahlkreiskandidatur_id'])
-    temp_csv = source_dir / 'temp_erststimme.csv'
-    bulk_df.to_csv(temp_csv, index=False, header=False)
+    bulk_df.to_csv(output, index=False, header=False)
+    output.seek(0)  # Move cursor to start of buffer
 
+    print("Streaming CSV to database...")
     with session.connection().connection.cursor() as cursor:
-        # Disable constraint and index before import
-        cursor.execute("ALTER TABLE erststimmen DROP CONSTRAINT IF EXISTS erststimmen_wahlkreiskandidatur_id_fkey")
-        cursor.execute("DROP INDEX IF EXISTS ix_erststimmen_wahlkreiskandidatur_id")
-        
-        # Do the bulk import
-        with open(temp_csv, 'r') as f:
-            cursor.copy_expert("COPY erststimmen (wahlkreiskandidatur_id) FROM stdin WITH CSV", f)
-            
-        # Re-enable constraint and index after import
-        cursor.execute("""
-            ALTER TABLE erststimmen 
-            ADD CONSTRAINT erststimmen_wahlkreiskandidatur_id_fkey 
-            FOREIGN KEY (wahlkreiskandidatur_id) 
-            REFERENCES wahlkreiskandidaturen(id)
-        """)
-        cursor.execute("CREATE INDEX ix_erststimmen_wahlkreiskandidatur_id ON erststimmen(wahlkreiskandidatur_id)")
+        cursor.copy_expert("COPY erststimmen (wahlkreiskandidatur_id) FROM stdin WITH CSV", output)
     
     session.commit()
-
-    import os
-    os.remove(temp_csv)
 
 if __name__ == '__main__':
     # This section only runs if script is called directly
