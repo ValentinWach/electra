@@ -95,12 +95,12 @@ def parse_direct_votes(session, Base, year):
     # Create in-memory buffer
     output = StringIO()
     bulk_df = pd.DataFrame(wahlkreiskandidaturen_id, columns=['wahlkreiskandidatur_id'])
-    bulk_df.to_csv(output, index=False, header=False)
+    bulk_df.to_csv(output, index=False, header=False, sep='\t')
     output.seek(0)  # Move cursor to start of buffer
 
     print("Streaming CSV to database...")
     with session.connection().connection.cursor() as cursor:
-        cursor.copy_expert("COPY erststimmen (wahlkreiskandidatur_id) FROM stdin WITH CSV", output)
+        cursor.copy_from(output, 'erststimmen', columns=('wahlkreiskandidatur_id',))
     
     session.commit()
 
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     # This section only runs if script is called directly
     import os
     import argparse
-    from sqlalchemy import create_engine
+    from sqlalchemy import create_engine, text
     from sqlalchemy.orm import sessionmaker
     from dotenv import load_dotenv
     from sqlalchemy.ext.automap import automap_base
@@ -127,6 +127,31 @@ if __name__ == '__main__':
     Base.prepare(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
+
+    # Drop constraints and indexes before parsing
+    print("Dropping constraints and indexes...")
+    with session.connection().connection.cursor() as cursor:
+        cursor.execute("""
+            ALTER TABLE erststimmen DROP CONSTRAINT IF EXISTS erststimmen_wahlkreiskandidatur_id_fkey;
+            DROP INDEX IF EXISTS ix_erststimmen_wahlkreiskandidatur_id;
+        """)
+    session.commit()
     
+    # Parse the votes
     parse_direct_votes(session, Base, args.year)
+
+    # Rebuild constraints and indexes after parsing
+    print("Rebuilding constraints and indexes...")
+    with session.connection().connection.cursor() as cursor:
+        cursor.execute("""
+            ALTER TABLE erststimmen 
+            ADD CONSTRAINT erststimmen_wahlkreiskandidatur_id_fkey 
+            FOREIGN KEY (wahlkreiskandidatur_id) 
+            REFERENCES wahlkreiskandidaturen(id);
+            
+            CREATE INDEX ix_erststimmen_wahlkreiskandidatur_id 
+            ON erststimmen(wahlkreiskandidatur_id);
+        """)
+    session.commit()
+    
     session.close()

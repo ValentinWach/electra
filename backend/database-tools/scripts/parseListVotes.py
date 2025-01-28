@@ -66,12 +66,12 @@ def parse_list_votes(session, Base, year):
     # Create in-memory buffer
     output = StringIO()
     bulk_df = pd.DataFrame(foreign_keys, columns=['wahlkreis_id', 'partei_id', 'wahl_id'])
-    bulk_df.to_csv(output, index=False, header=False)
+    bulk_df.to_csv(output, index=False, header=False, sep='\t')
     output.seek(0)  # Move cursor to start of buffer
 
     print("Streaming CSV to database...")
     with session.connection().connection.cursor() as cursor:
-        cursor.copy_expert("COPY zweitstimmen (wahlkreis_id, partei_id, wahl_id) FROM stdin WITH CSV", output)
+        cursor.copy_from(output, 'zweitstimmen', columns=('wahlkreis_id', 'partei_id', 'wahl_id'))
     
     session.commit()
 
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     # This section only runs if script is called directly
     import os
     import argparse
-    from sqlalchemy import create_engine
+    from sqlalchemy import create_engine, text
     from sqlalchemy.orm import sessionmaker
     from dotenv import load_dotenv
     from sqlalchemy.ext.automap import automap_base
@@ -98,6 +98,51 @@ if __name__ == '__main__':
     Base.prepare(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
+
+    # Drop constraints and indexes before parsing
+    print("Dropping constraints and indexes...")
+    with session.connection().connection.cursor() as cursor:
+        cursor.execute("""
+            ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_wahlkreis_id_fkey;
+            ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_partei_id_fkey;
+            ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_wahl_id_fkey;
+            DROP INDEX IF EXISTS ix_zweitstimmen_wahlkreis_id;
+            DROP INDEX IF EXISTS ix_zweitstimmen_partei_id;
+            DROP INDEX IF EXISTS ix_zweitstimmen_wahl_id;
+        """)
+    session.commit()
     
+    # Parse the votes
     parse_list_votes(session, Base, args.year)
+
+    # Rebuild constraints and indexes after parsing
+    print("Rebuilding constraints and indexes...")
+    with session.connection().connection.cursor() as cursor:
+        cursor.execute("""
+            ALTER TABLE zweitstimmen 
+            ADD CONSTRAINT zweitstimmen_wahlkreis_id_fkey 
+            FOREIGN KEY (wahlkreis_id) 
+            REFERENCES wahlkreise(id);
+            
+            ALTER TABLE zweitstimmen 
+            ADD CONSTRAINT zweitstimmen_partei_id_fkey 
+            FOREIGN KEY (partei_id) 
+            REFERENCES parteien(id);
+            
+            ALTER TABLE zweitstimmen 
+            ADD CONSTRAINT zweitstimmen_wahl_id_fkey 
+            FOREIGN KEY (wahl_id) 
+            REFERENCES wahlen(id);
+            
+            CREATE INDEX ix_zweitstimmen_wahlkreis_id 
+            ON zweitstimmen(wahlkreis_id);
+            
+            CREATE INDEX ix_zweitstimmen_partei_id 
+            ON zweitstimmen(partei_id);
+            
+            CREATE INDEX ix_zweitstimmen_wahl_id 
+            ON zweitstimmen(wahl_id);
+        """)
+    session.commit()
+    
     session.close()
