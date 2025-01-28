@@ -4,65 +4,77 @@ from datetime import datetime
 from openapi_server.database.models import Kandidat, Wahlkreis, Partei, Wahl, Wahlkreiskandidatur
 
 def parse_directcandidacies(session, Base, year):
-    script_dir = Path(__file__).parent  # go up to database-tools directory
+    script_dir = Path(__file__).parent
     source_dir = script_dir / 'sourcefiles'
     
     df = pd.read_csv(source_dir / f'kandidaturen_{year}.csv', delimiter=';', keep_default_na=False)
     filtered_df = df[(df['Kennzeichen'] == 'Kreiswahlvorschlag') | (df['Kennzeichen'] == 'anderer Kreiswahlvorschlag')]
 
-    for index, row in filtered_df.iterrows():
+    print("Pre-fetching lookup data...")
+    
+    date_str = filtered_df['Wahltag'].iloc[0]
+    wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
+    wahl = session.query(Wahl).filter_by(date=wahl_date).one()
+
+    kandidaten_lookup = {}
+    for k in session.query(Kandidat).all():
+        key = (k.name, k.firstname, k.yearOfBirth)
+        kandidaten_lookup[key] = k.id
+
+    wahlkreis_lookup = {}
+    for wk in session.query(Wahlkreis).all():
+        wahlkreis_lookup[wk.name] = wk.id
+
+    partei_lookup = {}
+    for p in session.query(Partei).all():
+        partei_lookup[p.shortName] = p.id
+
+    wahlkreiskandidaturen = []
+    for _, row in filtered_df.iterrows():
         full_name = f"{row['Titel']} {row['Nachname']}".strip() if 'Titel' in row and row['Titel'] else row['Nachname']
+        
+        kandidat_key = (full_name, row['Vornamen'], row['Geburtsjahr'])
+        kandidat_id = kandidaten_lookup.get(kandidat_key)
+        if not kandidat_id:
+            print(f"Kandidat not found: {full_name}, {row['Vornamen']}, {row['Geburtsjahr']}")
+            continue
 
-        kandidat = session.query(Kandidat).filter_by(
-            name=full_name,
-            firstname=row['Vornamen'],
-            yearOfBirth=row['Geburtsjahr'],
-        ).one()
+        wahlkreis_id = wahlkreis_lookup.get(row['Gebietsname'])
+        if not wahlkreis_id:
+            print(f"Wahlkreis not found: {row['Gebietsname']}")
+            continue
 
-        wahlkreis = session.query(Wahlkreis).filter_by(
-            name = row['Gebietsname'],
-        ).one()
+        if not row['Gruppenname'].startswith("EB: "):
+            # Apply name corrections while maintaining mapping
+            gruppenname = row['Gruppenname']
+            gruppenname = 'HEIMAT' if gruppenname == 'NPD' or gruppenname == 'HEIMAT (2021: NPD)' else gruppenname
+            gruppenname = 'Wir Bürger' if gruppenname == 'LKR' or gruppenname == 'Wir Bürger (2021: LKR)' else gruppenname
+            gruppenname = 'Verjüngungsforschung' if gruppenname == 'Gesundheitsforschung' or gruppenname == 'Verjüngungsforschung (2021: Gesundheitsforschung)' else gruppenname
 
-        row['Gruppenname'] = 'HEIMAT' if row['Gruppenname'] == 'NPD' or row['Gruppenname'] == 'HEIMAT (2021: NPD)' else row['Gruppenname']
-        row['GruppennameLang'] = 'Die Heimat' if row['GruppennameLang'] == 'Nationaldemokratische Partei Deutschlands' or row['GruppennameLang'] == 'Die Heimat (2021: Nationaldemokratische Partei Deutschlands)' else row['GruppennameLang']
-        row['Gruppenname'] = 'Wir Bürger' if row['Gruppenname'] == 'LKR' or row['Gruppenname'] == 'Wir Bürger (2021: LKR)' else row['Gruppenname']
-        row['GruppennameLang'] = 'Wir Bürger' if row['GruppennameLang'] == 'Liberal-Konservative Reformer' or row['GruppennameLang'] == 'Wir Bürger (2021: Liberal-Konservative Reformer)' else row['GruppennameLang']
-        row['Gruppenname'] = 'Verjüngungsforschung' if row['Gruppenname'] == 'Gesundheitsforschung' or row['Gruppenname'] == 'Verjüngungsforschung (2021: Gesundheitsforschung)' else row['Gruppenname']
-        row['GruppennameLang'] = 'Partei für schulmedizinische Verjüngungsforschung' if row['GruppennameLang'] == 'Partei für Gesundheitsforschung' or row['GruppennameLang'] == 'Partei für schulmedizinische Verjüngungsforschung (2021: Partei für Gesundheitsforschung)' else row['GruppennameLang']
-
-        date_str = row['Wahltag']
-        wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
-        wahl = session.query(Wahl).filter_by(
-            date=wahl_date,
-        ).one()
-
-        if not (row['Gruppenname'].startswith("EB: ")):
-            partei = session.query(Partei).filter_by(
-                shortName=row['Gruppenname'],
-            ).first()
-            if partei is None:
-                print(f"Partei {row['Gruppenname']} not found")
+            partei_id = partei_lookup.get(gruppenname)
+            if not partei_id:
+                print(f"Partei not found: {gruppenname}")
                 continue
-            wahlkreiskandidatur = Wahlkreiskandidatur(
-                kandidat_id=kandidat.id,
-                wahlkreis_id=wahlkreis.id,
-                partei_id=partei.id,
+
+            wahlkreiskandidaturen.append(Wahlkreiskandidatur(
+                kandidat_id=kandidat_id,
+                wahlkreis_id=wahlkreis_id,
+                partei_id=partei_id,
                 wahl_id=wahl.id,
-            )
+            ))
         else:
-            wahlkreiskandidatur = Wahlkreiskandidatur(
-                kandidat_id=kandidat.id,
-                wahlkreis_id=wahlkreis.id,
+            wahlkreiskandidaturen.append(Wahlkreiskandidatur(
+                kandidat_id=kandidat_id,
+                wahlkreis_id=wahlkreis_id,
                 partei_id=None,
                 wahl_id=wahl.id,
-            )
+            ))
 
-        session.add(wahlkreiskandidatur)
-
-    session.commit()
+    if wahlkreiskandidaturen:
+        session.bulk_save_objects(wahlkreiskandidaturen)
+        session.commit()
 
 if __name__ == '__main__':
-    # This section only runs if script is called directly
     import os
     import argparse
     from sqlalchemy import create_engine

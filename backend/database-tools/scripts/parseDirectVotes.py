@@ -11,88 +11,56 @@ def parse_direct_votes(session, Base, year):
     df = pd.read_csv(source_dir / f'kerg2_{year}.csv', delimiter=';')
     filtered_df = df[(df['Stimme'] == 1) & ((df['Gruppenart'] == 'Partei') | (df['Gruppenart'] == 'Einzelbewerber/Wählergruppe')) & (df['Gebietsart'] == 'Wahlkreis')]
 
-    wahlkreiskandidaturen_id = []
+    print("Pre-fetching lookup data...")
+    wahl_date = datetime.strptime(filtered_df['Wahltag'].iloc[0], '%d.%m.%Y').date()
+    wahl_id = session.query(Wahl.id).filter_by(date=wahl_date).scalar()
+    
+    wahlkreis_lookup = {wk.name: wk.id for wk in session.query(Wahlkreis).all()}
+    partei_lookup = {p.shortName: p.id for p in session.query(Partei).all()}
+    
+    wahlkreiskandidaturen = session.query(Wahlkreiskandidatur).filter_by(wahl_id=wahl_id).all()
+    kandidaturen_lookup = {}
+    for wk in wahlkreiskandidaturen:
+        key = (wk.wahlkreis_id, wk.partei_id) if wk.partei_id else (wk.wahlkreis_id, None)
+        kandidaturen_lookup[key] = wk.id
 
-    voteCounter = 0
-    rowCounter = 0
     print("Processing votes...")
-    for index, row in filtered_df.iterrows():
-        if(rowCounter % 1000 == 0):
-            print(rowCounter)
-        rowCounter += 1
-
-        count = 0
-        if not pd.isna(row['Anzahl']):
-            count = int(row['Anzahl'])
-        else:
+    wahlkreiskandidaturen_id = []
+    
+    grouped_df = filtered_df.groupby(['Gebietsname', 'Gruppenname'])['Anzahl'].sum().reset_index()
+    
+    for _, row in grouped_df.iterrows():
+        wahlkreis_name = row['Gebietsname']
+        wahlkreis_name = 'Höxter – Gütersloh III – Lippe II' if wahlkreis_name == 'Höxter – Lippe II' else wahlkreis_name
+        wahlkreis_name = 'Paderborn' if wahlkreis_name == 'Paderborn – Gütersloh III' else wahlkreis_name
+        
+        wahlkreis_id = wahlkreis_lookup.get(wahlkreis_name)
+        if not wahlkreis_id:
             continue
 
-        date_str = row['Wahltag']
-        wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
+        gruppenname = row['Gruppenname']
+        gruppenname = 'HEIMAT' if gruppenname == 'NPD' or gruppenname == 'HEIMAT (2021: NPD)' else gruppenname
+        gruppenname = 'Wir Bürger' if gruppenname == 'LKR' or gruppenname == 'Wir Bürger (2021: LKR)' else gruppenname
+        gruppenname = 'Verjüngungsforschung' if gruppenname == 'Gesundheitsforschung' or gruppenname == 'Verjüngungsforschung (2021: Gesundheitsforschung)' else gruppenname
 
-        wahl_id = session.query(
-            Wahl.id
-        ).filter_by(date=wahl_date).scalar()
-
-        row['Gebietsname'] = 'Höxter – Gütersloh III – Lippe II' if row['Gebietsname'] == 'Höxter – Lippe II' else row['Gebietsname']
-        row['Gebietsname'] = 'Paderborn' if row['Gebietsname'] == 'Paderborn – Gütersloh III' else row['Gebietsname']
-
-        wahlkreis_id = session.query(
-            Wahlkreis.id
-        ).filter_by(name=row['Gebietsname']).scalar()
-
-        row['Gruppenname'] = 'HEIMAT' if row['Gruppenname'] == 'NPD' or row['Gruppenname'] == 'HEIMAT (2021: NPD)' else row['Gruppenname']
-        row['Gruppenname'] = 'Wir Bürger' if row['Gruppenname'] == 'LKR' or row['Gruppenname'] == 'Wir Bürger (2021: LKR)' else row['Gruppenname']
-        row['Gruppenname'] = 'Verjüngungsforschung' if row['Gruppenname'] == 'Gesundheitsforschung' or row['Gruppenname'] == 'Verjüngungsforschung (2021: Gesundheitsforschung)' else row['Gruppenname']
-
-        if row['Gruppenname'].startswith('EB: '):
-            kandidat_id = session.query(
-                Kandidat.id
-            ).filter(
-                Kandidat.id.in_(
-                    session.query(Wahlkreiskandidatur.kandidat_id).filter_by(
-                        wahlkreis_id=wahlkreis_id,
-                        wahl_id=wahl_id,
-                        partei_id=None
-                    )
-                )
-            ).filter(Kandidat.name.ilike(f"%{row['Gruppenname'].split(':')[1].strip()}%")).scalar()
-
-            wahlkreiskandidatur_id = session.query(
-                Wahlkreiskandidatur.id
-            ).filter_by(
-                wahlkreis_id=wahlkreis_id,
-                wahl_id=wahl_id,
-                kandidat_id=kandidat_id
-            ).scalar()
+        if gruppenname.startswith('EB: '):
+            key = (wahlkreis_id, None)
         else:
-            partei_id = session.query(
-                Partei.id
-            ).filter_by(shortName=row['Gruppenname']).scalar()
-            wahlkreiskandidatur_id = session.query(
-                Wahlkreiskandidatur.id
-            ).filter_by(
-                wahlkreis_id=wahlkreis_id,
-                wahl_id=wahl_id,
-                partei_id=partei_id
-            ).scalar()
+            partei_id = partei_lookup.get(gruppenname)
+            if not partei_id:
+                continue
+            key = (wahlkreis_id, partei_id)
 
-        if not wahl_id:
-            raise ValueError("Foreign key 'wahl_id' not found")
-        if not wahlkreis_id:
-            raise ValueError("Foreign key 'wahlkreis_id' not found")
-        if not partei_id:
-            raise ValueError("Foreign key 'partei_id' for " + row['Gruppenname'] + " not found")
+        wahlkreiskandidatur_id = kandidaturen_lookup.get(key)
         if not wahlkreiskandidatur_id:
-            raise ValueError("'wahlkreiskandidatur_id' for not found")
-        if wahl_id and wahlkreis_id and partei_id and wahlkreiskandidatur_id:
-            for _ in range(count):
-                wahlkreiskandidaturen_id.append(wahlkreiskandidatur_id)
-                voteCounter += 1
-    print(voteCounter)
+            continue
+
+        count = int(row['Anzahl'])
+        wahlkreiskandidaturen_id.extend([wahlkreiskandidatur_id] * count)
+
+    print(f"Total votes: {len(wahlkreiskandidaturen_id)}")
 
     print("Creating CSV in memory...")
-    # Create in-memory buffer
     output = StringIO()
     bulk_df = pd.DataFrame(wahlkreiskandidaturen_id, columns=['wahlkreiskandidatur_id'])
     bulk_df.to_csv(output, index=False, header=False, sep='\t')
@@ -105,7 +73,6 @@ def parse_direct_votes(session, Base, year):
     session.commit()
 
 if __name__ == '__main__':
-    # This section only runs if script is called directly
     import os
     import argparse
     from sqlalchemy import create_engine, text
@@ -128,27 +95,22 @@ if __name__ == '__main__':
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    # Drop constraints and indexes before parsing
     print("Dropping constraints and indexes...")
     with session.connection().connection.cursor() as cursor:
         cursor.execute("""
-            ALTER TABLE erststimmen DROP CONSTRAINT IF EXISTS erststimmen_wahlkreiskandidatur_id_fkey;
+            ALTER TABLE erststimmen DISABLE TRIGGER ALL;
+            
             DROP INDEX IF EXISTS ix_erststimmen_wahlkreiskandidatur_id;
         """)
     session.commit()
     
-    # Parse the votes
     parse_direct_votes(session, Base, args.year)
 
-    # Rebuild constraints and indexes after parsing
     print("Rebuilding constraints and indexes...")
     with session.connection().connection.cursor() as cursor:
         cursor.execute("""
-            ALTER TABLE erststimmen 
-            ADD CONSTRAINT erststimmen_wahlkreiskandidatur_id_fkey 
-            FOREIGN KEY (wahlkreiskandidatur_id) 
-            REFERENCES wahlkreiskandidaturen(id);
-            
+            ALTER TABLE erststimmen ENABLE TRIGGER ALL;
+
             CREATE INDEX ix_erststimmen_wahlkreiskandidatur_id 
             ON erststimmen(wahlkreiskandidatur_id);
         """)

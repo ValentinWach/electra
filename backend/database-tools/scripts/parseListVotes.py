@@ -11,59 +11,42 @@ def parse_list_votes(session, Base, year):
     df = pd.read_csv(source_dir / f'kerg2_{year}.csv', delimiter=';')
     filtered_df = df[(df['Stimme'] == 2) & (df['Gruppenart'] == 'Partei') & (df['Gebietsart'] == 'Wahlkreis')]
 
+    print("Pre-fetching lookup data...")
+    wahl_date = datetime.strptime(filtered_df['Wahltag'].iloc[0], '%d.%m.%Y').date()
+    wahl_id = session.query(Wahl.id).filter_by(date=wahl_date).scalar()
+    
+    wahlkreis_lookup = {wk.name: wk.id for wk in session.query(Wahlkreis).all()}
+    partei_lookup = {p.shortName: p.id for p in session.query(Partei).all()}
+
+    print("Processing votes...")
     foreign_keys = []
-
-    rowCounter = 0
-    voteCounter = 0
-    for index, row in filtered_df.iterrows():
-        if(rowCounter % 1000 == 0):
-            print(rowCounter)
-        rowCounter += 1
-
-        count = 0
-        if(pd.isna(row['Anzahl'])):
-            continue
-        else:
-            count = int(row['Anzahl'])
-
-        date_str = row['Wahltag']
-        wahl_date = datetime.strptime(date_str, '%d.%m.%Y').date()
-
-        wahl_id = session.query(Wahl.id).filter_by(
-            date=wahl_date
-        ).scalar()
-
-        row['Gebietsname'] = 'Höxter – Gütersloh III – Lippe II' if row['Gebietsname'] == 'Höxter – Lippe II' else row['Gebietsname']
-        row['Gebietsname'] = 'Paderborn' if row['Gebietsname'] == 'Paderborn – Gütersloh III' else row['Gebietsname']
-
-        wahlkreis_id = session.query(Wahlkreis.id).filter_by(
-            name=row['Gebietsname']
-        ).scalar()
-
-        row['Gruppenname'] = 'HEIMAT' if row['Gruppenname'] == 'NPD' or row['Gruppenname'] == 'HEIMAT (2021: NPD)' else row['Gruppenname']
-        row['Gruppenname'] = 'Wir Bürger' if row['Gruppenname'] == 'LKR' or row['Gruppenname'] == 'Wir Bürger (2021: LKR)' else row['Gruppenname']
-        row['Gruppenname'] = 'Verjüngungsforschung' if row['Gruppenname'] == 'Gesundheitsforschung' or row['Gruppenname'] == 'Verjüngungsforschung (2021: Gesundheitsforschung)' else row['Gruppenname']
-
-        partei_id = session.query(Partei.id).filter_by(
-            shortName=row['Gruppenname']
-        ).scalar()
-
-        if not wahl_id:
-            raise ValueError("Foreign key 'wahl_id' not found")
+    
+    grouped_df = filtered_df.groupby(['Gebietsname', 'Gruppenname'])['Anzahl'].sum().reset_index()
+    
+    for _, row in grouped_df.iterrows():
+        wahlkreis_name = row['Gebietsname']
+        wahlkreis_name = 'Höxter – Gütersloh III – Lippe II' if wahlkreis_name == 'Höxter – Lippe II' else wahlkreis_name
+        wahlkreis_name = 'Paderborn' if wahlkreis_name == 'Paderborn – Gütersloh III' else wahlkreis_name
+        
+        wahlkreis_id = wahlkreis_lookup.get(wahlkreis_name)
         if not wahlkreis_id:
-            raise ValueError("Foreign key 'wahlkreis_id' not found")
+            continue
+
+        gruppenname = row['Gruppenname']
+        gruppenname = 'HEIMAT' if gruppenname == 'NPD' or gruppenname == 'HEIMAT (2021: NPD)' else gruppenname
+        gruppenname = 'Wir Bürger' if gruppenname == 'LKR' or gruppenname == 'Wir Bürger (2021: LKR)' else gruppenname
+        gruppenname = 'Verjüngungsforschung' if gruppenname == 'Gesundheitsforschung' or gruppenname == 'Verjüngungsforschung (2021: Gesundheitsforschung)' else gruppenname
+
+        partei_id = partei_lookup.get(gruppenname)
         if not partei_id:
-            raise ValueError("Foreign key 'partei_id' not found")
+            continue
 
-        if wahl_id and wahlkreis_id and partei_id:
-            for _ in range(count):
-                foreign_keys.append((wahlkreis_id, partei_id, wahl_id))
-                voteCounter += 1
+        count = int(row['Anzahl'])
+        foreign_keys.extend([(wahlkreis_id, partei_id, wahl_id)] * count)
 
-    print(voteCounter)
+    print(f"Total votes: {len(foreign_keys)}")
 
     print("Creating CSV in memory...")
-    # Create in-memory buffer
     output = StringIO()
     bulk_df = pd.DataFrame(foreign_keys, columns=['wahlkreis_id', 'partei_id', 'wahl_id'])
     bulk_df.to_csv(output, index=False, header=False, sep='\t')
@@ -76,7 +59,6 @@ def parse_list_votes(session, Base, year):
     session.commit()
 
 if __name__ == '__main__':
-    # This section only runs if script is called directly
     import os
     import argparse
     from sqlalchemy import create_engine, text
@@ -99,40 +81,22 @@ if __name__ == '__main__':
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    # Drop constraints and indexes before parsing
     print("Dropping constraints and indexes...")
     with session.connection().connection.cursor() as cursor:
         cursor.execute("""
-            ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_wahlkreis_id_fkey;
-            ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_partei_id_fkey;
-            ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_wahl_id_fkey;
+            ALTER TABLE zweitstimmen DISABLE TRIGGER ALL;
             DROP INDEX IF EXISTS ix_zweitstimmen_wahlkreis_id;
             DROP INDEX IF EXISTS ix_zweitstimmen_partei_id;
             DROP INDEX IF EXISTS ix_zweitstimmen_wahl_id;
         """)
     session.commit()
     
-    # Parse the votes
     parse_list_votes(session, Base, args.year)
 
-    # Rebuild constraints and indexes after parsing
     print("Rebuilding constraints and indexes...")
     with session.connection().connection.cursor() as cursor:
         cursor.execute("""
-            ALTER TABLE zweitstimmen 
-            ADD CONSTRAINT zweitstimmen_wahlkreis_id_fkey 
-            FOREIGN KEY (wahlkreis_id) 
-            REFERENCES wahlkreise(id);
-            
-            ALTER TABLE zweitstimmen 
-            ADD CONSTRAINT zweitstimmen_partei_id_fkey 
-            FOREIGN KEY (partei_id) 
-            REFERENCES parteien(id);
-            
-            ALTER TABLE zweitstimmen 
-            ADD CONSTRAINT zweitstimmen_wahl_id_fkey 
-            FOREIGN KEY (wahl_id) 
-            REFERENCES wahlen(id);
+            ALTER TABLE zweitstimmen ENABLE TRIGGER ALL;
             
             CREATE INDEX ix_zweitstimmen_wahlkreis_id 
             ON zweitstimmen(wahlkreis_id);

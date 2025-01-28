@@ -50,12 +50,10 @@ def create_tables():
             
             # Remove constraints and indexes for votes tables
             conn.execute(text("""
-                ALTER TABLE erststimmen DROP CONSTRAINT IF EXISTS erststimmen_wahlkreiskandidatur_id_fkey;
+                ALTER TABLE erststimmen DISABLE TRIGGER ALL;
                 DROP INDEX IF EXISTS ix_erststimmen_wahlkreiskandidatur_id;
                 
-                ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_wahlkreis_id_fkey;
-                ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_partei_id_fkey;
-                ALTER TABLE zweitstimmen DROP CONSTRAINT IF EXISTS zweitstimmen_wahl_id_fkey;
+                ALTER TABLE zweitstimmen DISABLE TRIGGER ALL;
                 DROP INDEX IF EXISTS ix_zweitstimmen_wahlkreis_id;
                 DROP INDEX IF EXISTS ix_zweitstimmen_partei_id;
                 DROP INDEX IF EXISTS ix_zweitstimmen_wahl_id;
@@ -166,37 +164,10 @@ def insert_data():
     print("\nRebuilding indexes and constraints for votes tables...")
     with session.connection().connection.cursor() as cursor:
         cursor.execute("""
-            ALTER TABLE erststimmen 
-            ADD CONSTRAINT erststimmen_wahlkreiskandidatur_id_fkey 
-            FOREIGN KEY (wahlkreiskandidatur_id) 
-            REFERENCES wahlkreiskandidaturen(id);
+            ALTER TABLE erststimmen ENABLE TRIGGER ALL;
             
-            CREATE INDEX ix_erststimmen_wahlkreiskandidatur_id 
-            ON erststimmen(wahlkreiskandidatur_id);
+            ALTER TABLE zweitstimmen ENABLE TRIGGER ALL;
             
-            ALTER TABLE zweitstimmen 
-            ADD CONSTRAINT zweitstimmen_wahlkreis_id_fkey 
-            FOREIGN KEY (wahlkreis_id) 
-            REFERENCES wahlkreise(id);
-            
-            ALTER TABLE zweitstimmen 
-            ADD CONSTRAINT zweitstimmen_partei_id_fkey 
-            FOREIGN KEY (partei_id) 
-            REFERENCES parteien(id);
-            
-            ALTER TABLE zweitstimmen 
-            ADD CONSTRAINT zweitstimmen_wahl_id_fkey 
-            FOREIGN KEY (wahl_id) 
-            REFERENCES wahlen(id);
-            
-            CREATE INDEX ix_zweitstimmen_wahlkreis_id 
-            ON zweitstimmen(wahlkreis_id);
-            
-            CREATE INDEX ix_zweitstimmen_partei_id 
-            ON zweitstimmen(partei_id);
-            
-            CREATE INDEX ix_zweitstimmen_wahl_id 
-            ON zweitstimmen(wahl_id);
         """)
 
     print("Committing changes...")

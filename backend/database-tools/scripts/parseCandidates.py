@@ -3,37 +3,35 @@ from pathlib import Path
 from openapi_server.database.models import Kandidat
 
 def parse_candidates(session, Base, year):
-    script_dir = Path(__file__).parent  # go up to database-tools directory
+    script_dir = Path(__file__).parent
     source_dir = script_dir / 'sourcefiles'
     
     df = pd.read_csv(source_dir / f'kandidaturen_{year}.csv', delimiter=';', keep_default_na=False)
-    filtered_df = df
 
-    for index, row in filtered_df.iterrows():
+    existing_candidates = set()
+    for k in session.query(Kandidat).all():
+        existing_candidates.add((k.name, k.firstname, k.yearOfBirth))
+
+    new_candidates = []
+    for _, row in df.iterrows():
         full_name = f"{row['Titel']} {row['Nachname']}".strip() if 'Titel' in row and row['Titel'] else row['Nachname']
-
-        existing_kandidat = session.query(Kandidat).filter(
-            Kandidat.name == full_name,
-            Kandidat.firstname == row['Vornamen'],
-            Kandidat.yearOfBirth == row['Geburtsjahr']
-        ).first()
-
-        if existing_kandidat is not None:
-            #print(f"Kandidat {existing_kandidat} already exists")
-            pass
-        else:
-            kandidat = Kandidat(
+        
+        candidate_key = (full_name, row['Vornamen'], row['Geburtsjahr'])
+        if candidate_key not in existing_candidates:
+            new_candidates.append(Kandidat(
                 name=full_name,
                 firstname=row['Vornamen'],
                 profession=row['Beruf'],
                 yearOfBirth=row['Geburtsjahr'],
-            )
+            ))
+            # Add to existing set to prevent duplicates within the same file
+            existing_candidates.add(candidate_key)
 
-            session.add(kandidat)
-            session.commit()
+    if new_candidates:
+        session.bulk_save_objects(new_candidates)
+        session.commit()
 
 if __name__ == '__main__':
-    # This section only runs if script is called directly
     import os
     import argparse
     from sqlalchemy import create_engine
