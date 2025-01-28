@@ -199,6 +199,7 @@ def insert_data():
             ON zweitstimmen(wahl_id);
         """)
 
+    print("Committing changes...")
     session.commit()
     session.close()
 

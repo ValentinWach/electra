@@ -26,7 +26,7 @@ def parse_structural_data(session, Base):
             einkommen=int(row['Verfügbares Einkommen der privaten Haushalte 2014 (EUR je Einwohner)']),
         )
 
-        print(strukturdatum)
+        #print(strukturdatum)
         session.add(strukturdatum)
 
     for index, row in filtered_skd21.iterrows():
@@ -42,7 +42,7 @@ def parse_structural_data(session, Base):
             einkommen=int(row['Verfügbares Einkommen der privaten Haushalte 2018 (EUR je EW)']),
         )
 
-        print(strukturdatum)
+        #print(strukturdatum)
         session.add(strukturdatum)
 
     session.commit()
