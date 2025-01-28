@@ -126,7 +126,7 @@ class einwohner_pro_bundesland_temp(Base):
     einwohnerzahl = Column(Integer, nullable=False)
     wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)
     wahl = relationship('Wahl')
-    bundesland_id = Column(Integer, ForeignKey('bundeslaender.id'), nullable=False)
+    bundeslaender_id = Column(Integer, ForeignKey('bundeslaender.id'), nullable=False)
     bundesland = relationship('Bundesland')
 
 class Kandidat(Base):
