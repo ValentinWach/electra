@@ -59,6 +59,47 @@ def create_tables():
                 DROP INDEX IF EXISTS ix_zweitstimmen_wahl_id;
             """))
 
+def process_votes_for_year(year, database_url, vote_type):
+    """Process either direct or list votes for a specific year with its own database connection"""
+    engine = create_engine(database_url)
+    Base = automap_base()
+    Base.prepare(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    
+    from parseDirectVotes import parse_direct_votes
+    from parseListVotes import parse_list_votes
+
+    try:
+        print(f"\nProcessing {vote_type} votes for {year} in separate process...")
+
+        if vote_type == 'direct':
+            parse_direct_votes(session, Base, year)
+        else:
+            parse_list_votes(session, Base, year)
+    finally:
+        session.close()
+        engine.dispose()
+
+def process_all_votes_parallel(database_url):
+    """Process all votes (both years, both types) in parallel"""
+    import multiprocessing as mp
+    
+    # Use 'spawn' context for Windows compatibility
+    ctx = mp.get_context('spawn')
+    processes = []
+    
+    # Start all vote processing combinations in parallel
+    for year in ['2021', '2017']:
+        for vote_type in ['direct', 'list']:
+            p = ctx.Process(target=process_votes_for_year, args=(year, database_url, vote_type))
+            processes.append(p)
+            p.start()
+
+    # Wait for all processes to complete
+    for p in processes:
+        p.join()
+
 def insert_data():
     """Transaction 3: Insert data and rebuild indexes/constraints"""
     print("Transaction 3: Inserting data and rebuilding indexes/constraints...")
@@ -121,8 +162,6 @@ def insert_data():
     from parseCandidates import parse_candidates
     from parseDirectcandidacies import parse_directcandidacies
     from parseListCandidacies import parse_listcandidacies
-    from parseDirectVotes import parse_direct_votes
-    from parseListVotes import parse_list_votes
     from parseStructuralData import parse_structural_data
 
     # Run parsing functions in order
@@ -138,10 +177,6 @@ def insert_data():
     parse_directcandidacies(session, Base, '2021')
     print("Parsing list candidacies...")
     parse_listcandidacies(session, Base, '2021')
-    print("Parsing direct votes...")
-    parse_direct_votes(session, Base, '2021')
-    print("Parsing list votes...")
-    parse_list_votes(session, Base, '2021')
 
     print("\nProcessing data for 2017 election...")
     print("Parsing parties...")
@@ -152,22 +187,20 @@ def insert_data():
     parse_directcandidacies(session, Base, '2017')
     print("Parsing list candidacies...")
     parse_listcandidacies(session, Base, '2017')
-    print("Parsing direct votes...")
-    parse_direct_votes(session, Base, '2017')
-    print("Parsing list votes...")
-    parse_list_votes(session, Base, '2017')
 
     print("\nRunning parseStructuralData...")
     parse_structural_data(session, Base)
+
+    print("\nProcessing all votes in parallel...")
+    if __name__ == '__main__':
+        process_all_votes_parallel(DATABASE_URL)
 
     # Rebuild indexes and constraints for votes tables
     print("\nRebuilding indexes and constraints for votes tables...")
     with session.connection().connection.cursor() as cursor:
         cursor.execute("""
             ALTER TABLE erststimmen ENABLE TRIGGER ALL;
-            
             ALTER TABLE zweitstimmen ENABLE TRIGGER ALL;
-            
         """)
 
     print("Committing changes...")
