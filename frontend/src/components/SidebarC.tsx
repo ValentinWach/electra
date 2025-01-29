@@ -10,7 +10,8 @@ import DropdownC from "./UI-element-components/DropdownC.tsx";
 import type {DropdownData} from "../models/DropDownData.ts";
 import { useElection } from '../context/ElectionContext.tsx';
 import { useNavigate } from 'react-router-dom';
-import { resultPrefix } from '../utils/Logout.tsx';
+import { resultPrefix } from '../constants/PathPrefixes.ts';
+
 
 const navigation = [
     {name: 'Übersicht', href: resultPrefix + "/uebersicht", icon: HomeIcon, current: false},

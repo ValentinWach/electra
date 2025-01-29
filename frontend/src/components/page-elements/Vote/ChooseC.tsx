@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { handleLogout, votePrefix } from "../../../utils/Logout";
-import WahlzettelC from "./WahlzettelC";
-import WarningDialogC from "../../UI-element-components/WarningDialogC";
-import AlertC from "../../UI-element-components/AlertC";
-import { AlertData } from "../../../models/AlertData";
-import { AlertType } from "../../../models/AlertData";
-import ResultDialogC from "../../UI-element-components/ResultDialogC";
-import { useVote } from "../../../context/VoteContext";
-import { submitVote } from "../../../apiServices";
+import { handleLogout } from "../../../utils/Logout.tsx";
+import { votePrefix } from "../../../constants/PathPrefixes.ts";
+import WahlzettelC from "./WahlzettelC.tsx";
+import WarningDialogC from "../../UI-element-components/WarningDialogC.tsx";
+import AlertC from "../../UI-element-components/AlertC.tsx";
+import { AlertData } from "../../../models/AlertData.ts";
+import { AlertType } from "../../../models/AlertData.ts";
+import ResultDialogC from "../../UI-element-components/ResultDialogC.tsx";
+import { useVote } from "../../../context/VoteContext.tsx";
+import { submitVote } from "../../../apiServices.ts";
 import { Dialog, DialogBackdrop } from "@headlessui/react";
 
-export default function StimmabgabeC() {
+export default function ChooseC() {
     const navigate = useNavigate();
     const [showFinalWarning, setShowFinalWarning] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -65,7 +66,7 @@ export default function StimmabgabeC() {
                         <button
                             type="button"
                             className="mt-5 rounded-md bg-rose-800 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                            onClick={() => { navigate(`${votePrefix}/wahlentscheidung`); }}
+                            onClick={() => { navigate(`${votePrefix}/wahlzettel`); }}
                         >
                             Auswahl ändern
                         </button>

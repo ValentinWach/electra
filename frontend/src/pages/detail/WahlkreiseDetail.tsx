@@ -17,7 +17,8 @@ import { useCalcOnAggregate } from "../../context/CalcOnAggregateContext.tsx";
 import DirektkandidatC from "../../components/page-elements/Wahlkreise/DirektkandidatC.tsx";
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { ChartDataNum } from "../../models/ChartData";
-import { resultPrefix } from "../../utils/Logout.tsx";
+import { resultPrefix } from "../../constants/PathPrefixes.ts";
+
 
 export default function WahlkreiseDetail() {
     const { id } = useParams();

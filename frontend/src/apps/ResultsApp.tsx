@@ -11,7 +11,7 @@ import WahlkreiseDetail from '../pages/detail/WahlkreiseDetail';
 import ParteiDetail from '../pages/detail/ParteiDetail';
 import { useMinLoadingTime } from '../hooks/useMinLoadingTime';
 import FullPageLoadingC from '../components/UI-element-components/FullPageLoadingC';
-import { resultPrefix } from '../utils/Logout';
+import { resultPrefix } from '../constants/PathPrefixes';
 
 function ResultsContent() {
     const { isLoading } = useElection();

@@ -10,7 +10,8 @@ import BackBreadcrumbsC from "../../components/UI-element-components/BackBreadcr
 import ClosestWinnersC from "../../components/page-elements/Parteien/ClosestWinnersC.tsx";
 import UeberhangC from "../../components/page-elements/Parteien/UeberhangC.tsx";
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { resultPrefix } from "../../utils/Logout.tsx";
+import { resultPrefix } from "../../constants/PathPrefixes.ts";
+
 
 export default function ParteiDetail() {
     const { id } = useParams();

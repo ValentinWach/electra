@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { resultPrefix, votePrefix } from './utils/Logout.tsx';
+import { resultPrefix, votePrefix } from './constants/PathPrefixes.ts';
 import { lazy, Suspense } from 'react';
 import FullPageLoadingC from './components/UI-element-components/FullPageLoadingC.tsx';
 

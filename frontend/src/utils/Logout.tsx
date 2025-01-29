@@ -1,21 +1,19 @@
 import { createElement } from "react";
 import ResultDialogC from "../components/UI-element-components/ResultDialogC";
 import { createRoot } from "react-dom/client";
-
-export const resultPrefix = "/ergebnisse";
-export const votePrefix = "/wahl";
+import { votePrefix } from "../constants/PathPrefixes";
 
 export const handleTokenMissing = (resetVoting: () => void, navigate: (path: string) => void) => {
     sessionStorage.clear();
     resetVoting();
-    navigate(`${votePrefix}/authentication`);
+    navigate(`${votePrefix}/authentifizierung`);
 };
 
 export const handleLogout = (resetVoting: () => void, navigate: (path: string) => void, showDialog: boolean = true, logoutBecauseOfSessionTimeout: boolean = false) => {
     if (!showDialog) {
         sessionStorage.clear();
         resetVoting();
-        navigate(`${votePrefix}/authentication`);
+        navigate(`${votePrefix}/authentifizierung`);
         return;
     }
     const dialogContainer = document.createElement('div');
@@ -40,6 +38,6 @@ export const handleLogout = (resetVoting: () => void, navigate: (path: string) =
         resetVoting();
         root.unmount();
         document.body.removeChild(dialogContainer);
-        navigate(`${votePrefix}/authentication`);
+        navigate(`${votePrefix}/authentifizierung`);
     }, logoutBecauseOfSessionTimeout ? 3000 : 1500);
 };

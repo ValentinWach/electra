@@ -5,7 +5,8 @@ import {useElection} from "../../context/ElectionContext.tsx";
 import BundestagsparteienC from "../../components/page-elements/Parteien/BundestagsparteienC.tsx";
 import AngetreteneParteienC from "../../components/page-elements/Parteien/AngetreteneParteienC.tsx";
 import { useNavigate } from 'react-router-dom';
-import { resultPrefix } from "../../utils/Logout.tsx";
+import { resultPrefix } from "../../constants/PathPrefixes.ts";
+
 
 export default function Parteien() {
     const {selectedElection} = useElection();

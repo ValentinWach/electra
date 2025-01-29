@@ -6,6 +6,7 @@ import {
     Tooltip,
     Legend,
 } from 'chart.js';
+import { toPadding } from 'chart.js/helpers';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -38,13 +39,12 @@ export default function DoughnutChart(props: { data?: ChartDataNum, fullCircle?:
         rotation: 270,
         cutout: '40%',
         layout: {
-            padding: 20,
-
+            padding: 15
         },
         plugins: {
             legend: {
                 position: 'bottom' as const,
-                display: false,
+                display: true,
                 labels: {
                     usePointStyle: true,
                 },

@@ -1,20 +1,22 @@
 import { CheckIcon } from '@heroicons/react/24/solid'
 import { useLocation, Link } from "react-router-dom";
-import { votePrefix } from '../../utils/Logout';
+import { votePrefix } from '../../constants/PathPrefixes.ts';
 import { useEffect, useState } from 'react';
 import { useVote } from '../../context/VoteContext';
+
 
 export default function ProgressBarC() {
     const location = useLocation();
     const { selectedDirectCandidate, selectedParty } = useVote();
-    const isOnAuthPage = location.pathname.endsWith('authentication');
+    const isOnAuthPage = location.pathname.endsWith('login');
     const hasVoteSelected = selectedDirectCandidate !== null || selectedParty !== null;
     
     const steps = [
-        { id: '1', name: 'Authentifizierung', href: `${votePrefix}/authentication` },
-        { id: '2', name: 'Wahlentscheidung', href: `${votePrefix}/wahlentscheidung` },
-        { id: '3', name: 'Stimmabgabe', href: `${votePrefix}/stimmabgabe` },
+        { id: '1', name: 'Authentifizierung', href: `${votePrefix}/authentifizierung` },
+        { id: '2', name: 'Wahlzettel', href: `${votePrefix}/wahlzettel` },
+        { id: '3', name: 'Bestätigung', href: `${votePrefix}/bestaetigung` },
     ];
+
 
     const getStepStatus = (stepIndex: number, currentPath: string) => {
         const currentStep = steps.findIndex(step => currentPath.endsWith(step.href.split('/').pop()!));

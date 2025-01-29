@@ -8,6 +8,7 @@ import { useElection } from "../../../context/ElectionContext.tsx";
 import { getPartyColor } from "../../../utils/GetPartyColor.tsx";
 import { useMinLoadingTime } from '../../../hooks/useMinLoadingTime.ts';
 import GridC from '../../UI-element-components/GridC.tsx';
+import { getPartySeatingOrder } from '../../../utils/GetPartySeatingOrder.tsx';
 
 export default function SitzverteilungC() {
     const { selectedElection } = useElection();
@@ -19,7 +20,8 @@ export default function SitzverteilungC() {
         const getSitzverteilung = async () => {
             try {
                 const data = await fetchSitzveteilung(selectedElection?.id ?? 0);
-                setSitzverteilung(data);
+                const sortedParties = getPartySeatingOrder(data.distribution.map((partei) => partei.party));
+                setSitzverteilung({ ...data, distribution: sortedParties.map((partei) => ({ party: partei, seats: data.distribution.find((p) => p.party.id === partei.id)?.seats ?? 0 })) });
             } catch (error) {
                 console.error('Error fetching Sitzverteilung:', error);
             }

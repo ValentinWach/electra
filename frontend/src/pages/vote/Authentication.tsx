@@ -3,7 +3,8 @@ import { useVote } from "../../context/VoteContext.tsx";
 import { authenticateVoter } from "../../apiServices";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { votePrefix } from "../../utils/Logout.tsx";
+import { votePrefix } from "../../constants/PathPrefixes.ts";
+
 
 export default function Authentication() {
     const { initialize } = useVote();
@@ -27,7 +28,7 @@ export default function Authentication() {
                 sessionStorage.setItem("wahlId", response.wahl.id.toString());
                 sessionStorage.setItem("wahlkreisId", response.wahlkreis.id.toString());
                 await initialize(token, idNumber, response.wahl.id, response.wahlkreis.id, response.wahl, response.wahlkreis);
-                navigate(`${votePrefix}/wahlentscheidung`);
+                navigate(`${votePrefix}/wahlzettel`);
             }
             else {
                 setAuthentificationError(true);

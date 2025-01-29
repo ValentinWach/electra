@@ -7,7 +7,7 @@ export default function HeaderC() {
     const navigate = useNavigate();
     const { resetVoting } = useVote();
     const location = useLocation();
-    const isAuthenticating = location.pathname.startsWith('/wahl/authentication');
+    const isAuthenticating = location.pathname.startsWith('/wahl/authentifizierung');
 
     return (
         <header className={"w-full h-auto top-0 sticky bg-white shadow-sm pt-5 pb-5 pl-10 pr-10 flex flex-row justify-between items-center"}>

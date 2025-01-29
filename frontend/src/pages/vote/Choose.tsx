@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import StimmabgabeC from "../../components/page-elements/Vote/StimmabgabeC";
-import { votePrefix, handleTokenMissing } from "../../utils/Logout";
-import { useVote } from "../../context/VoteContext";
+import ChooseC from "../../components/page-elements/Vote/ChooseC.tsx";
+import { votePrefix } from "../../constants/PathPrefixes.ts";
+import { handleTokenMissing } from "../../utils/Logout.tsx";
+import { useVote } from "../../context/VoteContext.tsx";
 
-export default function Stimmabgabe() {
+
+export default function Choose() {
     const { token, selectedDirectCandidate, selectedParty, resetVoting } = useVote();
     const navigate = useNavigate();
     useEffect(() => {
@@ -13,10 +15,10 @@ export default function Stimmabgabe() {
             handleTokenMissing(resetVoting, navigate);
         }
         else if(!selectedDirectCandidate && !selectedParty) {
-            navigate(`${votePrefix}/wahlentscheidung`);
+            navigate(`${votePrefix}/wahlzettel`);
         }
     }, [token, selectedDirectCandidate, selectedParty])
     return (
-        <StimmabgabeC />
+        <ChooseC />
     )
 }
