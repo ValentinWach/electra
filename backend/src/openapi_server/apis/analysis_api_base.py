@@ -39,10 +39,7 @@ class BaseAnalysisApi:
                 is_2021 = db.execute(validation_query, {"wahlId": wahlid}).fetchone()
                 
                 if not is_2021:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="This endpoint is only available for the 2021 election"
-                    )
+                    return Berufsgruppen(berufsgruppen=[])
                 
                 if only_abgeordnete:
 
