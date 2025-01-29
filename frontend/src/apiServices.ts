@@ -1,4 +1,4 @@
-import { GeneralApi, GlobalApi, WahlkreisApi, ElectApi} from "./api";
+import { GeneralApi, GlobalApi, WahlkreisApi, ElectApi, AnalysisApi} from "./api";
 import {SeatDistribution, Wahl, Wahlkreis } from "./api";
 import * as runtime from './api/runtime';
 
@@ -253,8 +253,8 @@ export async function fetchForeignerShareAnalysis(wahlid: number, parteiid: numb
     const cacheKey = getCacheKey('fetchForeignerShareAnalysis', wahlid, parteiid);
     return withCache(cacheKey, async () => {
         try {
-            const wahlkreisApi = new WahlkreisApi();
-            const foreigners = await wahlkreisApi.getForeigners({ wahlid, parteiid });
+            const analysisApi = new AnalysisApi();
+            const foreigners = await analysisApi.getForeigners({ wahlid, parteiid });
             console.log('Fetched Foreigner analysis:', foreigners);
             return foreigners;
         } catch (error) {
@@ -268,12 +268,27 @@ export async function fetchIncomeAnalysis(wahlid: number, parteiid: number) {
     const cacheKey = getCacheKey('fetchIncomeAnalysis', wahlid, parteiid);
     return withCache(cacheKey, async () => {
         try {
-            const wahlkreisApi = new WahlkreisApi();
-            const income = await wahlkreisApi.getIncome({ wahlid, parteiid });
-            console.log('Fetched Income analysis:', income);
-            return income;
+            const analysisApi = new AnalysisApi();
+            const berufsgruppen = await analysisApi.getIncome({ wahlid, parteiid });
+            console.log('Fetched Income analysis:', berufsgruppen);
+            return berufsgruppen;
         } catch (error) {
             console.error('Error fetching Income analysis:', error);
+            throw error;
+        }
+    });
+}
+
+export async function fetchBerufsgruppen(wahlid: number, parteiid: number) {
+    const cacheKey = getCacheKey('fetchBerufsgruppen', wahlid, parteiid);
+    return withCache(cacheKey, async () => {
+        try {
+            const analysisApi = new AnalysisApi();
+            const berufsgruppen = await analysisApi.getBerufsgruppen({ wahlid, parteiid });
+            console.log('Fetched Berufsgruppen:', berufsgruppen);
+            return {berufsgruppen: berufsgruppen.berufsgruppen?.sort((a, b) =>a.name.localeCompare(b.name))};
+        } catch (error) {
+            console.error('Error fetching Berufsgruppen:', error);
             throw error;
         }
     });
