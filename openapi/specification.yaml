@@ -275,6 +275,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/wahlid'
         - $ref: '#/components/parameters/parteiid'
+        - $ref: '#/components/parameters/only_abgeordnete'
       tags:
         - Analysis
       responses:
@@ -560,6 +561,13 @@ components:
       schema:
         type: boolean
         default: true
+    only_abgeordnete:
+      name: only_abgeordnete
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
 
   schemas:
     Wahl:
