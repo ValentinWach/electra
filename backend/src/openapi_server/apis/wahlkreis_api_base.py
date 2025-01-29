@@ -36,16 +36,27 @@ class BaseWahlkreisApi:
         try:
             with db_session() as db:
                 if generatefromaggregate:
-                    overview_query = text('''
-                                SELECT k.id, k.name, k.firstname, k.profession, k."yearOfBirth", p.id, p.name, p."shortName", wahlbeteiligung
+                    direktkandidat_query = text('''
+                                SELECT k.id, k.name, k.firstname, k.profession, k."yearOfBirth", p.id, p.name, p."shortName"
                                 FROM wahlkreis_winners ww 
                                 JOIN kandidaten k ON ww.kandidat_id = k.id 
                                 JOIN parteien p ON ww.partei_id = p.id
-                                JOIN strukturdaten s ON s.wahl_id = :wahlId AND s.wahlkreis_id = :wahlkreisId
                                 WHERE ww.wahlkreis_id = :wahlkreisId AND ww.wahl_id = :wahlId;
                             ''')
+
+                    wahlbeteiligung_query = text('''
+                                                    SELECT
+                                                        ROUND((SUM(zwp.stimmen_sum) / NULLIF(s.wahlberechtigte, 0)) * 100, 2) AS percentage
+                                                    FROM strukturdaten s
+                                                    JOIN zweitstimmen_wahlkreis_partei zwp
+                                                        ON s.wahlkreis_id = zwp.wahlkreise_id
+                                                        AND s.wahl_id = zwp.wahlen_id
+                                                    WHERE zwp.wahlkreise_id = :wahlkreisId
+                                                    AND zwp.wahlen_id = :wahlId
+                                                    GROUP BY s.wahlberechtigte;
+                                                ''')
                 else:
-                    overview_query = text('''
+                    direktkandidat_query = text('''
                                 WITH candidate_votes AS
                                     (SELECT w.kandidat_id, w.partei_id, COUNT(*) AS votes
                                     FROM erststimmen e
@@ -55,32 +66,57 @@ class BaseWahlkreisApi:
                                 max_votes AS (SELECT kandidat_id, partei_id
                                     FROM candidate_votes
                                     WHERE votes = (SELECT MAX(votes) FROM candidate_votes)) 
-                                SELECT k.id, k.name, k.firstname, k.profession, k."yearOfBirth", p.id, p.name, p."shortName", wahlbeteiligung
+                                SELECT k.id, k.name, k.firstname, k.profession, k."yearOfBirth", p.id, p.name, p."shortName"
                                 FROM max_votes mv 
                                 JOIN kandidaten k ON mv.kandidat_id = k.id
-                                JOIN parteien p ON mv.partei_id = p.id
-                                JOIN strukturdaten s ON s.wahl_id = :wahlId AND s.wahlkreis_id = :wahlkreisId; ;
+                                JOIN parteien p ON mv.partei_id = p.id;
                             ''')
 
-                overview_results = db.execute(
-                    overview_query,
+                    wahlbeteiligung_query = text('''
+                                SELECT
+                                    ROUND(
+                                        (COUNT(*) * 100.0) / NULLIF(
+                                            (SELECT s.wahlberechtigte
+                                             FROM strukturdaten s
+                                             WHERE s.wahlkreis_id = :wahlkreisId
+                                             AND s.wahl_id = :wahlId
+                                             LIMIT 1), 0),
+                                        2
+                                    ) AS percentage
+                                FROM zweitstimmen z
+                                WHERE z.wahlkreis_id = :wahlkreisId
+                                AND z.wahl_id = :wahlId;
+                            ''')
+
+                direktkandidat_results = db.execute(
+                    direktkandidat_query,
                     {"wahlId": wahlid, "wahlkreisId": wahlkreisid}
                 ).fetchall()
 
-                if not overview_results:
+                wahlbeteiligung_results = db.execute(
+                    wahlbeteiligung_query,
+                    {"wahlId": wahlid, "wahlkreisId": wahlkreisid}
+                ).fetchall()
+
+                if not direktkandidat_results:
                     raise HTTPException(status_code=404, detail="No direktkandidat found")
 
-                overview_data = overview_results[0]
+                if not wahlbeteiligung_results:
+                    raise HTTPException(status_code=404, detail="No wahlbeteiligung found")
 
                 overview = OverviewWahlkreis(
-                    wahlbeteiligung=overview_data[8],
+                    wahlbeteiligung=wahlbeteiligung_results[0][0],
                     direktkandidat=Abgeordneter(
-                        id=overview_data[0],
-                        name=overview_data[1],
-                        firstname=overview_data[2],
-                        profession=overview_data[3],
-                        year_of_birth=overview_data[4],
-                        party=Partei(id=overview_data[5], name=overview_data[6], shortname=overview_data[7])
+                        id=direktkandidat_results[0][0],
+                        name=direktkandidat_results[0][1],
+                        firstname=direktkandidat_results[0][2],
+                        profession=direktkandidat_results[0][3],
+                        year_of_birth=direktkandidat_results[0][4],
+                        party=Partei(
+                            id=direktkandidat_results[0][5], 
+                            name=direktkandidat_results[0][6], 
+                            shortname=direktkandidat_results[0][7]
+                        )
                     )
                 )
 

@@ -167,7 +167,7 @@ class Strukturdatum(Base):
 
 
     einwohnerzahl = Column(Integer, nullable=False)
-    wahlbeteiligung = Column(Float, nullable=False)
+    wahlberechtigte = Column(Integer, nullable=False)
     auslaenderanteil = Column(Float, nullable=False)
     unternehmensdichte = Column(Float, nullable=False) # je 1000 EW
     einkommen = Column(Integer, nullable=False) # je EW
