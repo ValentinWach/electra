@@ -9,8 +9,6 @@ interface ChartData {
 }
 
 
-
-
 export interface ChartDatasetNum extends ChartDataset{
     data: number[];
 }
@@ -18,8 +16,6 @@ export interface ChartDatasetNum extends ChartDataset{
 export interface ChartDataNum extends ChartData{
     datasets: ChartDatasetNum[];
 }
-
-
 
 export interface ChartDatasetXYR extends ChartDataset{
     data: { x: number; y: number; r: number }[];

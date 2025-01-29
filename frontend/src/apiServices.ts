@@ -279,12 +279,12 @@ export async function fetchIncomeAnalysis(wahlid: number, parteiid: number) {
     });
 }
 
-export async function fetchBerufsgruppen(wahlid: number, parteiid: number) {
-    const cacheKey = getCacheKey('fetchBerufsgruppen', wahlid, parteiid);
+export async function fetchBerufsgruppen(wahlid: number, parteiid: number, showBundestagsabgeordneteOnly: boolean = false) {
+    const cacheKey = getCacheKey('fetchBerufsgruppen', wahlid, parteiid, showBundestagsabgeordneteOnly);
     return withCache(cacheKey, async () => {
         try {
             const analysisApi = new AnalysisApi();
-            const berufsgruppen = await analysisApi.getBerufsgruppen({ wahlid, parteiid });
+            const berufsgruppen = await analysisApi.getBerufsgruppen({ wahlid, parteiid, onlyAbgeordnete: showBundestagsabgeordneteOnly });
             console.log('Fetched Berufsgruppen:', berufsgruppen);
             return {berufsgruppen: berufsgruppen.berufsgruppen?.sort((a, b) =>a.name.localeCompare(b.name))};
         } catch (error) {

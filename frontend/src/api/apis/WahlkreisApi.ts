@@ -15,17 +15,11 @@
 
 import * as runtime from '../runtime';
 import type {
-  Auslaenderanteil,
-  Einkommen,
   OverviewWahlkreis,
   Stimmanteil,
   WinningParties,
 } from '../models/index';
 import {
-    AuslaenderanteilFromJSON,
-    AuslaenderanteilToJSON,
-    EinkommenFromJSON,
-    EinkommenToJSON,
     OverviewWahlkreisFromJSON,
     OverviewWahlkreisToJSON,
     StimmanteilFromJSON,
@@ -33,16 +27,6 @@ import {
     WinningPartiesFromJSON,
     WinningPartiesToJSON,
 } from '../models/index';
-
-export interface GetForeignersRequest {
-    wahlid: number;
-    parteiid: number;
-}
-
-export interface GetIncomeRequest {
-    wahlid: number;
-    parteiid: number;
-}
 
 export interface GetOverviewWahlkreisRequest {
     wahlid: number;
@@ -69,82 +53,6 @@ export interface GetWinningPartiesWahlkreiseRequest {
  * 
  */
 export class WahlkreisApi extends runtime.BaseAPI {
-
-    /**
-     */
-    async getForeignersRaw(requestParameters: GetForeignersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Auslaenderanteil>> {
-        if (requestParameters['wahlid'] == null) {
-            throw new runtime.RequiredError(
-                'wahlid',
-                'Required parameter "wahlid" was null or undefined when calling getForeigners().'
-            );
-        }
-
-        if (requestParameters['parteiid'] == null) {
-            throw new runtime.RequiredError(
-                'parteiid',
-                'Required parameter "parteiid" was null or undefined when calling getForeigners().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/results/{wahlid}/auslaenderanteil/{parteiid}/`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))).replace(`{${"parteiid"}}`, encodeURIComponent(String(requestParameters['parteiid']))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => AuslaenderanteilFromJSON(jsonValue));
-    }
-
-    /**
-     */
-    async getForeigners(requestParameters: GetForeignersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Auslaenderanteil> {
-        const response = await this.getForeignersRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     */
-    async getIncomeRaw(requestParameters: GetIncomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Einkommen>> {
-        if (requestParameters['wahlid'] == null) {
-            throw new runtime.RequiredError(
-                'wahlid',
-                'Required parameter "wahlid" was null or undefined when calling getIncome().'
-            );
-        }
-
-        if (requestParameters['parteiid'] == null) {
-            throw new runtime.RequiredError(
-                'parteiid',
-                'Required parameter "parteiid" was null or undefined when calling getIncome().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/results/{wahlid}/income/{parteiid}/`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))).replace(`{${"parteiid"}}`, encodeURIComponent(String(requestParameters['parteiid']))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => EinkommenFromJSON(jsonValue));
-    }
-
-    /**
-     */
-    async getIncome(requestParameters: GetIncomeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Einkommen> {
-        const response = await this.getIncomeRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
 
     /**
      */

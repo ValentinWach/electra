@@ -5,6 +5,8 @@ export * from './Auslaenderanteil';
 export * from './AuslaenderanteilWahlkreiseInner';
 export * from './AuthenticatedResponse';
 export * from './AuthenticationRequest';
+export * from './Berufsgruppen';
+export * from './BerufsgruppenBerufsgruppenInner';
 export * from './Bundesland';
 export * from './ClosestWinner';
 export * from './ClosestWinners';

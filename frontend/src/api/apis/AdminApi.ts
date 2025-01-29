@@ -134,4 +134,27 @@ export class AdminApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     */
+    async refreshRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/admin/refresh`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     */
+    async refresh(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.refreshRaw(initOverrides);
+    }
+
 }

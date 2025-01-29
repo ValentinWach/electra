@@ -107,7 +107,7 @@ export default function WahlzettelC({ wahlkreis, directCandidates, parties, chec
                                             <td className="border-solid border border-blue-900 border-l-0 align-bottom pb-1 pr-3 w-[294px] h-24 overflow-hidden">
                                                 <div className="flex flex-col items-start justify-between h-full">
                                                     <p className="font-bold text-sm text-blue-900">{party.partei.name ?? ""}</p>
-                                                    <p className="text-xs text-blue-900">{party.topfive.map(p => `${p.firstname} ${p.name}`).join(", ")}</p>
+                                                    <p className="text-xs text-blue-900">{party.topfive.map(p => `${p.name}, ${p.firstname}`).join("; ")}</p>
                                                 </div>
                                             </td>
                                             <td className="border-solid border border-blue-900 text-center font-bold w-[40px] text-blue-900">{index + 1}</td>

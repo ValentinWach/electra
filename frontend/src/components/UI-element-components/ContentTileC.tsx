@@ -1,12 +1,13 @@
-import { ReactNode } from "react";
+import { ReactNode, LegacyRef } from "react";
 import DropdownC from "./DropdownC.tsx";
 import { DropdownData } from "../../models/DropDownData.ts";
 
 interface CharttileProps {
     children?: ReactNode;
+    containerRef?: LegacyRef<HTMLDivElement>;
 }
 
-export default function ContentTileC({ children, header, xlWidth, dropDownContent, loading = false, dropDownFunction }: CharttileProps & { header: string, xlWidth?: Boolean, dropDownContent?: DropdownData, dropDownFunction?: (id: number) => void } & { loading?: boolean }) {
+export default function ContentTileC({ children, header, xlWidth, dropDownContent, loading = false, dropDownFunction, containerRef }: CharttileProps & { header: string, xlWidth?: Boolean, dropDownContent?: DropdownData, dropDownFunction?: (id: number) => void } & { loading?: boolean }) {
     xlWidth = xlWidth ?? false;
 
     const tableSkeletonRow = (index: number) => (
@@ -34,6 +35,7 @@ export default function ContentTileC({ children, header, xlWidth, dropDownConten
     );
     return (
         <div
+            ref={containerRef}
             className={`${xlWidth ? "max-w-[1300px]" : "max-w-[1100px]"} sm:w-full xl:w-[90%] 2xl:w-3/4 drop-shadow-lg bg-white rounded-md p-8 flex items-center flex-col gap-3 text-left mt-8 mb-8`}>
             <p className={"text-2xl font-bold text-left text-gray-800"}>{header}</p>
             <div className={"flex flex-row justify-center w-full gap-10"}>

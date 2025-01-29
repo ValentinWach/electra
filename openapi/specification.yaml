@@ -102,7 +102,7 @@ paths:
                 title: sitzverteilung
                 $ref: '#/components/schemas/SeatDistribution'
 
-  #----- Abgeordnete per region ----- TODO: Bundeslaender & Wahlkreise
+  #----- Abgeordnete per region ----- Hier könnten BL und Wahlkreise hinzugefügt werden
   /results/{wahlid}/abgeordnete:
     get:
       operationId: getAbgeordnete
@@ -121,7 +121,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Abgeordneter'
 
-  #----- Stimmanteil per region ----- TODO: Bundeslaender
+  #----- Stimmanteil per region ----- Hier könnten Bundesländer hinzugefügt werden
   /results/{wahlid}/stimmanteil:
     get:
       operationId: getStimmanteil
@@ -160,7 +160,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Stimmanteil'
 
-  #-----winningparties per region----- TODO: Bundeslaender
+  #-----winningparties per region----- Hier könnten Bundesländer hinzugefügt werden
   /results/{wahlid}/winningparties/wahlkreis/{wahlkreisid}:
     get:
       operationId: getWinningPartiesWahlkreis
@@ -561,6 +561,7 @@ components:
       schema:
         type: boolean
         default: true
+        
     only_abgeordnete:
       name: only_abgeordnete
       in: query
@@ -846,3 +847,7 @@ components:
               share:
                 type: number
                 title: Share
+              absolute:
+                type: integer
+                title: Absolute
+
