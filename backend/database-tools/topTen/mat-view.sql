@@ -1,5 +1,3 @@
-REFRESH MATERIALIZED VIEW wahlkreis_knappste_sieger;
-
 CREATE MATERIALIZED VIEW wahlkreis_knappste_sieger AS
 WITH candidate_votes AS (
     SELECT wahlkreis_id, w.kandidat_id, w.partei_id, w.wahl_id, COUNT(*) AS votes

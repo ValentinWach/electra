@@ -18,6 +18,7 @@ from openapi_server.apis.global_api import router as GlobalApiRouter
 from openapi_server.apis.wahlkreis_api import router as WahlkreisApiRouter
 from openapi_server.apis.elect_api import router as ElectApiRouter
 from openapi_server.apis.admin_api import router as AdminApiRouter
+from openapi_server.apis.analysis_api import router as AnalysisApiRouter
 
 
 
@@ -47,3 +48,4 @@ app.include_router(GlobalApiRouter)
 app.include_router(WahlkreisApiRouter)
 app.include_router(ElectApiRouter)
 app.include_router(AdminApiRouter)
+app.include_router(AnalysisApiRouter)

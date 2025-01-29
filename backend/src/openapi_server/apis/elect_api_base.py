@@ -9,7 +9,7 @@ from pydantic import StrictInt
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
-from openapi_server.database.models import ErststimmeTest, ZweitstimmeTest, Token
+from openapi_server.database.models import Erststimme, Zweitstimme, Token
 from openapi_server.models.bundesland import Bundesland
 from openapi_server.models.abgeordneter import Abgeordneter
 
@@ -242,10 +242,10 @@ class BaseElectApi:
                         SELECT id FROM wahlkreiskandidaturen WHERE wahl_id = :wahlid AND wahlkreis_id = :wahlkreisid AND kandidat_id = :direct_candidate_id LIMIT 1
                     """)
                     direktkandidatur_id = db.execute(direktkandidatur_id_query, {"direct_candidate_id": vote_request.direct_candidate_id, "wahlid": wahl_id, "wahlkreisid": wahlkreis_id}).fetchone()
-                    erststimme = ErststimmeTest(wahlkreiskandidatur_id=direktkandidatur_id.id)
+                    erststimme = Erststimme(wahlkreiskandidatur_id=direktkandidatur_id.id)
                     db.add(erststimme)
                 if partei_valid:
-                    zweitstimme = ZweitstimmeTest(wahl_id=wahl_id, wahlkreis_id=wahlkreis_id, partei_id=vote_request.party_id)
+                    zweitstimme = Zweitstimme(wahl_id=wahl_id, wahlkreis_id=wahlkreis_id, partei_id=vote_request.party_id)
                     db.add(zweitstimme)
                 token = db.query(Token).filter(Token.hash == hash_value).first()
                 if token:

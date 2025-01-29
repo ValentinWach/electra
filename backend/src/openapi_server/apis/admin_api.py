@@ -69,3 +69,17 @@ async def generate_token(
 ):
     admin_api = BaseAdminApi()
     return await admin_api.generate_token(wahlid, wahlkreisid, amount, id_numbers)
+
+
+@router.post(
+    "/admin/refresh",
+    responses={
+        200: {"description": "Successfully refreshed all materialized views."},
+        400: {"description": "Failed to refresh materialized views."},
+    },
+    tags=["Admin"],
+    response_model_by_alias=True,
+)
+async def refresh() -> None:
+    admin_api = BaseAdminApi()
+    return await admin_api.refresh()

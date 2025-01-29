@@ -4,10 +4,11 @@ import string
 import csv
 import io
 import hashlib
+import os
 
 from fastapi import UploadFile, File, HTTPException
 from typing import ClassVar, Dict, List, Tuple, Any  # noqa: F401
-from openapi_server.database.connection import Session as db_session
+from openapi_server.database.connection import Session as db_session, engine
 from sqlalchemy import text, insert
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -15,7 +16,7 @@ from pydantic import Field, StrictBytes, StrictInt, StrictStr
 from typing_extensions import Annotated
 from typing import Any, List, Optional, Tuple, Union
 
-from openapi_server.database.models import Token, ErststimmeTest, ZweitstimmeTest
+from openapi_server.database.models import Token, Erststimme, Zweitstimme
 
 
 class BaseAdminApi:
@@ -136,9 +137,9 @@ class BaseAdminApi:
 
     async def prepare_votes(self, wahl_id, wahlkreis_id, direktkandidat_id, partei_id, row):
 
-        erststimme = ErststimmeTest(wahlkreiskandidatur_id=direktkandidat_id)
+        erststimme = Erststimme(wahlkreiskandidatur_id=direktkandidat_id)
 
-        zweitstimme = ZweitstimmeTest(wahl_id=wahl_id, wahlkreis_id=wahlkreis_id, partei_id=partei_id)
+        zweitstimme = Zweitstimme(wahl_id=wahl_id, wahlkreis_id=wahlkreis_id, partei_id=partei_id)
 
         return erststimme, zweitstimme
 
@@ -173,6 +174,25 @@ class BaseAdminApi:
 
         except HTTPException as http_ex:
             raise http_ex
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Internal server error: {str(e)}"
+            )
+
+    async def refresh(
+        self
+    ) -> None:
+        try:
+            script_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 
+                                     'database-tools', 'sitzverteilung', 'refresh-materialized-views.sql')
+            
+            with engine.connect() as conn:
+                with conn.begin():
+                    with open(script_path, 'r') as file:
+                        sql_commands = file.read()
+                        conn.execute(text(sql_commands))
+                        conn.commit()
         except Exception as e:
             raise HTTPException(
                 status_code=500,

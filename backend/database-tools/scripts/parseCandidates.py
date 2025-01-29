@@ -18,13 +18,29 @@ def parse_candidates(session, Base, year):
         
         candidate_key = (full_name, row['Vornamen'], row['Geburtsjahr'])
         if candidate_key not in existing_candidates:
+            profession_key = None
+            if year == '2021' and 'Berufsschluessel' in row:
+                berufsschluessel = str(row['Berufsschluessel']).strip()
+                if berufsschluessel:
+                    if len(berufsschluessel) == 1:
+                        mapping = {
+                            '1': 0,   # Militär
+                            '4': 10,  # In Ausbildung
+                            '5': 11,  # Rentner
+                            '9': 12,  # Freiberufler
+                            '6': 13   # Arbeitslose
+                        }
+                        profession_key = mapping.get(berufsschluessel, None)
+                    else:
+                        profession_key = int(berufsschluessel[0])
+            
             new_candidates.append(Kandidat(
                 name=full_name,
                 firstname=row['Vornamen'],
                 profession=row['Beruf'],
                 yearOfBirth=row['Geburtsjahr'],
+                profession_key=profession_key,
             ))
-            # Add to existing set to prevent duplicates within the same file
             existing_candidates.add(candidate_key)
 
     if new_candidates:

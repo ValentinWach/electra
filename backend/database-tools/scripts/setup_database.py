@@ -81,7 +81,7 @@ def process_all_votes_parallel(database_url):
     """Process all votes (both years, both types) in parallel"""
     # Determine the appropriate start method based on the platform
     if platform.system() == 'Darwin':  # macOS
-        mp.set_start_method('fork')
+        mp.set_start_method('spawn')
     elif platform.system() == 'Windows':
         mp.set_start_method('spawn')
     else:  # Linux and others
@@ -158,6 +158,30 @@ def insert_data():
 
         session.commit()
 
+        # Insert profession categories
+        profession_categories = [
+            (0, 'Militär'),
+            (1, 'Land-, Forst- und Tierwirtschaft und Gartenbau'),
+            (2, 'Rohstoffgewinnung, Produktion und Fertigung'),
+            (3, 'Bau, Architektur, Vermessung und Gebäudetechnik'),
+            (4, 'Naturwissenschaft, Geografie und Informatik'),
+            (5, 'Verkehr, Logistik, Schutz und Sicherheit'),
+            (6, 'Kaufmännische Dienstleistungen, Warenhandel, Vertrieb, Hotel und Tourismus'),
+            (7, 'Unternehmensorganisation, Buchhaltung, Recht und Verwaltung'),
+            (8, 'Gesundheit, Soziales, Lehre und Erziehung'),
+            (9, 'Geistes-, Gesellschafts- und Wirtschaftswissenschaften, Medien, Kunst und Kultur'),
+            (10, 'Studenten, Auszubildende und Schüler'),
+            (11, 'Rentner'),
+            (12, 'Freiberufler'),
+            (13, 'Arbeitslose')
+        ]
+
+        for id, name in profession_categories:
+            category = BerufsKategorie(id=id, name=name)
+            session.add(category)
+
+        session.commit()
+
         from parseWahlkreise import parse_wahlkreise
         from parseParties import parse_parties
         from parseCandidates import parse_candidates
@@ -206,11 +230,29 @@ def insert_data():
     finally:
         session.close()
 
+def execute_sql_file(file_path):
+    with engine.connect() as conn:
+        with conn.begin():
+            with open(file_path, 'r') as file:
+                sql_commands = file.read()
+                conn.execute(text(sql_commands))
+
 def main():
     if __name__ == '__main__':
         drop_schema()
         create_tables()
         insert_data()
+        
+        print("\nCreating materialized views...")
+        sql_files = [
+            '../sitzverteilung/sitzverteilung-functions.sql',
+            '../sitzverteilung/sitzverteilung-views.sql',
+            '../topTen/mat-view.sql'
+        ]
+        
+        for sql_file in sql_files:
+            execute_sql_file(sql_file)
+        
         print("\nDatabase setup completed successfully!")
 
 main()

@@ -6,6 +6,7 @@ REFRESH MATERIALIZED VIEW zweitstimmen_wahlkreis_partei;
 REFRESH MATERIALIZED VIEW zweitstimmen_bundesland_partei;
 REFRESH MATERIALIZED VIEW zweitstimmen_partei;
 REFRESH MATERIALIZED VIEW wahlkreis_winners;
+REFRESH MATERIALIZED VIEW wahlkreis_knappste_sieger;
 
 ----------Berechnungen----------
 REFRESH MATERIALIZED VIEW bundestag_parties;
@@ -23,8 +24,9 @@ REFRESH MATERIALIZED VIEW ov_2_sitzkontingente_bundesweit_erhoeht_basis;
 --Depends on dynamic statement and can thus not be a materialized view
 TRUNCATE TABLE ov_2_sitzkontingente_bundesweit_erhoeht;
 INSERT INTO ov_2_sitzkontingente_bundesweit_erhoeht
-SELECT wahl_id, partei_id, stimmen_sum, mindestsitzanspruch, verbleibender_ueberhang, sitze_nach_erhoehung from calculate_seats_per_party_per_election_nationwide();
-
+SELECT wahl_id, partei_id, stimmen_sum, mindestsitzanspruch, verbleibender_ueberhang, sitze_nach_erhoehung from calculate_seats_per_party_per_election_nationwide(1)
+UNION
+SELECT wahl_id, partei_id, stimmen_sum, mindestsitzanspruch, verbleibender_ueberhang, sitze_nach_erhoehung from calculate_seats_per_party_per_election_nationwide(2);
 --Depends on dynamic statement and can thus not be a materialized view
 TRUNCATE TABLE uv_2_sitzkontingente_landeslisten_erhoeht;
 INSERT INTO uv_2_sitzkontingente_landeslisten_erhoeht (wahl_id, bundesland_id, partei_id, landeslistensitze, stimmen_sum, mindestsitzanspruch, sum)

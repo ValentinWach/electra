@@ -100,31 +100,3 @@ async def get_winning_parties_wahlkreis(
 ) -> WinningParties:
     return await BaseWahlkreisApi.get_winning_parties(wahlid, self=None)
 
-@router.get(
-    "/results/{wahlid}/auslaenderanteil/{parteiid}/",
-    responses={
-        200: {"model": Auslaenderanteil, "description": "Returning the auslaenderanteil and zweitstimmen per selected party for all wahlkreise"},
-    },
-    tags=["Wahlkreis"],
-    response_model_by_alias=True,
-)
-async def get_foreigners(
-    wahlid: StrictInt = Path(..., description=""),
-    parteiid: StrictInt = Path(..., description=""),
-) -> Auslaenderanteil:
-    return await BaseWahlkreisApi.get_foreigners(wahlid, parteiid, self=None)
-
-
-@router.get(
-    "/results/{wahlid}/income/{parteiid}/",
-    responses={
-        200: {"model": Einkommen, "description": "Returning the income and zweitstimmen per selected party for all wahlkreise"},
-    },
-    tags=["Wahlkreis"],
-    response_model_by_alias=True,
-)
-async def get_income(
-    wahlid: StrictInt = Path(..., description=""),
-    parteiid: StrictInt = Path(..., description=""),
-) -> Einkommen:
-    return await BaseWahlkreisApi.get_income(wahlid, parteiid, self=None)
