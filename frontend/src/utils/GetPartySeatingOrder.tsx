@@ -1,7 +1,7 @@
 import { Partei } from "../api";
 
 export function getPartySeatingOrder(parties: Partei[]) {
-    const shortNameSeatingOrder = ["DIE LINKE", "SSW", "SPD", "GRÜNE", "CDU", "CSU", "FDP", "AFD"]
+    const shortNameSeatingOrder = ["DIE LINKE", "SPD", "GRÜNE", "CDU", "CSU", "FDP", "AfD", "SSW"]
     const filteredParties = parties.filter((partei) => shortNameSeatingOrder.includes(partei.shortname ?? ""));
     const sortedFilteredParties = filteredParties.sort((a, b) => {
         const indexA = shortNameSeatingOrder.indexOf(a.shortname ?? "");

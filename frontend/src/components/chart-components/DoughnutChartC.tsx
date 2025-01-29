@@ -39,7 +39,12 @@ export default function DoughnutChart(props: { data?: ChartDataNum, fullCircle?:
         rotation: 270,
         cutout: '40%',
         layout: {
-            padding: 15
+            padding: {
+                left: 10,
+                right: 10,
+                top: 15,
+                bottom: 15
+            },
         },
         plugins: {
             legend: {
