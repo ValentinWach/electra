@@ -243,7 +243,7 @@ def main():
         create_tables()
         insert_data()
         
-        print("\nCreating materialized views...")
+        print("\nAggregating votes, calculating election results and creating relevant materialized views...")
         sql_files = [
             '../sitzverteilung/sitzverteilung-functions.sql',
             '../sitzverteilung/sitzverteilung-views.sql',
