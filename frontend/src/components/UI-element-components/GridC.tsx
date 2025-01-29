@@ -46,8 +46,8 @@ export default function GridC({ gridData, usePagination = true, pageSize = 10, c
 
             if (sortConfig.columnId !== null && sortConfig.direction !== null) {
                 data.sort((a, b) => {
-                    const aValue = a.values.find(col => col.column_id === sortConfig.columnId)?.value || "";
-                    const bValue = b.values.find(col => col.column_id === sortConfig.columnId)?.value || "";
+                    const aValue = a.values.find(col => col.column_id === sortConfig.columnId)?.value.replace(/\s+/g, '') || "";
+                    const bValue = b.values.find(col => col.column_id === sortConfig.columnId)?.value.replace(/\s+/g, '') || "";
 
                     if (sortConfig.direction === 'asc') {
                         return aValue.localeCompare(bValue, undefined, { numeric: true, sensitivity: 'base' });
