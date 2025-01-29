@@ -1,2 +1,2 @@
-export const resultPrefix = "/analyse";
+export const resultPrefix = "/ergebnisse";
 export const votePrefix = "/stimmabgabe";
