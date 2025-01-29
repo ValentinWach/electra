@@ -25,8 +25,6 @@ def parse_list_votes(session, Base, year):
         
 
         grouped_df = filtered_df.groupby(['Gebietsname', 'Gruppenname'])['Anzahl'].sum().reset_index()
-        print("Count of grouped_df:")
-        print(len(grouped_df))
         
         # Process the grouped DataFrame in chunks
         for chunk_start in range(0, len(grouped_df), chunk_size):
@@ -59,9 +57,8 @@ def parse_list_votes(session, Base, year):
             # Insert chunk directly into database using COPY
             if foreign_keys:
                 total_votes += len(foreign_keys)
-                print(f"Processing chunk {chunk_start//chunk_size + 1}, votes in chunk: {len(foreign_keys)}")
+                print(f"Streaming chunk into database {chunk_start//chunk_size + 1}, votes in chunk: {len(foreign_keys)}")
                 
-                # Create a buffer with the data
                 buffer = StringIO()
                 for wk_id, p_id, w_id in foreign_keys:
                     buffer.write(f"{wk_id}\t{p_id}\t{w_id}\n")
@@ -73,7 +70,7 @@ def parse_list_votes(session, Base, year):
                 session.commit()
                 buffer.close()
                 
-        print(f"Total votes processed: {total_votes}")
+        print(f"Total list votes processed for {year}: {total_votes}")
     except Exception as e:
         print(f"Error processing list votes for {year}: {str(e)}")
         session.rollback()

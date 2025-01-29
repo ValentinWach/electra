@@ -74,7 +74,6 @@ def parse_direct_votes(session, Base, year):
                 total_votes += len(wahlkreiskandidaturen_id)
                 print(f"Processing chunk {chunk_start//chunk_size + 1}, votes in chunk: {len(wahlkreiskandidaturen_id)}")
                 
-                # Create a buffer with the data
                 buffer = StringIO()
                 for id in wahlkreiskandidaturen_id:
                     buffer.write(f"{id}\n")
@@ -86,7 +85,7 @@ def parse_direct_votes(session, Base, year):
                 session.commit()
                 buffer.close()
                 
-        print(f"Total votes processed: {total_votes}")
+        print(f"Total direct votes processed for {year}: {total_votes}")
     except Exception as e:
         print(f"Error processing direct votes for {year}: {str(e)}")
         session.rollback()

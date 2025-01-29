@@ -4,12 +4,13 @@ from sqlalchemy import create_engine, Table, Column, Integer, MetaData, text
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 from pathlib import Path
+import multiprocessing as mp
+import platform
 from sqlalchemy.ext.automap import automap_base
 
 # Change to the script's directory
 os.chdir(Path(__file__).parent)
 
-# Import models
 import sys
 script_dir = Path(__file__).parent.parent.parent / 'src'
 sys.path.append(str(script_dir))
@@ -32,11 +33,8 @@ def drop_schema():
     print("Transaction 1: Dropping and recreating schema...")
     with engine.connect() as conn:
         with conn.begin():
-            # Drop schema if exists
             conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE"))
-            # Create new schema
             conn.execute(text("CREATE SCHEMA public"))
-            # Grant privileges to current user instead of hardcoded postgres
             conn.execute(text("GRANT ALL ON SCHEMA public TO CURRENT_USER"))
             conn.execute(text("GRANT ALL ON SCHEMA public TO public"))
 
@@ -45,9 +43,7 @@ def create_tables():
     print("Transaction 2: Creating tables without vote constraints/indexes...")
     with engine.connect() as conn:
         with conn.begin():
-            # Create all tables from models
             Base.metadata.create_all(bind=engine)
-            
             # Remove constraints and indexes for votes tables
             conn.execute(text("""
                 ALTER TABLE erststimmen DISABLE TRIGGER ALL;
@@ -61,14 +57,14 @@ def create_tables():
 
 def process_votes_for_year(year, database_url, vote_type):
     """Process either direct or list votes for a specific year with its own database connection"""
+    from parseDirectVotes import parse_direct_votes
+    from parseListVotes import parse_list_votes
+    
     engine = create_engine(database_url)
     Base = automap_base()
     Base.prepare(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
-    
-    from parseDirectVotes import parse_direct_votes
-    from parseListVotes import parse_list_votes
 
     try:
         print(f"\nProcessing {vote_type} votes for {year} in separate process...")
@@ -83,20 +79,27 @@ def process_votes_for_year(year, database_url, vote_type):
 
 def process_all_votes_parallel(database_url):
     """Process all votes (both years, both types) in parallel"""
-    import multiprocessing as mp
+    # Determine the appropriate start method based on the platform
+    if platform.system() == 'Darwin':  # macOS
+        mp.set_start_method('fork')
+    elif platform.system() == 'Windows':
+        mp.set_start_method('spawn')
+    else:  # Linux and others
+        mp.set_start_method('fork')
     
-    # Use 'spawn' context for Windows compatibility
-    ctx = mp.get_context('spawn')
     processes = []
+    combinations = [
+        ('2021', 'direct'),
+        ('2021', 'list'),
+        ('2017', 'direct'),
+        ('2017', 'list')
+    ]
     
-    # Start all vote processing combinations in parallel
-    for year in ['2021', '2017']:
-        for vote_type in ['direct', 'list']:
-            p = ctx.Process(target=process_votes_for_year, args=(year, database_url, vote_type))
-            processes.append(p)
-            p.start()
+    for year, vote_type in combinations:
+        p = mp.Process(target=process_votes_for_year, args=(year, database_url, vote_type))
+        processes.append(p)
+        p.start()
 
-    # Wait for all processes to complete
     for p in processes:
         p.join()
 
@@ -105,113 +108,109 @@ def insert_data():
     print("Transaction 3: Inserting data and rebuilding indexes/constraints...")
     session = Session()
 
-    # Insert Bundesländer and Wahlen data
-    bundeslaender_data = [
-        'Baden-Württemberg', 'Bayern', 'Berlin', 'Brandenburg', 'Bremen',
-        'Hamburg', 'Hessen', 'Mecklenburg-Vorpommern', 'Niedersachsen',
-        'Nordrhein-Westfalen', 'Rheinland-Pfalz', 'Saarland', 'Sachsen',
-        'Sachsen-Anhalt', 'Schleswig-Holstein', 'Thüringen'
-    ]
+    try:
+        bundeslaender_data = [
+            'Baden-Württemberg', 'Bayern', 'Berlin', 'Brandenburg', 'Bremen',
+            'Hamburg', 'Hessen', 'Mecklenburg-Vorpommern', 'Niedersachsen',
+            'Nordrhein-Westfalen', 'Rheinland-Pfalz', 'Saarland', 'Sachsen',
+            'Sachsen-Anhalt', 'Schleswig-Holstein', 'Thüringen'
+        ]
 
-    for name in bundeslaender_data:
-        bundesland = Bundesland(name=name)
-        session.add(bundesland)
+        for name in bundeslaender_data:
+            bundesland = Bundesland(name=name)
+            session.add(bundesland)
 
-    # Insert Wahlen
-    wahlen_data = ['2021-09-26', '2017-09-24']
-    for date_str in wahlen_data:
-        date = datetime.strptime(date_str, '%Y-%m-%d').date()
-        wahl = Wahl(date=date)
-        session.add(wahl)
+        wahlen_data = ['2021-09-26', '2017-09-24']
+        for date_str in wahlen_data:
+            date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            wahl = Wahl(date=date)
+            session.add(wahl)
 
-    session.commit()
+        session.commit()
 
-    # Insert einwohner_pro_bundesland_temp data
-    einwohner_data = [
-        (1, 9313413, 1), (1, 9365001, 2),
-        (2, 11328866, 1), (2, 11362245, 2),
-        (3, 2942960, 1), (3, 2975745, 2),
-        (4, 2391746, 2), (4, 2397701, 1),
-        (5, 548941, 1), (5, 568510, 2),
-        (6, 1525090, 2), (6, 1537766, 1),
-        (7, 5222158, 1), (7, 5281198, 2),
-        (8, 1548400, 2), (8, 1532412, 1),
-        (9, 7207587, 1), (9, 7278789, 2),
-        (10, 15707569, 2), (10, 15415642, 1),
-        (11, 3661245, 2), (11, 3610865, 1),
-        (12, 899748, 2), (12, 865191, 1),
-        (13, 3826905, 1), (13, 3914671, 2),
-        (14, 2145671, 2), (14, 2056177, 1),
-        (15, 2659792, 1), (15, 2673803, 2),
-        (16, 1996822, 1), (16, 2077901, 2)
-    ]
+        # Insert einwohner_pro_bundesland_temp data
+        einwohner_data = [
+            (1, 9313413, 1), (1, 9365001, 2),
+            (2, 11328866, 1), (2, 11362245, 2),
+            (3, 2942960, 1), (3, 2975745, 2),
+            (4, 2391746, 2), (4, 2397701, 1),
+            (5, 548941, 1), (5, 568510, 2),
+            (6, 1525090, 2), (6, 1537766, 1),
+            (7, 5222158, 1), (7, 5281198, 2),
+            (8, 1548400, 2), (8, 1532412, 1),
+            (9, 7207587, 1), (9, 7278789, 2),
+            (10, 15707569, 2), (10, 15415642, 1),
+            (11, 3661245, 2), (11, 3610865, 1),
+            (12, 899748, 2), (12, 865191, 1),
+            (13, 3826905, 1), (13, 3914671, 2),
+            (14, 2145671, 2), (14, 2056177, 1),
+            (15, 2659792, 1), (15, 2673803, 2),
+            (16, 1996822, 1), (16, 2077901, 2)
+        ]
 
-    for bundesland_id, einwohnerzahl, wahl_id in einwohner_data:
-        einwohner = einwohner_pro_bundesland_temp(
-            bundeslaender_id=bundesland_id,
-            einwohnerzahl=einwohnerzahl,
-            wahl_id=wahl_id
-        )
-        session.add(einwohner)
+        for bundesland_id, einwohnerzahl, wahl_id in einwohner_data:
+            einwohner = einwohner_pro_bundesland_temp(
+                bundeslaender_id=bundesland_id,
+                einwohnerzahl=einwohnerzahl,
+                wahl_id=wahl_id
+            )
+            session.add(einwohner)
 
-    session.commit()
+        session.commit()
 
-    # Import all parsing functions
-    from parseWahlkreise import parse_wahlkreise
-    from parseParties import parse_parties
-    from parseCandidates import parse_candidates
-    from parseDirectcandidacies import parse_directcandidacies
-    from parseListCandidacies import parse_listcandidacies
-    from parseStructuralData import parse_structural_data
+        from parseWahlkreise import parse_wahlkreise
+        from parseParties import parse_parties
+        from parseCandidates import parse_candidates
+        from parseDirectcandidacies import parse_directcandidacies
+        from parseListCandidacies import parse_listcandidacies
+        from parseStructuralData import parse_structural_data
 
-    # Run parsing functions in order
-    print("Running parseWahlkreise...")
-    parse_wahlkreise(session, Base)
+        print("Running parseWahlkreise...")
+        parse_wahlkreise(session, Base)
 
-    print("\nProcessing data for 2021 election...")
-    print("Parsing parties...")
-    parse_parties(session, Base, '2021')
-    print("Parsing candidates...")
-    parse_candidates(session, Base, '2021')
-    print("Parsing direct candidacies...")
-    parse_directcandidacies(session, Base, '2021')
-    print("Parsing list candidacies...")
-    parse_listcandidacies(session, Base, '2021')
+        print("\nProcessing data for 2021 election...")
+        print("Parsing parties...")
+        parse_parties(session, Base, '2021')
+        print("Parsing candidates...")
+        parse_candidates(session, Base, '2021')
+        print("Parsing direct candidacies...")
+        parse_directcandidacies(session, Base, '2021')
+        print("Parsing list candidacies...")
+        parse_listcandidacies(session, Base, '2021')
 
-    print("\nProcessing data for 2017 election...")
-    print("Parsing parties...")
-    parse_parties(session, Base, '2017')
-    print("Parsing candidates...")
-    parse_candidates(session, Base, '2017')
-    print("Parsing direct candidacies...")
-    parse_directcandidacies(session, Base, '2017')
-    print("Parsing list candidacies...")
-    parse_listcandidacies(session, Base, '2017')
+        print("\nProcessing data for 2017 election...")
+        print("Parsing parties...")
+        parse_parties(session, Base, '2017')
+        print("Parsing candidates...")
+        parse_candidates(session, Base, '2017')
+        print("Parsing direct candidacies...")
+        parse_directcandidacies(session, Base, '2017')
+        print("Parsing list candidacies...")
+        parse_listcandidacies(session, Base, '2017')
 
-    print("\nRunning parseStructuralData...")
-    parse_structural_data(session, Base)
+        print("\nRunning parseStructuralData...")
+        parse_structural_data(session, Base)
 
-    print("\nProcessing all votes in parallel...")
-    if __name__ == '__main__':
+        print("\nProcessing all votes in parallel...")
         process_all_votes_parallel(DATABASE_URL)
 
-    # Rebuild indexes and constraints for votes tables
-    print("\nRebuilding indexes and constraints for votes tables...")
-    with session.connection().connection.cursor() as cursor:
-        cursor.execute("""
-            ALTER TABLE erststimmen ENABLE TRIGGER ALL;
-            ALTER TABLE zweitstimmen ENABLE TRIGGER ALL;
-        """)
+        print("\nRebuilding indexes and constraints for votes tables...")
+        with session.connection().connection.cursor() as cursor:
+            cursor.execute("""
+                ALTER TABLE erststimmen ENABLE TRIGGER ALL;
+                ALTER TABLE zweitstimmen ENABLE TRIGGER ALL;
+            """)
 
-    print("Committing changes...")
-    session.commit()
-    session.close()
+        print("Committing changes...")
+        session.commit()
+    finally:
+        session.close()
 
 def main():
-    drop_schema()
-    create_tables()
-    insert_data()
-    print("\nDatabase setup completed successfully!")
+    if __name__ == '__main__':
+        drop_schema()
+        create_tables()
+        insert_data()
+        print("\nDatabase setup completed successfully!")
 
-if __name__ == "__main__":
-    main()
+main()
