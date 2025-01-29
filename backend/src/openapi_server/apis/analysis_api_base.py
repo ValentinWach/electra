@@ -47,18 +47,24 @@ class BaseAnalysisApi:
                 if only_abgeordnete:
 
                     berufsgruppen_query = text('''
-                        WITH total AS (
+                       WITH total AS (
                             SELECT COUNT(a.kandidat_id) AS total_candidates
                             FROM abgeordnete a
                             WHERE a.wahl_id = :wahlId AND a.partei_id = :parteiId
+                        ),
+                        joined_candidates AS (
+                            SELECT k.id, k.profession_key
+                            FROM kandidaten k
+                            JOIN abgeordnete a ON k.id = a.kandidat_id
+                            WHERE a.wahl_id = :wahlId AND a.partei_id = :parteiId
                         )
-                        SELECT bk.id, bk.name,
-                               COUNT(DISTINCT k.id) AS absolute,
-                               ROUND((COUNT(DISTINCT k.id) * 100.0) / (SELECT total_candidates FROM total), 2) AS share
-                        FROM kandidaten k
-                        JOIN berufskategorien bk ON k.profession_key = bk.id
-                        JOIN abgeordnete a ON k.id = a.kandidat_id
-                        WHERE a.wahl_id = :wahlId AND a.partei_id = :parteiId
+                        SELECT
+                            bk.id,
+                            bk.name,
+                            COALESCE(COUNT(DISTINCT jc.id), 0) AS absolute,
+                            COALESCE(ROUND((COUNT(DISTINCT jc.id) * 100.0) / NULLIF((SELECT total_candidates FROM total), 0), 2), 0.0) AS share
+                        FROM berufskategorien bk
+                        LEFT JOIN joined_candidates jc ON bk.id = jc.profession_key
                         GROUP BY bk.id, bk.name;
                     ''')
                 else:
@@ -70,18 +76,24 @@ class BaseAnalysisApi:
                                 UNION
                                 SELECT kandidat_id FROM wahlkreiskandidaturen WHERE wahl_id = :wahlId AND partei_id = :parteiId
                             ) combined
+                        ),
+                        joined_candidates AS (
+                            SELECT k.id, k.profession_key
+                            FROM kandidaten k
+                            JOIN (
+                                SELECT kandidat_id FROM listenkandidaturen WHERE wahl_id = :wahlId AND partei_id = :parteiId
+                                UNION
+                                SELECT kandidat_id FROM wahlkreiskandidaturen WHERE wahl_id = :wahlId AND partei_id = :parteiId
+                            ) combined ON k.id = combined.kandidat_id
                         )
-                        SELECT bk.id, bk.name,
-                               COUNT(DISTINCT k.id) AS absolute,
-                               ROUND((COUNT(DISTINCT k.id) * 100.0) / (SELECT total_candidates FROM total), 2) AS share
-                        FROM kandidaten k
-                        JOIN berufskategorien bk ON k.profession_key = bk.id
-                        JOIN (
-                            SELECT kandidat_id FROM listenkandidaturen WHERE wahl_id = :wahlId AND partei_id = :parteiId
-                            UNION
-                            SELECT kandidat_id FROM wahlkreiskandidaturen WHERE wahl_id = :wahlId AND partei_id = :parteiId
-                        ) combined ON k.id = combined.kandidat_id
-                        GROUP BY bk.id, bk.name; 
+                        SELECT
+                            bk.id,
+                            bk.name,
+                            COALESCE(COUNT(DISTINCT jc.id), 0) AS absolute,
+                            COALESCE(ROUND((COUNT(DISTINCT jc.id) * 100.0) / NULLIF((SELECT total_candidates FROM total), 0), 2), 0.0) AS share
+                        FROM berufskategorien bk
+                        LEFT JOIN joined_candidates jc ON bk.id = jc.profession_key
+                        GROUP BY bk.id, bk.name;
                                         ''')
 
                 berufsgruppen_results = db.execute(
