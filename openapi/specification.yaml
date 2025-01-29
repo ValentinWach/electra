@@ -828,13 +828,13 @@ components:
             - id
             - name
             - share
-          properties:
-            id:
-              type: integer
-              title: Id
-            name:
-              type: string
-              title: Name
-            share:
-              type: number
-              title: Share
+            properties:
+              id:
+                type: integer
+                title: Id
+              name:
+                type: string
+                title: Name
+              share:
+                type: number
+                title: Share
