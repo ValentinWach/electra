@@ -1,0 +1,35 @@
+Unsere Implementierung des Sitzverteilungsalgorithmus basiert auf dem Fünfundzwanzigsten Gesetz zur Änderung des Bundeswahlgesetzes (BWG)
+vom 14. November 2020.
+
+Musterberechnungen der Sitzverteilungen mit diesem Verfahren für die Wahlen 2017 und 2021 können unter folgenden Links eingesehen werden:
+https://www.bundeswahlleiterin.de/dam/jcr/05c1185a-173f-4bab-80d6-51027c94b1bc/bwg2021_mustersitzberechnung_ergebnis2017.pdf
+https://www.bundeswahlleiterin.de/dam/jcr/bf33c285-ee92-455a-a9c3-8d4e3a1ee4b4/btw21_sitzberechnung.pdf
+
+Dabei ist zu beachten, dass die Musterberechnung für 2021 die Wiederholungswahl in Teilen Berlins nicht einschließt, im Zuge derer die FDP einen Sitz im Bundestag verlor.
+
+Um schnelle Zugriffe auf unsere API-Endpunkte zu gewährleisten, nutzt unsere Implementierung der Sitzplatzberechnung materialized views um Zwischen- und Endergebnisse zu speichern.
+Die Definitionen dieser Relationen sind unter /backend/database-tools/sitzverteilung/sitzverteilung-views.sql abgelegt.
+
+Weiterhin nutzen wir Postgres Funktionen, um gewisse Teilberechnungen der Sitzplatzberechnung zu realisieren.
+Diese können unter /backend/database-tools/sitzverteilung/sitzverteilung-functions.sql gefunden werden.
+
+Um das für die Sitzberechnung zentrale Sainte-Laguë-Verfahren zu implementieren haben wir uns für die Auszählung des Höchstzahlenschemas entschieden.
+Das Höchstzahlverfahren teilt die als Input gegebenen Stimmen oder Bevölkerungszahlen schrittweise durch eine Reihe von steigenden Divisoren und ermittelt die höchsten resultierenden Werte.
+Die zu verteilenden Sitze werden dann der Reihe nach an die Parteien mit den größten Zahlen zugewiesen, bis alle Sitze verteilt sind.
+
+Die Implementierung dieses Verfahrens bilden die Funktionen sainte_lague_table() und sainte_lague(). Während sainte_lague_table() die Tabelle der aus den Divisionen entstehenden Werte berechnet, führt sainte_lague() die Ermittlung der höchsten Werte durch.
+
+Mit Hilfe, dieser Funktionen kann so in einem ersten Schritt die erste Oberverteilung, repräsentiert durch die view ov_1_sitzkontingente_bundesleander, berechnet werden.
+
+Anschließend wird die erste Unterverteilung, welche Sitzkontingente der Länder auf Landeslisten der Parteien verteilt berechnet und in der Relation uv_1_sitzkontingente_landeslisten abgelegt.
+Die Berechnung dieser Unterverteilung ist durch die Funktion calculate_seats_per_party_per_bundesland_and_election() realisiert.
+
+
+
+
+
+
+
+
+
+

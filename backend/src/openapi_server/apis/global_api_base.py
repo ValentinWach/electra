@@ -151,7 +151,7 @@ class BaseGlobalApi:
             raise HTTPException(status_code=500, detail=str(e))
 
 
-    async def get_stimmanteil_zweitstimmmen(
+    async def get_stimmanteil_zweitstimmen(
         wahlId: StrictInt,
         self,
     ) -> List[Stimmanteil]:

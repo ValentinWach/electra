@@ -105,7 +105,7 @@ async def get_stimmanteil_zweitstimmen(
 async def get_stimmanteil_erstimmen(
     wahlid: StrictInt = Path(..., description=""),
 ) -> List[Stimmanteil]:
-    return await BaseGlobalApi.get_stimmanteil_erstimmen(wahlid, self=None)
+    return await BaseGlobalApi.get_stimmanteil_erststimmen(wahlid, self=None)
 
 @router.get(
     "/results/{wahlid}/ueberhang/{parteiid}",
