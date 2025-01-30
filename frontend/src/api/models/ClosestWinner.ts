@@ -46,6 +46,12 @@ export interface ClosestWinner {
      * @memberof ClosestWinner
      */
     wahlkreis: Wahlkreis;
+    /**
+     * 
+     * @type {number}
+     * @memberof ClosestWinner
+     */
+    margin?: number;
 }
 
 /**
@@ -69,6 +75,7 @@ export function ClosestWinnerFromJSONTyped(json: any, ignoreDiscriminator: boole
         
         'abgeordneter': AbgeordneterFromJSON(json['abgeordneter']),
         'wahlkreis': WahlkreisFromJSON(json['wahlkreis']),
+        'margin': json['margin'] == null ? undefined : json['margin'],
     };
 }
 
@@ -85,6 +92,7 @@ export function ClosestWinnerToJSONTyped(value?: ClosestWinner | null, ignoreDis
         
         'abgeordneter': AbgeordneterToJSON(value['abgeordneter']),
         'wahlkreis': WahlkreisToJSON(value['wahlkreis']),
+        'margin': value['margin'],
     };
 }
 

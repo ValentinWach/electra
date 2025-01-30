@@ -26,7 +26,7 @@ import {
 } from '../models/index';
 
 export interface BatchVoteRequest {
-    file?: Blob;
+    file: Blob;
 }
 
 export interface GenerateTokenRequest {
@@ -44,6 +44,13 @@ export class AdminApi extends runtime.BaseAPI {
      * Accepts a CSV file for batch voting.
      */
     async batchVoteRaw(requestParameters: BatchVoteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['file'] == null) {
+            throw new runtime.RequiredError(
+                'file',
+                'Required parameter "file" was null or undefined when calling batchVote().'
+            );
+        }
+
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -82,7 +89,7 @@ export class AdminApi extends runtime.BaseAPI {
     /**
      * Accepts a CSV file for batch voting.
      */
-    async batchVote(requestParameters: BatchVoteRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+    async batchVote(requestParameters: BatchVoteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.batchVoteRaw(requestParameters, initOverrides);
     }
 

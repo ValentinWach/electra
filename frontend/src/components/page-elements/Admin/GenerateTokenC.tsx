@@ -79,7 +79,7 @@ export default function GenerateTokenC() {
     const formatReturnedTokens = (tokens: Token[]): string => tokens.map(token => `${token.idNumber}: ${token.token}`).join('\n');
 
     return (
-        <div className="flex flex-col gap-4 w-1/2">
+        <div className="flex flex-col gap-4 w-3/4 2xl:w-[60%]">
             <h1 className="text-2xl font-bold">Wahltokengenerierung</h1>
             <div className="flex flex-row gap-2">
                 <DropdownC dropdownData={dropdownData} dropDownFunction={handleElectionSelect} />
@@ -90,7 +90,7 @@ export default function GenerateTokenC() {
             {isLoading && <div className="flex flex-col w-full -mt-5">
                 <ProgressLoaderFullWidthC />
             </div>}
-            <PrimaryButtonC disabled={idNumbers == "" || selectedElection == null || selectedWahlkreisId == null} label="Wahltokens generieren" size="md" onClick={() => handleGenerateTokens(idNumbers)} />
+            <PrimaryButtonC width="w-52" disabled={idNumbers == "" || selectedElection == null || selectedWahlkreisId == null} label="Wahltokens generieren" size="md" onClick={() => handleGenerateTokens(idNumbers)} />
         </div>
     );
 }

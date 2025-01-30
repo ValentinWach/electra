@@ -37,7 +37,7 @@ export default function Parteien() {
     return (
         <>
             <BundestagsparteienC showParteiDetails={showParteiDetails}/>
-            <AngetreteneParteienC/>
+            <AngetreteneParteienC showParteiDetails={showParteiDetails}/>
         </>
     )
 }

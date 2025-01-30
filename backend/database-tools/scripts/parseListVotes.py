@@ -57,7 +57,7 @@ def parse_list_votes(session, Base, year):
             # Insert chunk directly into database using COPY
             if foreign_keys:
                 total_votes += len(foreign_keys)
-                print(f"Streaming chunk into database {chunk_start//chunk_size + 1}, votes in chunk: {len(foreign_keys)}")
+                print(f"Streaming chunk {chunk_start//chunk_size + 1} into database, votes in chunk: {len(foreign_keys)}")
                 
                 buffer = StringIO()
                 for wk_id, p_id, w_id in foreign_keys:

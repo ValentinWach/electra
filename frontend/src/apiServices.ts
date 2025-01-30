@@ -389,3 +389,14 @@ export async function recalculateResults(): Promise<boolean> {
         return false;
     }
 }
+
+export async function batchUpload(file: File): Promise<boolean> {
+    const adminApi = new AdminApi();
+    try {
+        await adminApi.batchVote({ file });
+        return true;
+    } catch (error) {
+        console.error('Error batch uploading votes:', error);
+        return false;
+    }
+}

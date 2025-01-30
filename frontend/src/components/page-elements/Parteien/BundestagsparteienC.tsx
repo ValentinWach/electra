@@ -12,14 +12,14 @@ export default function BundestagsparteienC({showParteiDetails}: {showParteiDeta
         loading={showLoader}
         gridData={{
             columns: [
-                {id: 1, label: 'Name', searchable: false},
-                {id: 2, label: 'Kurzname', searchable: false}
+                {id: 1, label: 'Kurzname', searchable: false},
+                {id: 2, label: 'Name', searchable: false}
             ],
             rows: parteien?.map(partei => ({
                 key: partei.id,
                 values: [
-                    {column_id: 1, value: partei.name ?? ''},
-                    {column_id: 2, value: partei.shortname ?? '', badge: {color: getPartyColor(partei.shortname, false)}}
+                    {column_id: 1, value: partei.shortname ?? '', badge: {color: getPartyColor(partei.shortname, false)}},
+                    {column_id: 2, value: partei.name ?? ''}
                 ]
             })) ?? []
         }}

@@ -17,7 +17,7 @@ export default function RecalculateResultsC() {
     }
 
     return (
-        <div className="flex flex-col gap-4 w-1/2">
+        <div className="flex flex-col gap-4 w-3/4 2xl:w-[60%]">
             <h1 className="text-2xl font-bold">Wahladministration</h1>
             <div className="flex flex-col w-full">
                 { isLoading ?

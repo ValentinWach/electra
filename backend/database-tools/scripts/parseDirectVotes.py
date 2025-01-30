@@ -72,7 +72,7 @@ def parse_direct_votes(session, Base, year):
             # Insert chunk directly into database using COPY
             if wahlkreiskandidaturen_id:
                 total_votes += len(wahlkreiskandidaturen_id)
-                print(f"Processing chunk {chunk_start//chunk_size + 1}, votes in chunk: {len(wahlkreiskandidaturen_id)}")
+                print(f"Streaming chunk {chunk_start//chunk_size + 1} into database, votes in chunk: {len(wahlkreiskandidaturen_id)}")
                 
                 buffer = StringIO()
                 for id in wahlkreiskandidaturen_id:

@@ -4,8 +4,6 @@ import { useElection } from "../../../context/ElectionContext.tsx";
 import GridC from "../../UI-element-components/GridC.tsx";
 import { ContentTileConfig } from "../../../models/GridData.ts";
 import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
-import { AlertType } from "../../../models/AlertData.ts";
-import AlertC from "../../UI-element-components/AlertC.tsx";
 
 export default function ClosestWinnersC({ fetchClostestWinners }: {
     fetchClostestWinners: (id: number) => Promise<ClosestWinners>
@@ -47,40 +45,35 @@ export default function ClosestWinnersC({ fetchClostestWinners }: {
                 usePagination={false}
             />
         ) : (
-            closestWinners?.closestWinners?.length != null && closestWinners?.closestWinners?.length > 0 ? (
-                <GridC
-                    loading={showLoader}
-                    gridData={{
-                        columns: [
-                            { id: 1, label: 'Name', searchable: false },
-                            { id: 2, label: 'Vorname', searchable: false },
-                            { id: 3, label: 'Beruf', searchable: false },
-                            { id: 4, label: 'Geburtsjahr', searchable: false },
-                            { id: 5, label: 'Wahlkreisname', searchable: false }
-                        ],
-                        rows: closestWinners?.closestWinners?.map(winner => ({
-                            key: winner.abgeordneter.id,
-                            values: [
-                                { column_id: 1, value: winner.abgeordneter.name },
-                                { column_id: 2, value: winner.abgeordneter.firstname },
-                                { column_id: 3, value: winner.abgeordneter.profession ?? '' },
-                                { column_id: 4, value: winner.abgeordneter.yearOfBirth?.toString() ?? '' },
-                                { column_id: 5, value: winner.wahlkreis.name }
-                            ]
-                        })) ?? []
-                    }}
-                    contentTileConfig={new ContentTileConfig(
-                        closestWinners?.closestType === "Winner" ? "Knappste Sieger" : "Knappste Verlierer",
-                        true
-                    )}
-                    usePagination={false}
-                />
-            ) : (
-                <AlertC alertData={{
-                    message: "Daten nur für Bundestagsparteien verfügbar.",
-                    type: AlertType.warning
-                }} />
-            )
+            <GridC
+                loading={showLoader}
+                gridData={{
+                    columns: [
+                        { id: 1, label: 'Name', searchable: false },
+                        { id: 2, label: 'Vorname', searchable: false },
+                        { id: 3, label: 'Beruf', searchable: false },
+                        { id: 4, label: 'Geburtsjahr', searchable: false },
+                        { id: 5, label: 'Wahlkreisname', searchable: false },
+                        { id: 6, label: `${closestWinners?.closestType === "Winner" ? "Vorsprung" : "Rückstand"}`, searchable: false }
+                    ],
+                    rows: closestWinners?.closestWinners?.map(winner => ({
+                        key: winner.abgeordneter.id,
+                        values: [
+                            { column_id: 1, value: winner.abgeordneter.name },
+                            { column_id: 2, value: winner.abgeordneter.firstname },
+                            { column_id: 3, value: winner.abgeordneter.profession ?? '' },
+                            { column_id: 4, value: winner.abgeordneter.yearOfBirth?.toString() ?? '' },
+                            { column_id: 5, value: winner.wahlkreis.name },
+                            { column_id: 6, value: winner.margin?.toString() ?? '' }
+                        ]
+                    })) ?? []
+                }}
+                contentTileConfig={new ContentTileConfig(
+                    closestWinners?.closestType === "Winner" ? "Knappste Sieger" : "Knappste Verlierer",
+                    true
+                )}
+                usePagination={false}
+            />
         )
     )
 }
