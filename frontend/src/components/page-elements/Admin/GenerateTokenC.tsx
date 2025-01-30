@@ -88,6 +88,26 @@ export default function GenerateTokenC() {
 
     const formatReturnedTokens = (tokens: Token[]): string => tokens.map(token => `${token.idNumber}: ${token.token}`).join('\n');
 
+    const handleExportCSV = () => {
+        if (!generatedTokens) return;
+        
+        const csvContent = '\uFEFF' + [
+            'Ausweisnummer,Token',
+            ...generatedTokens.map(token => `${token.idNumber},${token.token}`)
+        ].join('\r\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'wahltoken.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="flex flex-col gap-4 w-3/4 2xl:w-[60%]">
             <h1 className="text-2xl font-bold">Wahltokengenerierung</h1>
@@ -104,7 +124,10 @@ export default function GenerateTokenC() {
                 message: `Fehler beim Generieren der Wahltokens. Haben Sie eine gültige Wahlkreisnummer eingegeben?`,
                 type: AlertType.error
             }} />}
-            <PrimaryButtonC width="w-52" disabled={idNumbers == "" || selectedElection == null || selectedWahlkreisId == null} label="Wahltokens generieren" size="md" onClick={() => handleGenerateTokens(idNumbers)} />
+            <div className="flex flex-row gap-4">
+                <PrimaryButtonC width="w-52" disabled={idNumbers == "" || selectedElection == null || selectedWahlkreisId == null} label="Wahltokens generieren" size="md" onClick={() => handleGenerateTokens(idNumbers)} />
+                <PrimaryButtonC width="w-52" disabled={!generatedTokens} label="Als CSV exportieren" size="md" onClick={handleExportCSV} />
+            </div>
         </div>
     );
 }
