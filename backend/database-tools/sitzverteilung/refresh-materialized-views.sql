@@ -5,9 +5,9 @@ BEGIN;
 REFRESH MATERIALIZED VIEW zweitstimmen_wahlkreis_partei;
 REFRESH MATERIALIZED VIEW zweitstimmen_bundesland_partei;
 REFRESH MATERIALIZED VIEW zweitstimmen_partei;
-REFRESH MATERIALIZED VIEW erstimmen_wahlkreis_partei_kandidat;
-REFRESH MATERIALIZED VIEW erstimmen_wahlkreis_partei;
-REFRESH MATERIALIZED VIEW erstimmen_partei;
+REFRESH MATERIALIZED VIEW erststimmen_wahlkreis_partei_kandidat;
+REFRESH MATERIALIZED VIEW erststimmen_wahlkreis_partei;
+REFRESH MATERIALIZED VIEW erststimmen_partei;
 REFRESH MATERIALIZED VIEW wahlkreis_winners;
 REFRESH MATERIALIZED VIEW wahlkreis_knappste_sieger;
 
