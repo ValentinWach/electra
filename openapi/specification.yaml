@@ -524,11 +524,14 @@ paths:
           multipart/form-data:
             schema:
               type: object
+              required:
+                - file
               properties:
                 file:
                   type: string
                   format: binary
                   description: A CSV file with the columns `wahl_id`, `wahlkreis_id`, `direktkandidat_id`, `partei_id`.
+      
       responses:
         '200':
           description: Batch voting successfully processed.
@@ -771,6 +774,9 @@ components:
                 $ref: '#/components/schemas/Abgeordneter'
               wahlkreis:
                 $ref: '#/components/schemas/Wahlkreis'
+              margin:
+                type: number
+                title: Margin
 
     Auslaenderanteil:
       type: object
