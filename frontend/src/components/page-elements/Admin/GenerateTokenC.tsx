@@ -7,6 +7,8 @@ import { DropdownData } from "../../../models/DropDownData";
 import DropdownC from "../../UI-element-components/DropdownC";
 import TextInputC from "../../UI-element-components/TextInputC";
 import ProgressLoaderFullWidthC from "../_shared/ProgressLoaderFullWidthC";
+import AlertC from "../../UI-element-components/AlertC";
+import { AlertType } from "../../../models/AlertData";
 
 export default function GenerateTokenC() {
 
@@ -16,6 +18,7 @@ export default function GenerateTokenC() {
     const [selectedWahlkreisId, setSelectedWahlkreisId] = useState<number | null>(null);
     const [idNumbers, setIdNumbers] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isError, setIsError] = useState<boolean>(false);
 
     const defaultDD: DropdownData = {
         items: elections?.map(election => ({
@@ -44,12 +47,19 @@ export default function GenerateTokenC() {
 
     const handleGenerateTokens = async (idNumbers: string) => {
         if (selectedElection != null && selectedWahlkreisId != null) {
-            setIsLoading(true);
-            setGeneratedTokens(null);
-            const idNumbersArray = idNumbers.split(',').map((id: string) => id.replace(/\s+/g, '').trim());
-            const tokens = await generateTokens(idNumbersArray.length, idNumbersArray, selectedElection?.id ?? 1, selectedWahlkreisId ?? 1);
-            setIsLoading(false);
-            setGeneratedTokens(tokens);
+            try {
+                setIsLoading(true);
+                setGeneratedTokens(null);
+                const idNumbersArray = idNumbers.split(',').map((id: string) => id.replace(/\s+/g, '').trim());
+                const tokens = await generateTokens(idNumbersArray.length, idNumbersArray, selectedElection?.id ?? 1, selectedWahlkreisId ?? 1);
+                setIsLoading(false);
+                setGeneratedTokens(tokens);
+                setIsError(false);
+            } catch (error) {
+                console.error('Error generating tokens:', error);
+                setIsLoading(false);
+                setIsError(true);
+            }
         }
     }
 
@@ -90,6 +100,10 @@ export default function GenerateTokenC() {
             {isLoading && <div className="flex flex-col w-full -mt-5">
                 <ProgressLoaderFullWidthC />
             </div>}
+            {isError && <AlertC alertData={{
+                message: `Fehler beim Generieren der Wahltokens. Haben Sie eine gültige Wahlkreisnummer eingegeben?`,
+                type: AlertType.error
+            }} />}
             <PrimaryButtonC width="w-52" disabled={idNumbers == "" || selectedElection == null || selectedWahlkreisId == null} label="Wahltokens generieren" size="md" onClick={() => handleGenerateTokens(idNumbers)} />
         </div>
     );

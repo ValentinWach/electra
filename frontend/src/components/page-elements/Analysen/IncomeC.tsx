@@ -31,7 +31,7 @@ export default function IncomeC({parteien} : {parteien: Partei[]}) {
                     labels: data.wahlkreise.map(w => `WK ${w.wahlkreisId}: ${w.wahlkreisName}`),
                     datasets: [{
                         data: data.wahlkreise
-                            .filter(w => w.stimmanteil !== undefined && w.stimmanteil > 0)
+                            .filter(w => w.stimmanteil !== undefined && w.stimmanteil > 0).sort((a, b) => a.einkommen - b.einkommen)
                             .map(w => ({x: w.einkommen, y: w.stimmanteil!, r: 2.5})),
                         backgroundColor: [getPartyColor(parteien.find(p => p.id === selectedParteiId)?.shortname ?? '')],
                     }]

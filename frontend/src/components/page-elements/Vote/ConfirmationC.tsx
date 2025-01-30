@@ -16,7 +16,7 @@ export default function ConfirmationC() {
     const navigate = useNavigate();
     const [showFinalWarning, setShowFinalWarning] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
-    const { wahlkreis, selectedDirectCandidate, selectedParty, token, idNumber, resetVoting } = useVote();
+    const { wahlkreis, selectedDirectCandidate, selectedParty, token, idNumber, resetVoting, wahl } = useVote();
     const [submitVoteError, setSubmitVoteError] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 

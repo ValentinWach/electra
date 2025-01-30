@@ -30,7 +30,7 @@ export default function ForeignerShareC({parteien} : {parteien: Partei[]}) {
                     labels: data.wahlkreise.map(w => `WK ${w.wahlkreisId}: ${w.wahlkreisName}`),
                     datasets: [{
                         data: data.wahlkreise
-                            .filter(w => w.stimmanteil !== undefined && w.stimmanteil > 0)
+                            .filter(w => w.stimmanteil !== undefined && w.stimmanteil > 0).sort((a, b) => a.auslaenderanteil - b.auslaenderanteil)
                             .map(w => ({x: w.auslaenderanteil, y: w.stimmanteil!, r: 2.5})),
                         backgroundColor: [getPartyColor(parteien.find(p => p.id === selectedParteiId)?.shortname ?? '')],
                     }]

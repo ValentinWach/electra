@@ -7,7 +7,7 @@ import { useEffect } from "react";
 
 
 export default function ChooseParty() {
-    const { wahlkreis, parties, candidates, selectedDirectCandidate, selectedParty, token, resetVoting } = useVote();
+    const { wahlkreis, parties, candidates, selectedDirectCandidate, selectedParty, token, resetVoting, wahl } = useVote();
     const navigate = useNavigate();
     const handleGoToStimmabgabe = () => {
         navigate(`${votePrefix}/bestaetigung`);
@@ -21,7 +21,7 @@ export default function ChooseParty() {
     
     return (
         <div className="flex flex-col justify-start items-end">
-            <WahlzettelC wahlkreis={wahlkreis} directCandidates={candidates} parties={parties?.parteien} />
+            <WahlzettelC wahlkreis={wahlkreis} wahl={wahl} directCandidates={candidates} parties={parties?.parteien} />
             <button
                     type="button"
                     onClick={handleGoToStimmabgabe}

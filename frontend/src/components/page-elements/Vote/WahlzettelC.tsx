@@ -1,8 +1,8 @@
-import { Abgeordneter } from "../../../api";
+import { Abgeordneter, Wahl } from "../../../api";
 import { Wahlkreis, WahlzettelParteiWrapper } from "../../../api";
 import { useVote } from "../../../context/VoteContext";
 
-export default function WahlzettelC({ wahlkreis, directCandidates, parties, checkMode = false }: { checkMode?: boolean, wahlkreis?: Wahlkreis, directCandidates?: Abgeordneter[], parties?: WahlzettelParteiWrapper[] }) {
+export default function WahlzettelC({ wahlkreis, wahl, directCandidates, parties, checkMode = false }: { checkMode?: boolean, wahlkreis?: Wahlkreis, wahl?: Wahl, directCandidates?: Abgeordneter[], parties?: WahlzettelParteiWrapper[] }) {
 
     const { selectedDirectCandidate, selectedParty, setSelectedDirectCandidate: setDirectCandidate, setSelectedParty: setParty } = useVote();
 
@@ -23,6 +23,7 @@ export default function WahlzettelC({ wahlkreis, directCandidates, parties, chec
                     >
                         Auswahl löschen
                     </button>}
+                    {wahl && <h1 className="font-bold text-4xl pb-10 text-center w-[1000px]">{`Bundestagswahl ${wahl?.date.getFullYear()}`}</h1>}  
                     <h2 className="font-bold text-3xl pb-10 text-center w-[1000px]">{checkMode ? ( "Dies sind Ihre 2 Stimmen.") : "Sie haben 2 Stimmen"} </h2>
                     <h2 className="font-bold text-lg pb-10 text-center w-[1000px]">Ihr Wahlkreis: {wahlkreis.id} {wahlkreis.name}</h2>
                     <div className="flex flex-row items-start justify-start gap-10 bg-[#f5f5f0] pb-5">
