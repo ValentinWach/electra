@@ -123,7 +123,7 @@ paths:
 
   /results/{wahlid}/stimmanteil/zweitstimmen:
     get:
-      operationId: getZweistimmanteile
+      operationId: getZweitstimmen
       parameters:
         - $ref: '#/components/parameters/wahlid'
       tags:
@@ -141,7 +141,7 @@ paths:
 
   /results/{wahlid}/stimmanteil/zweitstimmen/wahlkreis/{wahlkreisid}:
     get:
-      operationId: getErststimmanteile
+      operationId: getZweitstimmenWahlkreis
       parameters:
         - $ref: '#/components/parameters/wahlid'
         - $ref: '#/components/parameters/wahlkreisid'
@@ -161,7 +161,7 @@ paths:
 
   /results/{wahlid}/stimmanteil/erststimmen:
     get:
-      operationId: getStimmanteil
+      operationId: getErststimmen
       parameters:
         - $ref: '#/components/parameters/wahlid'
       tags:
@@ -179,7 +179,7 @@ paths:
 
   /results/{wahlid}/stimmanteil/erststimmen/wahlkreis/{wahlkreisid}:
     get:
-      operationId: getStimmanteilWahlkreis
+      operationId: getErststimmenWahlkreis
       parameters:
         - $ref: '#/components/parameters/wahlid'
         - $ref: '#/components/parameters/wahlkreisid'
