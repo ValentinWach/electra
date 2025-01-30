@@ -43,17 +43,21 @@ export interface GetClosestWinnersRequest {
     parteiid: number;
 }
 
-export interface GetSitzverteilungRequest {
+export interface GetErststimmenRequest {
     wahlid: number;
 }
 
-export interface GetStimmanteilRequest {
+export interface GetSitzverteilungRequest {
     wahlid: number;
 }
 
 export interface GetUeberhangRequest {
     wahlid: number;
     parteiid: number;
+}
+
+export interface GetZweitstimmenRequest {
+    wahlid: number;
 }
 
 /**
@@ -132,6 +136,37 @@ export class GlobalApi extends runtime.BaseAPI {
 
     /**
      */
+    async getErststimmenRaw(requestParameters: GetErststimmenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Stimmanteil>>> {
+        if (requestParameters['wahlid'] == null) {
+            throw new runtime.RequiredError(
+                'wahlid',
+                'Required parameter "wahlid" was null or undefined when calling getErststimmen().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/results/{wahlid}/stimmanteil/erststimmen`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(StimmanteilFromJSON));
+    }
+
+    /**
+     */
+    async getErststimmen(requestParameters: GetErststimmenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Stimmanteil>> {
+        const response = await this.getErststimmenRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
     async getSitzverteilungRaw(requestParameters: GetSitzverteilungRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SeatDistribution>> {
         if (requestParameters['wahlid'] == null) {
             throw new runtime.RequiredError(
@@ -158,37 +193,6 @@ export class GlobalApi extends runtime.BaseAPI {
      */
     async getSitzverteilung(requestParameters: GetSitzverteilungRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SeatDistribution> {
         const response = await this.getSitzverteilungRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     */
-    async getStimmanteilRaw(requestParameters: GetStimmanteilRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Stimmanteil>>> {
-        if (requestParameters['wahlid'] == null) {
-            throw new runtime.RequiredError(
-                'wahlid',
-                'Required parameter "wahlid" was null or undefined when calling getStimmanteil().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/results/{wahlid}/stimmanteil`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(StimmanteilFromJSON));
-    }
-
-    /**
-     */
-    async getStimmanteil(requestParameters: GetStimmanteilRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Stimmanteil>> {
-        const response = await this.getStimmanteilRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -227,6 +231,37 @@ export class GlobalApi extends runtime.BaseAPI {
      */
     async getUeberhang(requestParameters: GetUeberhangRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Ueberhang> {
         const response = await this.getUeberhangRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getZweitstimmenRaw(requestParameters: GetZweitstimmenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Stimmanteil>>> {
+        if (requestParameters['wahlid'] == null) {
+            throw new runtime.RequiredError(
+                'wahlid',
+                'Required parameter "wahlid" was null or undefined when calling getZweitstimmen().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/results/{wahlid}/stimmanteil/zweitstimmen`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(StimmanteilFromJSON));
+    }
+
+    /**
+     */
+    async getZweitstimmen(requestParameters: GetZweitstimmenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Stimmanteil>> {
+        const response = await this.getZweitstimmenRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

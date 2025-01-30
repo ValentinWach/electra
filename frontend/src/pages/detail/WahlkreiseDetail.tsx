@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import {
-    fetchStimmanteileWahlkreis,
+    fetchErststimmanteileWahlkreis,
     fetchWahlkreise,
     fetchWinningPartiesWahlkreis,
-    fetchWahlkreisOverview
+    fetchWahlkreisOverview,
+    fetchZweitstimmanteileWahlkreis
 } from "../../apiServices.ts";
 import { OverviewWahlkreis, Wahlkreis } from "../../api";
 import { useElection } from "../../context/ElectionContext.tsx";
-import ZweitstimmenanteilC from "../../components/page-elements/_shared/ZweitstimmenanteilC.tsx";
+import StimmanteileC from "../../components/page-elements/_shared/StimmenanteileC.tsx";
 import WinningPartiesC from "../../components/page-elements/Wahlkreise/WinningPartiesC.tsx";
 import ContentTileC from "../../components/UI-element-components/ContentTileC.tsx";
 import DoughnutChart from "../../components/chart-components/DoughnutChartC.tsx";
@@ -28,7 +29,7 @@ export default function WahlkreiseDetail() {
     const navigate = useNavigate();
     const { selectedElection } = useElection();
     const { calcOnAggregate, setCalcOnAggregate } = useCalcOnAggregate();
-    
+
     const [wahlkreis, setWahlkreis] = useState<Wahlkreis | null>(location.state?.wahlkreis);
     const [overview, setOverview] = useState<OverviewWahlkreis>();
     const [loading, setLoading] = useState(true);
@@ -78,12 +79,17 @@ export default function WahlkreiseDetail() {
         }],
     };
 
-    const wrapFetchStimmanteileWahlkreis = useCallback(async (wahlId: number) => {
-        const data = await fetchStimmanteileWahlkreis(wahlId, wahlkreis?.id ?? 1, calcOnAggregate);
+    const wrapFetchErststimmanteileWahlkreis = useCallback(async (wahlId: number) => {
+        const data = await fetchErststimmanteileWahlkreis(wahlId, wahlkreis?.id ?? 1, calcOnAggregate);
         return data;
     }, [wahlkreis, calcOnAggregate]);
 
-    const wrapFetchWinningPartiesWahlkreis = useCallback(async (wahlId: number) => {
+    const wrapFetchZweitstimmanteileWahlkreis = useCallback(async (wahlId: number) => {
+        const data = await fetchZweitstimmanteileWahlkreis(wahlId, wahlkreis?.id ?? 1);
+        return data;
+    }, [wahlkreis]);
+
+        const wrapFetchWinningPartiesWahlkreis = useCallback(async (wahlId: number) => {
         const data = await fetchWinningPartiesWahlkreis(wahlId, wahlkreis?.id ?? 1);
         return data;
     }, [wahlkreis]);
@@ -100,12 +106,14 @@ export default function WahlkreiseDetail() {
                 <div className="max-w-[1100px] sm:w-full xl:w-[90%] 2xl:w-3/4 flex flex-col justify-start gap-5 -mb-5">
                     <ToggleSwitchC defaultEnabled={!calcOnAggregate} setEnabledInputFunct={(calcOnEinzelstimmen: boolean) => setCalcOnAggregate(!calcOnEinzelstimmen)} label={"Ab hier auf Einzelstimmen berechnen"} />
                 </div>
-                <ZweitstimmenanteilC fetchStimmanteile={wrapFetchStimmanteileWahlkreis}
-                    showAbsoluteVotesDefault={true} />
+                <StimmanteileC fetchStimmanteile={wrapFetchZweitstimmanteileWahlkreis}
+                    showAbsoluteVotesDefault={true} title="Zweitstimmanteile" />
+                <StimmanteileC fetchStimmanteile={wrapFetchErststimmanteileWahlkreis}
+                    showAbsoluteVotesDefault={true} title="Erststimmanteile" />
                 <DirektkandidatC overview={overview} loading={loading} />
                 <ContentTileC header={"Wahlbeteiligung nach Zweitstimmen"} loading={loading}>
                     <div className="flex flex-col w-2/3">
-                        <AlertC alertData={{type: AlertType.info, message: `Berechnet auf Basis der Einwohnerzahlen vom ${selectedElection?.date.getFullYear() === 2021 ? '31.12.2019' : '31.12.2015'}. Als wahlberechtigt gelten hier alle volljährigen deutschen Staatsbürger.`}} />
+                        <AlertC alertData={{ type: AlertType.info, message: `Berechnet auf Basis der Einwohnerzahlen vom ${selectedElection?.date.getFullYear() === 2021 ? '31.12.2019' : '31.12.2015'}. Als wahlberechtigt gelten hier alle volljährigen deutschen Staatsbürger.` }} />
                     </div>
                     <DoughnutChart data={wahlbeteiligungData} fullCircle={true}></DoughnutChart>
                 </ContentTileC>

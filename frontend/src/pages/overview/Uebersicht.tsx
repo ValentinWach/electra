@@ -1,13 +1,15 @@
 import SitzverteilungC from "../../components/page-elements/Uebersicht/SitzverteilungC.tsx";
-import {fetchStimmanteile} from '../../apiServices.ts';
-import ZweitstimmenanteilC from "../../components/page-elements/_shared/ZweitstimmenanteilC.tsx";
+import {fetchErststimmanteile} from '../../apiServices.ts';
+import {fetchZweitstimmanteile} from '../../apiServices.ts';
+import StimmanteileC from "../../components/page-elements/_shared/StimmenanteileC.tsx";
 
 export default function Stimmverteilungen() {
 
     return (
         <>
             <SitzverteilungC/>
-            <ZweitstimmenanteilC fetchStimmanteile={fetchStimmanteile} />
+            <StimmanteileC fetchStimmanteile={fetchZweitstimmanteile} title="Zweitstimmanteile" />
+            <StimmanteileC fetchStimmanteile={fetchErststimmanteile} title="Erststimmanteile" />
         </>
     )
 }

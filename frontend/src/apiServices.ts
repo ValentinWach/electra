@@ -133,32 +133,66 @@ export async function fetchParteien(wahlid: number) {
     });
 }
 
-export async function fetchStimmanteile(wahlid: number) {
-    const cacheKey = getCacheKey('fetchStimmanteile', wahlid);
+export async function fetchErststimmanteile(wahlid: number) {
+    const cacheKey = getCacheKey('fetchErststimmanteile', wahlid);
     return withCache(cacheKey, async () => {
         try {
             const globalapi = new GlobalApi();
-            const stimmanteile = await globalapi.getStimmanteil({ wahlid });
-            console.log('Fetched Stimmanteile:', stimmanteile);
+            const stimmanteile = await globalapi.getErststimmen({ wahlid });
+            console.log('Fetched Erststimmanteile:', stimmanteile);
             return stimmanteile;
         } catch (error) {
-            console.error('Error fetching Stimmanteile:', error);
+            console.error('Error fetching Erststimmanteile:', error);
             throw error;
         }
     });
 }
 
-export async function fetchStimmanteileWahlkreis(wahlid: number, wahlkreisid: number, generateFromAggregate: boolean = true) {
+export async function fetchZweitstimmanteile(wahlid: number) {
+    const cacheKey = getCacheKey('fetchZweitstimmanteile', wahlid);
+    return withCache(cacheKey, async () => {
+        try {
+            const globalapi = new GlobalApi();
+            const stimmanteile = await globalapi.getZweitstimmen({ wahlid });
+            console.log('Fetched Zweitstimmanteile:', stimmanteile);
+            return stimmanteile;
+        } catch (error) {
+            console.error('Error fetching Zweitstimmanteile:', error);
+            throw error;
+        }
+    });
+}
+
+export async function fetchErststimmanteileWahlkreis(wahlid: number, wahlkreisid: number, generateFromAggregate: boolean = true) {
+    const cacheKey = getCacheKey('fetchErststimmanteileWahlkreis', wahlid, wahlkreisid, generateFromAggregate);
+    return withCache(cacheKey, async () => {
     try {
         const wahlkreisApi = new WahlkreisApi();
-        const stimmanteile = await wahlkreisApi.getStimmanteilWahlkreis({ wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate });
+        const stimmanteile = await wahlkreisApi.getErststimmenWahlkreis({ wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate });
         console.log('Fetched Stimmanteile:', stimmanteile);
         console.log('Used aggregate: ', generateFromAggregate);
         return stimmanteile;
     } catch (error) {
         console.error('Error fetching Stimmanteile:', error);
         throw error;
-    }
+        }
+    });
+}
+
+export async function fetchZweitstimmanteileWahlkreis(wahlid: number, wahlkreisid: number, generateFromAggregate: boolean = true) {
+    const cacheKey = getCacheKey('fetchZweitstimmanteileWahlkreis', wahlid, wahlkreisid, generateFromAggregate);
+    return withCache(cacheKey, async () => {
+    try {
+        const wahlkreisApi = new WahlkreisApi();
+        const stimmanteile = await wahlkreisApi.getZweitstimmenWahlkreis({ wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate });
+        console.log('Fetched Zweitstimmanteile:', stimmanteile);
+        console.log('Used aggregate: ', generateFromAggregate);
+        return stimmanteile;
+    } catch (error) {
+        console.error('Error fetching Zweitstimmanteile:', error);
+        throw error;
+        }
+    });
 }
 
 export async function fetchWinningPartiesWahlkreis(wahlid: number, wahlkreisid: number) {

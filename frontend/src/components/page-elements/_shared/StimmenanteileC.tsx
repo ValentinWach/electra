@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Stimmanteil, Wahl} from "../../../api";
+import {Stimmanteil, Wahl} from "../../../api/index.ts";
 import ContentTileC from "../../UI-element-components/ContentTileC.tsx";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {getPartyColor} from "../../../utils/GetPartyColor.tsx";
@@ -8,13 +8,14 @@ import type {DropdownData} from "../../../models/DropDownData.ts";
 import { useBundestagsParteien } from '../../../hooks/useBundestagsParteien.ts';
 import GridC from '../../UI-element-components/GridC.tsx';
 import CheckboxC from '../../UI-element-components/CheckboxC.tsx';
-import type { ChartDataNum } from '../../../models/ChartData';
+import type { ChartDataNum } from '../../../models/ChartData.ts';
 import { useMinLoadingTime } from '../../../hooks/useMinLoadingTime.ts';
 import { formatNumberWithSpaces } from "../../../utils/FormatNumber.tsx";
 
-export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVotesDefault = false}: {
+export default function StimmanteileC({fetchStimmanteile, showAbsoluteVotesDefault = false, title}: {
     fetchStimmanteile: (wahlId: number) => Promise<Stimmanteil[]>,
-    showAbsoluteVotesDefault?: boolean
+    showAbsoluteVotesDefault?: boolean,
+    title: string
 }) {
     const {elections, selectedElection} = useElection();
     const [stimmanteil, setStimmanteil] = useState<Stimmanteil[]>();
@@ -131,7 +132,7 @@ export default function ZweitstimmenanteilC({fetchStimmanteile, showAbsoluteVote
     };
     
     return (
-            <ContentTileC  loading={showLoader} dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={"Zweitstimmenanteile"}>
+            <ContentTileC  loading={showLoader} dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={title}>
                 {comparedElection ?
                     <BarchartC data={comparedData}></BarchartC>
                     :

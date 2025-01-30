@@ -28,13 +28,13 @@ import {
     WinningPartiesToJSON,
 } from '../models/index';
 
-export interface GetOverviewWahlkreisRequest {
+export interface GetErststimmenWahlkreisRequest {
     wahlid: number;
     wahlkreisid: number;
     generatefromaggregate?: boolean;
 }
 
-export interface GetStimmanteilWahlkreisRequest {
+export interface GetOverviewWahlkreisRequest {
     wahlid: number;
     wahlkreisid: number;
     generatefromaggregate?: boolean;
@@ -49,10 +49,58 @@ export interface GetWinningPartiesWahlkreiseRequest {
     wahlid: number;
 }
 
+export interface GetZweitstimmenWahlkreisRequest {
+    wahlid: number;
+    wahlkreisid: number;
+    generatefromaggregate?: boolean;
+}
+
 /**
  * 
  */
 export class WahlkreisApi extends runtime.BaseAPI {
+
+    /**
+     */
+    async getErststimmenWahlkreisRaw(requestParameters: GetErststimmenWahlkreisRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Stimmanteil>>> {
+        if (requestParameters['wahlid'] == null) {
+            throw new runtime.RequiredError(
+                'wahlid',
+                'Required parameter "wahlid" was null or undefined when calling getErststimmenWahlkreis().'
+            );
+        }
+
+        if (requestParameters['wahlkreisid'] == null) {
+            throw new runtime.RequiredError(
+                'wahlkreisid',
+                'Required parameter "wahlkreisid" was null or undefined when calling getErststimmenWahlkreis().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['generatefromaggregate'] != null) {
+            queryParameters['generatefromaggregate'] = requestParameters['generatefromaggregate'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/results/{wahlid}/stimmanteil/erststimmen/wahlkreis/{wahlkreisid}`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))).replace(`{${"wahlkreisid"}}`, encodeURIComponent(String(requestParameters['wahlkreisid']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(StimmanteilFromJSON));
+    }
+
+    /**
+     */
+    async getErststimmenWahlkreis(requestParameters: GetErststimmenWahlkreisRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Stimmanteil>> {
+        const response = await this.getErststimmenWahlkreisRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      */
@@ -93,48 +141,6 @@ export class WahlkreisApi extends runtime.BaseAPI {
      */
     async getOverviewWahlkreis(requestParameters: GetOverviewWahlkreisRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<OverviewWahlkreis> {
         const response = await this.getOverviewWahlkreisRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     */
-    async getStimmanteilWahlkreisRaw(requestParameters: GetStimmanteilWahlkreisRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Stimmanteil>>> {
-        if (requestParameters['wahlid'] == null) {
-            throw new runtime.RequiredError(
-                'wahlid',
-                'Required parameter "wahlid" was null or undefined when calling getStimmanteilWahlkreis().'
-            );
-        }
-
-        if (requestParameters['wahlkreisid'] == null) {
-            throw new runtime.RequiredError(
-                'wahlkreisid',
-                'Required parameter "wahlkreisid" was null or undefined when calling getStimmanteilWahlkreis().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        if (requestParameters['generatefromaggregate'] != null) {
-            queryParameters['generatefromaggregate'] = requestParameters['generatefromaggregate'];
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/results/{wahlid}/stimmanteil/wahlkreis/{wahlkreisid}`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))).replace(`{${"wahlkreisid"}}`, encodeURIComponent(String(requestParameters['wahlkreisid']))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(StimmanteilFromJSON));
-    }
-
-    /**
-     */
-    async getStimmanteilWahlkreis(requestParameters: GetStimmanteilWahlkreisRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Stimmanteil>> {
-        const response = await this.getStimmanteilWahlkreisRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -204,6 +210,48 @@ export class WahlkreisApi extends runtime.BaseAPI {
      */
     async getWinningPartiesWahlkreise(requestParameters: GetWinningPartiesWahlkreiseRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WinningParties> {
         const response = await this.getWinningPartiesWahlkreiseRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getZweitstimmenWahlkreisRaw(requestParameters: GetZweitstimmenWahlkreisRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Stimmanteil>>> {
+        if (requestParameters['wahlid'] == null) {
+            throw new runtime.RequiredError(
+                'wahlid',
+                'Required parameter "wahlid" was null or undefined when calling getZweitstimmenWahlkreis().'
+            );
+        }
+
+        if (requestParameters['wahlkreisid'] == null) {
+            throw new runtime.RequiredError(
+                'wahlkreisid',
+                'Required parameter "wahlkreisid" was null or undefined when calling getZweitstimmenWahlkreis().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['generatefromaggregate'] != null) {
+            queryParameters['generatefromaggregate'] = requestParameters['generatefromaggregate'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/results/{wahlid}/stimmanteil/zweitstimmen/wahlkreis/{wahlkreisid}`.replace(`{${"wahlid"}}`, encodeURIComponent(String(requestParameters['wahlid']))).replace(`{${"wahlkreisid"}}`, encodeURIComponent(String(requestParameters['wahlkreisid']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(StimmanteilFromJSON));
+    }
+
+    /**
+     */
+    async getZweitstimmenWahlkreis(requestParameters: GetZweitstimmenWahlkreisRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Stimmanteil>> {
+        const response = await this.getZweitstimmenWahlkreisRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -101,7 +101,7 @@ export default function GenerateTokenC() {
         const url = URL.createObjectURL(blob);
         
         link.setAttribute('href', url);
-        link.setAttribute('download', 'wahltoken.csv');
+        link.setAttribute('download', 'wahltokens.csv');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
