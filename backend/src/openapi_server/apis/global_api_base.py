@@ -71,9 +71,10 @@ class BaseGlobalApi:
         try:
             with db_session() as db:
                 closest_for_party_query = text('''
-                    SELECT p.id, p.name, p."shortName", wk.id, wk.name, bl.id AS bundesland_id, bl.name AS bundesland_name, result_status, k.id, k.name, k.firstname, k."yearOfBirth", k.profession
+                    SELECT p.id, p.name, p."shortName", wk.id, wk.name, bl.id AS bundesland_id, bl.name AS bundesland_name, result_status, k.id, k.name, k.firstname, k."yearOfBirth", k.profession, wks.margin
                     FROM wahlkreis_knappste_sieger wks JOIN parteien p ON wks.partei_id = p.id JOIN kandidaten k ON wks.kandidat_id = k.id JOIN wahlkreise wk ON wks.wahlkreis_id = wk.id JOIN bundeslaender bl ON wk.bundesland_id = bl.id
                     WHERE wks.wahl_id = :wahlid and wks.partei_id = :partyid
+                    ORDER BY wks.margin_rank ASC
                 ''')
                 closest_for_party_results = db.execute(closest_for_party_query,
                                                        {"wahlid": wahlId, "partyid": parteiId}).fetchall()
@@ -96,6 +97,7 @@ class BaseGlobalApi:
                                 profession=row[12],
                                 party=Partei(id=closest_for_party_results[0][0], name=closest_for_party_results[0][1], shortname=closest_for_party_results[0][2])
                             ),
+                            margin=row[13],
                             wahlkreis=Wahlkreis(
                                 id=row[3],
                                 name=row[4],

@@ -20,7 +20,7 @@ import json
 
 
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, StrictInt
 from typing import Any, ClassVar, Dict, List
 from openapi_server.models.abgeordneter import Abgeordneter
 from openapi_server.models.wahlkreis import Wahlkreis
@@ -35,6 +35,7 @@ class ClosestWinner(BaseModel):
     """ # noqa: E501
     abgeordneter: Abgeordneter
     wahlkreis: Wahlkreis
+    margin: StrictInt
     __properties: ClassVar[List[str]] = ["abgeordneter", "wahlkreis"]
 
     model_config = {

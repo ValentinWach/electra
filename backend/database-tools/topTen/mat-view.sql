@@ -26,7 +26,7 @@ margin_calculation AS (
 ),
 party_margin_calculation AS (
     SELECT m.wahlkreis_id, m.wahl_id, m.winner_kandidat_id, m.winner_partei_id, m.margin,
-           DENSE_RANK() OVER (PARTITION BY m.winner_partei_id, m.wahl_id ORDER BY m.margin ASC) AS margin_rank
+           RANK() OVER (PARTITION BY m.winner_partei_id, m.wahl_id ORDER BY m.margin ASC) AS margin_rank
     FROM margin_calculation m
 ),
 losing_margins AS (
@@ -39,19 +39,14 @@ losing_margins AS (
 ),
 party_losing_margins AS (
     SELECT l.wahlkreis_id, l.wahl_id, l.losing_kandidat_id, l.losing_partei_id, l.margin,
-           DENSE_RANK() OVER (PARTITION BY l.losing_partei_id, l.wahl_id ORDER BY l.margin ASC) AS margin_rank
+           RANK() OVER (PARTITION BY l.losing_partei_id, l.wahl_id ORDER BY l.margin ASC) AS margin_rank
     FROM losing_margins l
-),
-relevant_parties AS (
-    SELECT DISTINCT parteien_id AS partei_id, wahlen_id AS wahl_id FROM bundestag_parties
 ),
 winner_results AS (
     SELECT p.wahlkreis_id, p.wahl_id, p.winner_kandidat_id AS kandidat_id, p.winner_partei_id AS partei_id,
            p.margin, p.margin_rank
     FROM party_margin_calculation p
-    WHERE p.margin_rank <= 10 AND EXISTS (
-        SELECT 1 FROM relevant_parties rp WHERE rp.partei_id = p.winner_partei_id AND rp.wahl_id = p.wahl_id
-    )
+    WHERE p.margin_rank <= 10
 ),
 loser_results AS (
     SELECT l.wahlkreis_id, l.wahl_id, l.losing_kandidat_id AS kandidat_id, l.losing_partei_id AS partei_id,
@@ -60,8 +55,6 @@ loser_results AS (
     WHERE l.margin_rank <= 10 AND NOT EXISTS (
         SELECT 1 FROM party_margin_calculation p
         WHERE p.winner_partei_id = l.losing_partei_id AND p.wahl_id = l.wahl_id
-    ) AND EXISTS (
-        SELECT 1 FROM relevant_parties rp WHERE rp.partei_id = l.losing_partei_id AND rp.wahl_id = l.wahl_id
     )
 )
 SELECT *, 'Winner' AS result_status FROM winner_results
