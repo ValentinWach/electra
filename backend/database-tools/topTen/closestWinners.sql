@@ -2,7 +2,7 @@ CREATE MATERIALIZED VIEW wahlkreis_knappste_sieger AS
 WITH ranked_votes AS (
     SELECT cv.wahlkreis_id, cv.wahl_id, cv.kandidat_id, cv.partei_id, cv.votes,
            RANK() OVER (PARTITION BY cv.wahlkreis_id, cv.wahl_id ORDER BY cv.votes DESC) AS vote_rank
-    FROM erstimmen_wahlkreis_partei_kandidat cv
+    FROM erststimmen_wahlkreis_partei_kandidat cv
 ),
 second_place_votes AS (
     SELECT wahlkreis_id, wahl_id, MAX(votes) AS second_place_votes
