@@ -31,27 +31,27 @@ SELECT parteien_id, wahlen_id, sum(stimmen_sum) as stimmen_sum
 from zweitstimmen_bundesland_partei
 group by parteien_id, wahlen_id;
 
-CREATE MATERIALIZED VIEW erstimmen_wahlkreis_partei_kandidat AS
+CREATE MATERIALIZED VIEW erststimmen_wahlkreis_partei_kandidat AS
 SELECT wahlkreis_id, w.kandidat_id, w.partei_id, w.wahl_id, COUNT(*) AS votes
 FROM erststimmen e JOIN wahlkreiskandidaturen w ON e.wahlkreiskandidatur_id = w.id
 GROUP BY wahlkreis_id, w.kandidat_id, w.partei_id, w.wahl_id;
 
-CREATE MATERIALIZED VIEW erstimmen_wahlkreis_partei AS
+CREATE MATERIALIZED VIEW erststimmen_wahlkreis_partei AS
 SELECT wk.partei_id as parteien_id, wk.wahl_id as wahlen_id, wk.wahlkreis_id as wahlkreise_id, count(*) as stimmen_sum
-FROM erstimmen_wahlkreis_partei_kandidat wk
+FROM erststimmen_wahlkreis_partei_kandidat wk
 GROUP BY wk.partei_id, wk.wahl_id, wk.wahlkreis_id;
 
-CREATE MATERIALIZED VIEW erstimmen_partei AS
+CREATE MATERIALIZED VIEW erststimmen_partei AS
 SELECT parteien_id, wahlen_id, sum(stimmen_sum) as stimmen_sum
-FROM erstimmen_wahlkreis_partei wk
+FROM erststimmen_wahlkreis_partei wk
 GROUP BY wk.parteien_id, wk.wahlen_id;
 
 CREATE MATERIALIZED VIEW wahlkreis_winners AS --erststimmen
 WITH max_votes AS (SELECT wahlkreis_id, wahl_id, MAX(votes) AS max_votes
-FROM erstimmen_wahlkreis_partei_kandidat
+FROM erststimmen_wahlkreis_partei_kandidat
 GROUP BY wahlkreis_id, wahl_id)
 SELECT cv.wahlkreis_id, cv.wahl_id, cv.kandidat_id, cv.partei_id
-FROM erstimmen_wahlkreis_partei_kandidat cv
+FROM erststimmen_wahlkreis_partei_kandidat cv
          JOIN max_votes mv ON cv.wahlkreis_id = mv.wahlkreis_id AND cv.wahl_id = mv.wahl_id AND cv.votes = mv.max_votes;
 
 ----------Berechnungen----------
