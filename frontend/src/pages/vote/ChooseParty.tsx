@@ -6,7 +6,7 @@ import { useVote } from "../../context/VoteContext.tsx";
 import { useEffect } from "react";
 
 
-export default function Confirm() {
+export default function ChooseParty() {
     const { wahlkreis, parties, candidates, selectedDirectCandidate, selectedParty, token, resetVoting } = useVote();
     const navigate = useNavigate();
     const handleGoToStimmabgabe = () => {

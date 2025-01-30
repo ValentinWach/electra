@@ -123,7 +123,7 @@ export default function GridC({ gridData, usePagination = true, pageSize = 10, c
                     </tr>
                 </thead>
                 <tbody>
-                    {currentPageGridData.rows.map((row, index) => (
+                    {currentPageGridData.rows.map((row) => (
                         <tr key={row.key} className={`${onRowClick ? "hover:cursor-pointer hover:underline" : ""}`} onClick={() => onRowClick && onRowClick(row.key)}>
                             {row.values.map((col, index) => (
                                 <td title={col.value} key={index} style={col.style}>{col.badge ? <BadgeC text={col.value} color={col.badge.color} /> : col.value}</td>

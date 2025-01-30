@@ -1,4 +1,4 @@
-import { GeneralApi, GlobalApi, WahlkreisApi, ElectApi, AnalysisApi} from "./api";
+import { GeneralApi, GlobalApi, WahlkreisApi, ElectApi, AnalysisApi, AdminApi} from "./api";
 import {SeatDistribution, Wahl, Wahlkreis } from "./api";
 import * as runtime from './api/runtime';
 
@@ -359,5 +359,32 @@ export async function submitVote(token: string, idNumber: string, directCandidat
     } catch (error) {
         console.error('Error submitting vote.');
         return false;
+    }
+}
+
+export async function generateTokens(amount: number, idNumbers: string[], wahlid: number, wahlkreisid: number) {
+    const adminApi = new AdminApi();
+    try {
+        const tokens = await adminApi.generateToken({ 
+            wahlid, 
+            wahlkreisid, 
+            generateToken: { amount, idNumbers }
+        });
+        console.log('Fetched Tokens:', tokens);
+        return tokens;
+    } catch (error) {
+        console.error('Error generating tokens:', error);
+        throw error;
+    }
+}
+
+export async function recalculateResults() {
+    const adminApi = new AdminApi();
+    try {
+        await adminApi.refresh();
+        console.log("Ergebnisse wurden erfolgreich neu berechnet.");
+    } catch (error) {
+        console.error('Error recalculating results:', error);
+        throw error;
     }
 }

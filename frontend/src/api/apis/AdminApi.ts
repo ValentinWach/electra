@@ -16,13 +16,13 @@
 import * as runtime from '../runtime';
 import type {
   GenerateToken,
-  GenerateToken200ResponseInner,
+  Token,
 } from '../models/index';
 import {
     GenerateTokenFromJSON,
     GenerateTokenToJSON,
-    GenerateToken200ResponseInnerFromJSON,
-    GenerateToken200ResponseInnerToJSON,
+    TokenFromJSON,
+    TokenToJSON,
 } from '../models/index';
 
 export interface BatchVoteRequest {
@@ -88,7 +88,7 @@ export class AdminApi extends runtime.BaseAPI {
 
     /**
      */
-    async generateTokenRaw(requestParameters: GenerateTokenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<GenerateToken200ResponseInner>>> {
+    async generateTokenRaw(requestParameters: GenerateTokenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Token>>> {
         if (requestParameters['wahlid'] == null) {
             throw new runtime.RequiredError(
                 'wahlid',
@@ -124,12 +124,12 @@ export class AdminApi extends runtime.BaseAPI {
             body: GenerateTokenToJSON(requestParameters['generateToken']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(GenerateToken200ResponseInnerFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(TokenFromJSON));
     }
 
     /**
      */
-    async generateToken(requestParameters: GenerateTokenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<GenerateToken200ResponseInner>> {
+    async generateToken(requestParameters: GenerateTokenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Token>> {
         const response = await this.generateTokenRaw(requestParameters, initOverrides);
         return await response.value();
     }

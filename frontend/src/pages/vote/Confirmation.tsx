@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import ChooseC from "../../components/page-elements/Vote/ChooseC.tsx";
+import ConfirmationC from "../../components/page-elements/Vote/ConfirmationC.tsx";
 import { votePrefix } from "../../constants/PathPrefixes.ts";
 import { handleTokenMissing } from "../../utils/Logout.tsx";
 import { useVote } from "../../context/VoteContext.tsx";
 
 
-export default function Choose() {
+export default function Confirmation() {
     const { token, selectedDirectCandidate, selectedParty, resetVoting } = useVote();
     const navigate = useNavigate();
     useEffect(() => {
@@ -19,6 +19,6 @@ export default function Choose() {
         }
     }, [token, selectedDirectCandidate, selectedParty])
     return (
-        <ChooseC />
+        <ConfirmationC />
     )
 }

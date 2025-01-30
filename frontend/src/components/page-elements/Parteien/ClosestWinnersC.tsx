@@ -4,7 +4,8 @@ import { useElection } from "../../../context/ElectionContext.tsx";
 import GridC from "../../UI-element-components/GridC.tsx";
 import { ContentTileConfig } from "../../../models/GridData.ts";
 import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
-import WarningYellowC from "../../UI-element-components/WarningYellowC.tsx";
+import { AlertType } from "../../../models/AlertData.ts";
+import AlertC from "../../UI-element-components/AlertC.tsx";
 
 export default function ClosestWinnersC({ fetchClostestWinners }: {
     fetchClostestWinners: (id: number) => Promise<ClosestWinners>
@@ -75,7 +76,10 @@ export default function ClosestWinnersC({ fetchClostestWinners }: {
                     usePagination={false}
                 />
             ) : (
-                <WarningYellowC text="Daten nur für Bundestagsparteien verfügbar" />
+                <AlertC alertData={{
+                    message: "Daten nur für Bundestagsparteien verfügbar.",
+                    type: AlertType.warning
+                }} />
             )
         )
     )

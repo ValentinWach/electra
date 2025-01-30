@@ -12,7 +12,7 @@ import { useVote } from "../../../context/VoteContext.tsx";
 import { submitVote } from "../../../apiServices.ts";
 import { Dialog, DialogBackdrop } from "@headlessui/react";
 
-export default function ChooseC() {
+export default function ConfirmationC() {
     const navigate = useNavigate();
     const [showFinalWarning, setShowFinalWarning] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);

@@ -413,6 +413,7 @@ paths:
                 title: tokens
                 items:
                   type: object
+                  title: token
                   properties:
                     idNumber:
                       type: string

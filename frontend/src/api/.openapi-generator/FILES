@@ -20,12 +20,12 @@ models/Direktkandidaten.ts
 models/Einkommen.ts
 models/EinkommenWahlkreiseInner.ts
 models/GenerateToken.ts
-models/GenerateToken200ResponseInner.ts
 models/OverviewWahlkreis.ts
 models/Partei.ts
 models/SeatDistribution.ts
 models/SeatDistributionDistributionInner.ts
 models/Stimmanteil.ts
+models/Token.ts
 models/Ueberhang.ts
 models/UeberhangBundesland.ts
 models/VoteRequest.ts
