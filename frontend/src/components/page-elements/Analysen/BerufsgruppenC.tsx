@@ -9,6 +9,8 @@ import { useResizeDetector } from 'react-resize-detector';
 import { GridData } from "../../../models/GridData";
 import GridC from "../../UI-element-components/GridC";
 import CheckboxC from "../../UI-element-components/CheckboxC";
+import AlertC from "../../UI-element-components/AlertC";
+import { AlertType } from "../../../models/AlertData";
 interface Node extends d3.SimulationNodeDatum {
     id: string;
     name: string;
@@ -28,13 +30,40 @@ export default function BerufsgruppenC({ parteien }: { parteien: Partei[] }) {
     const svgRef = useRef<SVGSVGElement>(null);
     const PADDING = 40;
     const CHART_HEIGHT = 500;
-    const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
+    
+    // Create tooltip once
+    const tooltip = d3.select("body")
+        .append("div")
+        .attr("class", "d3-tooltip")
+        .style("position", "absolute")
+        .style("visibility", "hidden")
+        .style("background-color", "rgba(33, 33, 33, 0.85)")
+        .style("color", "white")
+        .style("padding", "8px 12px")
+        .style("border-radius", "4px")
+        .style("box-shadow", "0 4px 6px rgba(0,0,0,0.3)")
+        .style("font-size", "13px")
+        .style("line-height", "1.4")
+        .style("pointer-events", "none")
+        .style("border", "1px solid rgba(255,255,255,0.1)")
+        .style("opacity", "0")
+        .style("transition", "opacity 0.15s ease-in-out");
+
+    // Create a larger color palette by combining multiple D3 color schemes
+    const colorScale = d3.scaleOrdinal()
+        .range([
+            ...d3.schemeCategory10,
+            ...d3.schemeTableau10,
+            ...d3.schemePaired,
+            ...d3.schemeSet3,
+        ].filter((color, index, self) => self.indexOf(color) === index)); // Remove any duplicates
 
     // Effect for visualization updates
     useEffect(() => {
         async function fetchData() {
             const data = await fetchBerufsgruppen(selectedElection?.id ?? 0, selectedParteiId ?? 0, showBundestagsabgeordneteOnly);
             if (!data.berufsgruppen || data.berufsgruppen.length === 0) {
+                console.log("No data available");
                 setDataIsAvailable(false);
                 return;
             }
@@ -252,24 +281,8 @@ export default function BerufsgruppenC({ parteien }: { parteien: Partei[] }) {
             .style("font-size", d => `${Math.min(d.radius / 2.5, 12)}px`);
 
         // Add tooltips
-        const tooltip = d3.select("body").append("div")
-            .attr("class", "d3-tooltip")
-            .style("position", "absolute")
-            .style("visibility", "hidden")
-            .style("background-color", "rgba(33, 33, 33, 0.85)")
-            .style("color", "white")
-            .style("padding", "8px 12px")
-            .style("border-radius", "4px")
-            .style("box-shadow", "0 4px 6px rgba(0,0,0,0.3)")
-            .style("font-size", "13px")
-            .style("line-height", "1.4")
-            .style("pointer-events", "none")
-            .style("border", "1px solid rgba(255,255,255,0.1)")
-            .style("opacity", "0")
-            .style("transition", "opacity 0.15s ease-in-out");
-
-        bubbles
-            .on("mouseover", function (event: MouseEvent, d: unknown) {
+        bubblesMerge
+            .on("mouseover", function (_event: MouseEvent, d: unknown) {
                 const node = d as Node;
                 tooltip
                     .style("visibility", "visible")
@@ -286,12 +299,14 @@ export default function BerufsgruppenC({ parteien }: { parteien: Partei[] }) {
                     .style("opacity", "0")
                     .style("visibility", "hidden");
             });
+    };
 
-        // Clean up tooltip when component unmounts
+    // Clean up tooltip when component unmounts
+    useEffect(() => {
         return () => {
             tooltip.remove();
         };
-    };
+    }, []);
 
     // Effect for initial creation and party/election changes
     useEffect(() => {
@@ -354,15 +369,18 @@ export default function BerufsgruppenC({ parteien }: { parteien: Partei[] }) {
                         </div>
                     </div>
                 </div>
+                <div className="w-full px-6">
+                    <GridC gridData={berufsgruppenGridData} usePagination={false}
+                        defaultSortColumnId={3}
+                        defaultSortDirection={"desc"} />
+                </div>
             </>
             ) : (
-                <div>Keine Daten verfügbar</div>
+                <AlertC alertData={{
+                    message: "Es stehen leider keine vollständigen Berufsdaten für diese Wahl zur Verfügung.",
+                    type: AlertType.warning
+                }} />
             )}
-            <div className="w-full px-6">
-                <GridC gridData={berufsgruppenGridData} usePagination={false}
-                    defaultSortColumnId={3}
-                    defaultSortDirection={"desc"} />
-            </div>
         </ContentTileC>
 
     );

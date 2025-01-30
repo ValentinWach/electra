@@ -1,10 +1,10 @@
-import { ReactNode, LegacyRef } from "react";
+import { ReactNode, Ref } from "react";
 import DropdownC from "./DropdownC.tsx";
 import { DropdownData } from "../../models/DropDownData.ts";
 
 interface CharttileProps {
     children?: ReactNode;
-    containerRef?: LegacyRef<HTMLDivElement>;
+    containerRef?: Ref<HTMLDivElement>;
 }
 
 export default function ContentTileC({ children, header, xlWidth, dropDownContent, loading = false, dropDownFunction, containerRef }: CharttileProps & { header: string, xlWidth?: Boolean, dropDownContent?: DropdownData, dropDownFunction?: (id: number) => void } & { loading?: boolean }) {
