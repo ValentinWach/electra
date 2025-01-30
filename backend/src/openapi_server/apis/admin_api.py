@@ -65,10 +65,10 @@ async def generate_token(
     wahlid: StrictInt = Path(..., description=""),
     wahlkreisid: StrictInt = Path(..., description=""),
     amount: StrictInt = Body(None, description=""),
-    id_numbers: List[StrictStr] = Body(None, description=""),
+    idNumbers: List[StrictStr] = Body(None, description=""),
 ):
     admin_api = BaseAdminApi()
-    return await admin_api.generate_token(wahlid, wahlkreisid, amount, id_numbers)
+    return await admin_api.generate_token(wahlid, wahlkreisid, amount, idNumbers)
 
 
 @router.post(
