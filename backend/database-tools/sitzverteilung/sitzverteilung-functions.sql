@@ -14,25 +14,21 @@ DECLARE
     condition_met   BOOLEAN;
     rec             RECORD;
     temp_table_name TEXT;
-    lower_bound     INT;
-    upper_bound     INT;
-    mid            INT;
 BEGIN
     FOR rec IN (
         SELECT DISTINCT nw.wahl_id, nw.partei_id
         FROM ov_2_sitzkontingente_bundesweit_erhoeht nw
     ) LOOP
         temp_table_name := 'temp_table';
-        upper_bound := (
+        counter := (
             SELECT sitze_nach_erhoehung
             FROM ov_2_sitzkontingente_bundesweit_erhoeht nw
             WHERE nw.wahl_id = rec.wahl_id
               AND nw.partei_id = rec.partei_id
         );
-        lower_bound := 0;
 
         EXECUTE 'CREATE TEMP TABLE temp_table_verringert AS
-            SELECT 
+            SELECT
                 nw.wahl_id,
                 ma.bundesland_id,
                 nw.partei_id,
@@ -42,20 +38,20 @@ BEGIN
                 ma.mindestsitzzahlen as max_sitze_mindestsitze
             FROM ov_2_sitzkontingente_bundesweit_erhoeht nw
             JOIN mindestsitzanspruch_partei_bundesland ma
-                ON nw.wahl_id = ma.wahl_id 
+                ON nw.wahl_id = ma.wahl_id
                 AND nw.partei_id = ma.partei_id
-            JOIN zweitstimmen_bundesland_partei zbp 
-                ON zbp.bundeslaender_id = ma.bundesland_id 
-                AND zbp.wahlen_id = ma.wahl_id 
+            JOIN zweitstimmen_bundesland_partei zbp
+                ON zbp.bundeslaender_id = ma.bundesland_id
+                AND zbp.wahlen_id = ma.wahl_id
                 AND zbp.parteien_id = ma.partei_id
             WHERE nw.wahl_id = ' || rec.wahl_id || '
               AND nw.partei_id = ' || rec.partei_id;
 
-        WHILE lower_bound <= upper_bound LOOP
-            mid := lower_bound + (upper_bound - lower_bound) / 2;
+        EXECUTE 'SELECT EXISTS (SELECT 1)' INTO condition_met;
 
+        WHILE condition_met LOOP
             EXECUTE 'CREATE TEMP TABLE temp_table_verringert_helper AS
-                SELECT 
+                SELECT
                     verr.wahl_id,
                     bundesland_id,
                     partei_id,
@@ -66,8 +62,10 @@ BEGIN
                 FROM sainte_lague(' || quote_literal('temp_table_verringert') || ', ' ||
                     quote_literal('bundesland_id') || ', ' ||
                     quote_literal('stimmen_sum') || ', ' ||
-                    mid || ', ' || rec.wahl_id || ') sl
+                    counter || ', ' || rec.wahl_id || ') sl
                 JOIN temp_table_verringert verr ON verr.bundesland_id = sl.id';
+
+            counter := counter - 1;
 
             EXECUTE 'DROP TABLE temp_table_verringert';
             EXECUTE 'CREATE TEMP TABLE temp_table_verringert AS TABLE temp_table_verringert_helper';
@@ -82,22 +80,16 @@ BEGIN
                     SELECT 1
                     FROM total_max_sitze
                     WHERE total_max_sitze > (
-                        SELECT sitze_nach_erhoehung 
-                        FROM ov_2_sitzkontingente_bundesweit_erhoeht 
+                        SELECT sitze_nach_erhoehung
+                        FROM ov_2_sitzkontingente_bundesweit_erhoeht
                         WHERE wahl_id = ' || rec.wahl_id || '
                           AND partei_id = ' || rec.partei_id || '
                     )
                 )' INTO condition_met;
-
-            IF condition_met THEN
-                lower_bound := mid + 1;  -- Need more seats
-            ELSE
-                upper_bound := mid - 1;  -- Try to find an even smaller valid solution
-            END IF;
         END LOOP;
 
         RETURN QUERY EXECUTE '
-            SELECT 
+            SELECT
                 wahl_id,
                 bundesland_id,
                 partei_id,
