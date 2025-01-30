@@ -57,20 +57,36 @@ async def get_overview_wahlkreis(
 
 
 @router.get(
-    "/results/{wahlid}/stimmanteil/wahlkreis/{wahlkreisid}",
+    "/results/{wahlid}/stimmanteil/zweitstimmen/wahlkreis/{wahlkreisid}",
     responses={
-        200: {"model": List[Stimmanteil], "description": "Returning the results of the election in the wahlkreis"},
+        200: {"model": List[Stimmanteil], "description": "Returning the zweitstimmen of the election in the wahlkreis"},
     },
     tags=["Wahlkreis"],
     response_model_by_alias=True,
 )
-async def get_stimmanteil_wahlkreis(
+async def get_stimmanteil_zweitstimmen_wahlkreis(
     wahlid: StrictInt = Path(..., description=""),
     wahlkreisid: StrictInt = Path(..., description=""),
     generatefromaggregate: Optional[str] = Query("true", alias="generatefromaggregate"),
 ) -> List[Stimmanteil]:
     generatefromaggregate_bool = generatefromaggregate.lower() == "true"
-    return await BaseWahlkreisApi.get_stimmanteil_wahlkreis(wahlid, wahlkreisid, generatefromaggregate_bool, self=None)
+    return await BaseWahlkreisApi.get_stimmanteil_zweitstimmen_wahlkreis(wahlid, wahlkreisid, generatefromaggregate_bool, self=None)
+
+@router.get(
+    "/results/{wahlid}/stimmanteil/erststimmen/wahlkreis/{wahlkreisid}",
+    responses={
+        200: {"model": List[Stimmanteil], "description": "Returning the erststimmen of the election in the wahlkreis"},
+    },
+    tags=["Wahlkreis"],
+    response_model_by_alias=True,
+)
+async def get_stimmanteil_erststimmen_wahlkreis(
+    wahlid: StrictInt = Path(..., description=""),
+    wahlkreisid: StrictInt = Path(..., description=""),
+    generatefromaggregate: Optional[str] = Query("true", alias="generatefromaggregate"),
+) -> List[Stimmanteil]:
+    generatefromaggregate_bool = generatefromaggregate.lower() == "true"
+    return await BaseWahlkreisApi.get_stimmanteil_erststimmen_wahlkreis(wahlid, wahlkreisid, generatefromaggregate_bool, self=None)
 
 
 @router.get(

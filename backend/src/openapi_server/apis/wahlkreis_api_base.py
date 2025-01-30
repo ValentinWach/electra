@@ -125,7 +125,7 @@ class BaseWahlkreisApi:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-    async def get_stimmanteil_wahlkreis(
+    async def get_stimmanteil_zweitstimmen_wahlkreis(
         wahlid: StrictInt,
         wahlkreisid: StrictInt,
         generatefromaggregate: Optional[StrictBool],
@@ -157,6 +157,68 @@ class BaseWahlkreisApi:
                                                 ROUND((COUNT(*) * 100.0) / SUM(COUNT(*)) OVER(), 2) AS prozentualer_anteil
                                             FROM
                                                 zweitstimmen z JOIN parteien p ON z.partei_id = p.id   
+                                            WHERE
+                                                wahl_id = :wahlId and wahlkreis_id = :wahlkreisId
+                                            GROUP BY
+                                                p.id, p.name, p."shortName";
+                                                ''')
+
+                stimmanteil_results = db.execute(stimmanteil_query,
+                    {"wahlId": wahlid, "wahlkreisId": wahlkreisid}
+                ).fetchall()
+
+            if not stimmanteil_results:
+                raise HTTPException(status_code=404, detail="No stimmanteil found")
+
+            stimmanteile = []
+            for result in stimmanteil_results:
+                partei_id, partei_name, partei_short_name, stimmenanzahl, prozentualer_anteil = result
+
+                stimmanteile.append(
+                    Stimmanteil(
+                        party=Partei(id=partei_id, name=partei_name, shortname=partei_short_name),
+                        share=prozentualer_anteil,
+                        absolute=int(stimmenanzahl)
+                    )
+                )
+
+            return stimmanteile
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+    async def get_stimmanteil_erststimmen_wahlkreis(
+        wahlid: StrictInt,
+        wahlkreisid: StrictInt,
+        generatefromaggregate: Optional[StrictBool],
+        self,
+    ) -> List[Stimmanteil]:
+        try:
+            with db_session() as db:
+                if generatefromaggregate:
+                    stimmanteil_query = text('''
+                                SELECT
+                                    p.id, p.name, p."shortName",
+                                    stimmen_sum,
+                                    ROUND(
+                                        (stimmen_sum * 100.0) /
+                                        (SELECT SUM(stimmen_sum)
+                                         FROM erststimmen_wahlkreis_partei
+                                         WHERE wahlen_id = z.wahlen_id and wahlkreise_id = z.wahlkreise_id),
+                                        2
+                                    ) AS prozentualer_anteil
+                                FROM
+                                    erststimmen_wahlkreis_partei z JOIN parteien p ON z.parteien_id = p.id   
+                                WHERE wahlen_id = :wahlId and wahlkreise_id = :wahlkreisId;
+                                ''')
+                else:
+                    stimmanteil_query = text('''
+                                            SELECT
+                                                p.id, p.name, p."shortName",
+                                                COUNT(*) AS stimmenanzahl,
+                                                ROUND((COUNT(*) * 100.0) / SUM(COUNT(*)) OVER(), 2) AS prozentualer_anteil
+                                            FROM
+                                                erststimmen e JOIN wahlkreiskandidaturen wk ON e.wahlkreiskandidatur_id = wk.id JOIN parteien p ON wk.partei_id = p.id
                                             WHERE
                                                 wahl_id = :wahlId and wahlkreis_id = :wahlkreisId
                                             GROUP BY

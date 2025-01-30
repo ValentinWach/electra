@@ -151,7 +151,7 @@ class BaseGlobalApi:
             raise HTTPException(status_code=500, detail=str(e))
 
 
-    async def get_stimmanteil(
+    async def get_stimmanteil_zweitstimmmen(
         wahlId: StrictInt,
         self,
     ) -> List[Stimmanteil]:
@@ -177,7 +177,52 @@ class BaseGlobalApi:
                 ).fetchall()
 
             if not stimmanteil_results:
-                raise HTTPException(status_code=404, detail="No stimmanteil found")
+                raise HTTPException(status_code=404, detail="No zweitstimmen stimmanteil found")
+
+            stimmanteile = []
+            for result in stimmanteil_results:
+                id, name, short_name, stimmenanzahl, prozentualer_anteil = result
+
+                stimmanteile.append(
+                    Stimmanteil(
+                        party=Partei(id=id, name=name, shortname=short_name),
+                        share=prozentualer_anteil,
+                        absolute=int(stimmenanzahl)
+                    )
+                )
+
+            return stimmanteile
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+    async def get_stimmanteil_erststimmen(
+        wahlId: StrictInt,
+        self,
+    ) -> List[Stimmanteil]:
+        try:
+            with db_session() as db:
+                stimmanteil_query = text('''
+                            SELECT
+                                p.id, p.name, p."shortName",
+                                stimmen_sum,
+                                ROUND(
+                                    (stimmen_sum * 100.0) /
+                                    (SELECT SUM(stimmen_sum)
+                                     FROM erststimmen_partei
+                                     WHERE wahlen_id = z.wahlen_id),
+                                    2
+                                ) AS prozentualer_anteil
+                            FROM
+                                erststimmen_partei z JOIN parteien p on z.parteien_id = p.id
+                            WHERE wahlen_id = :wahlId;
+                            ''')
+                stimmanteil_results = db.execute(stimmanteil_query,
+                    {"wahlId": wahlId}
+                ).fetchall()
+
+            if not stimmanteil_results:
+                raise HTTPException(status_code=404, detail="No erststimmen stimmanteil found")
 
             stimmanteile = []
             for result in stimmanteil_results:

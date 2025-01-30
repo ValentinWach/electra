@@ -82,17 +82,30 @@ self=None) -> SeatDistribution:
 
 
 @router.get(
-    "/results/{wahlid}/stimmanteil/",
+    "/results/{wahlid}/stimmanteil/zweitstimmen",
     responses={
-        200: {"model": List[Stimmanteil], "description": "Returning the global results of the election"},
+        200: {"model": List[Stimmanteil], "description": "Returning the zweitstimmen results of the election"},
     },
     tags=["Global"],
     response_model_by_alias=True,
 )
-async def get_stimmanteil(
+async def get_stimmanteil_zweitstimmen(
     wahlid: StrictInt = Path(..., description=""),
 ) -> List[Stimmanteil]:
-    return await BaseGlobalApi.get_stimmanteil(wahlid, self=None)
+    return await BaseGlobalApi.get_stimmanteil_zweitstimmen(wahlid, self=None)
+
+@router.get(
+    "/results/{wahlid}/stimmanteil/erststimmen",
+    responses={
+        200: {"model": List[Stimmanteil], "description": "Returning the erststimmen results of the election"},
+    },
+    tags=["Global"],
+    response_model_by_alias=True,
+)
+async def get_stimmanteil_erstimmen(
+    wahlid: StrictInt = Path(..., description=""),
+) -> List[Stimmanteil]:
+    return await BaseGlobalApi.get_stimmanteil_erstimmen(wahlid, self=None)
 
 @router.get(
     "/results/{wahlid}/ueberhang/{parteiid}",
