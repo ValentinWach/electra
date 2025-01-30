@@ -247,7 +247,7 @@ def main():
         sql_files = [
             '../sitzverteilung/sitzverteilung-functions.sql',
             '../sitzverteilung/sitzverteilung-views.sql',
-            '../topTen/mat-view.sql'
+            '../topTen/closestWinners.sql'
         ]
         
         for sql_file in sql_files:
