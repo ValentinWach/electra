@@ -121,8 +121,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Abgeordneter'
 
-  #----- Stimmanteil per region ----- Hier könnten Bundesländer hinzugefügt werden
-  /results/{wahlid}/stimmanteil:
+  /results/{wahlid}/stimmanteil/zweitstimmen:
     get:
       operationId: getStimmanteil
       parameters:
@@ -131,7 +130,7 @@ paths:
         - Global
       responses:
         '200':
-          description: Returning the global results of the election
+          description: Returning the zweitstimmen results of the election
           content:
             application/json:
               schema:
@@ -140,7 +139,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Stimmanteil'
 
-  /results/{wahlid}/stimmanteil/wahlkreis/{wahlkreisid}:
+  /results/{wahlid}/stimmanteil/zweitstimmen/wahlkreis/{wahlkreisid}:
     get:
       operationId: getStimmanteilWahlkreis
       parameters:
@@ -151,7 +150,7 @@ paths:
         - Wahlkreis
       responses:
         '200':
-          description: Returning the results of the election in the wahlkreis
+          description: Returning the zweitstimmen results of the election in the wahlkreis
           content:
             application/json:
               schema:
@@ -160,7 +159,44 @@ paths:
                 items:
                   $ref: '#/components/schemas/Stimmanteil'
 
-  #-----winningparties per region----- Hier könnten Bundesländer hinzugefügt werden
+  /results/{wahlid}/stimmanteil/erststimmen:
+    get:
+      operationId: getStimmanteil
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+      tags:
+        - Global
+      responses:
+        '200':
+          description: Returning the erststimmen results of the election
+          content:
+            application/json:
+              schema:
+                type: array
+                title: stimmanteil
+                items:
+                  $ref: '#/components/schemas/Stimmanteil'
+
+  /results/{wahlid}/stimmanteil/erststimmen/wahlkreis/{wahlkreisid}:
+    get:
+      operationId: getStimmanteilWahlkreis
+      parameters:
+        - $ref: '#/components/parameters/wahlid'
+        - $ref: '#/components/parameters/wahlkreisid'
+        - $ref: '#/components/parameters/generatefromaggregate'
+      tags:
+        - Wahlkreis
+      responses:
+        '200':
+          description: Returning the erststimmen results of the election in the wahlkreis
+          content:
+            application/json:
+              schema:
+                type: array
+                title: stimmanteil
+                items:
+                  $ref: '#/components/schemas/Stimmanteil'
+
   /results/{wahlid}/winningparties/wahlkreis/{wahlkreisid}:
     get:
       operationId: getWinningPartiesWahlkreis
