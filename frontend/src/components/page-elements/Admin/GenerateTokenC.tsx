@@ -6,19 +6,35 @@ import PrimaryButtonC from "../../UI-element-components/PrimaryButtonC";
 import { DropdownData } from "../../../models/DropDownData";
 import DropdownC from "../../UI-element-components/DropdownC";
 import TextInputC from "../../UI-element-components/TextInputC";
+import ProgressLoaderFullWidthC from "../_shared/ProgressLoaderFullWidthC";
 
 export default function GenerateTokenC() {
+
     const [generatedTokens, setGeneratedTokens] = useState<Token[] | null>(null);
     const [elections, setElections] = useState<Wahl[] | null>(null);
     const [selectedElection, setSelectedElection] = useState<Wahl | null>(null);
     const [selectedWahlkreisId, setSelectedWahlkreisId] = useState<number | null>(null);
     const [idNumbers, setIdNumbers] = useState<string>("");
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const defaultDD: DropdownData = {
+        items: elections?.map(election => ({
+            label: election.date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }),
+            id: election.id
+        })) ?? [],
+
+        defaultChosenId: selectedElection?.id ?? 1,
+        label: "Wahljahr"
+    };
+    const [dropdownData, setDropdownData] = useState<DropdownData>(defaultDD);
+
 
     useEffect(() => {
         const getElections = async () => {
             try {
                 const data = await fetchWahlen();
                 setElections(data);
+                setSelectedElection(data[0]);
             } catch (error) {
                 console.error('Error fetching elections:', error);
             }
@@ -27,12 +43,14 @@ export default function GenerateTokenC() {
     }, []);
 
     const handleGenerateTokens = async (idNumbers: string) => {
-        setGeneratedTokens(null);
-        const idNumbersArray = idNumbers.split(',').map((id: string) => id.replace(/\s+/g, '').trim());
-        //if(!selectedElection || !selectedWahlkreis) return;
-        //const tokens = await generateTokens(idNumbersArray.length, idNumbersArray, selectedElection.id, selectedWahlkreis.id);
-        const tokens = await generateTokens(idNumbersArray.length, idNumbersArray, selectedElection?.id ?? 1, selectedWahlkreisId ?? 1);
-        setGeneratedTokens(tokens);
+        if (selectedElection != null && selectedWahlkreisId != null) {
+            setIsLoading(true);
+            setGeneratedTokens(null);
+            const idNumbersArray = idNumbers.split(',').map((id: string) => id.replace(/\s+/g, '').trim());
+            const tokens = await generateTokens(idNumbersArray.length, idNumbersArray, selectedElection?.id ?? 1, selectedWahlkreisId ?? 1);
+            setIsLoading(false);
+            setGeneratedTokens(tokens);
+        }
     }
 
     const handleElectionSelect = (id: number) => {
@@ -40,26 +58,39 @@ export default function GenerateTokenC() {
         setSelectedElection(election);
     };
 
-    const WahlDD: DropdownData = {
-        items: elections?.map(election => ({
-            label: election.date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }),
-            id: election.id
-        })) ?? [],
-        defaultChosenId: elections?.[0]?.id ?? 1,
-        label: "Wahljahr"
-    };
+    useEffect(() => {
+        const setDropdownDataFunc = () => {
+            if (selectedElection != null) {
+                const WahlDD: DropdownData = {
+                    items: elections?.map(election => ({
+                        label: election.date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }),
+                        id: election.id
+                    })) ?? [],
+
+                    defaultChosenId: selectedElection.id,
+                    label: "Wahljahr"
+                };
+                setDropdownData(WahlDD);
+            }
+        };
+        setDropdownDataFunc();
+    }, [selectedElection]);
+
+    const formatReturnedTokens = (tokens: Token[]): string => tokens.map(token => `${token.idNumber}: ${token.token}`).join('\n');
 
     return (
         <div className="flex flex-col gap-4 w-1/2">
             <h1 className="text-2xl font-bold">Wahltokengenerierung</h1>
             <div className="flex flex-row gap-2">
-                <DropdownC dropdownData={WahlDD} dropDownFunction={handleElectionSelect} />
-                <TextInputC label="Wahlkreisnummer" placeholder="100" id="wahlkreisnummer" name="wahlkreisnummer" inputFunction={(value: string) => {setSelectedWahlkreisId(parseInt(value))}} />
+                <DropdownC dropdownData={dropdownData} dropDownFunction={handleElectionSelect} />
+                <TextInputC label="Wahlkreisnummer" placeholder="100" id="wahlkreisnummer" name="wahlkreisnummer" inputFunction={(value: string) => { setSelectedWahlkreisId(parseInt(value)) }} />
             </div>
-            {/*<InputC label="Anzahl der Wahltoken" placeholder="100" id="amount" name="amount" />*/}
-            <TextAreaC label="Ausweisnummern (getrennt durch Kommas)" placeholder="L0X123456X, T2Y987654, M9Z456789" id="ausweisnummern" name="ausweisnummern" rows={4} inputFunction={setIdNumbers} />
-            {generatedTokens && <TextAreaC inputFunction={setIdNumbers} label="Generierte Wahltoken" placeholder={JSON.stringify(generatedTokens)} id="generatedTokens" name="generatedTokens" rows={4} />}
-            <PrimaryButtonC disabled={idNumbers == ""} label="Wahltokens generieren" size="md" onClick={() => handleGenerateTokens(idNumbers)} />
+            <TextAreaC maxHeight={300} label="Ausweisnummern (getrennt durch Kommas)" placeholder="L0X123456X, T2Y987654, M9Z456789" id="ausweisnummern" name="ausweisnummern" rows={4} inputFunction={setIdNumbers} />
+            {generatedTokens && <TextAreaC maxHeight={300} inputFunction={setIdNumbers} label="Generierte Wahltoken" defaultValue={formatReturnedTokens(generatedTokens)} id="generatedTokens" name="generatedTokens" rows={4} />}
+            {isLoading && <div className="flex flex-col w-full -mt-5">
+                <ProgressLoaderFullWidthC />
+            </div>}
+            <PrimaryButtonC disabled={idNumbers == "" || selectedElection == null || selectedWahlkreisId == null} label="Wahltokens generieren" size="md" onClick={() => handleGenerateTokens(idNumbers)} />
         </div>
     );
 }

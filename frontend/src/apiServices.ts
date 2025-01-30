@@ -378,13 +378,14 @@ export async function generateTokens(amount: number, idNumbers: string[], wahlid
     }
 }
 
-export async function recalculateResults() {
+export async function recalculateResults(): Promise<boolean> {
     const adminApi = new AdminApi();
     try {
         await adminApi.refresh();
         console.log("Ergebnisse wurden erfolgreich neu berechnet.");
+        return true;
     } catch (error) {
         console.error('Error recalculating results:', error);
-        throw error;
+        return false;
     }
 }
