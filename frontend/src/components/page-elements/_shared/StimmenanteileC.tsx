@@ -23,54 +23,79 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
     const { elections, selectedElection } = useElection();
     const [stimmanteil, setStimmanteil] = useState<Stimmanteil[]>();
     const [comparedStimmanteil, setComparedStimmanteil] = useState<Stimmanteil[]>()
+    const [comparedStimmanteilSummarized, setComparedStimmanteilSummarized] = useState<Stimmanteil[]>()
     const [comparedElection, setComparedElection] = useState<Wahl | null>()
     const [showAllParties, setShowAllParties] = useState(showAllPartiesDefault);
     const [showAbsoluteVotes, setShowAbsoluteVotes] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [apiLoading, setApiLoading] = useState(false);
     const [showZweitstimmen, setShowZweitstimmen] = useState(true);
 
     const { parteien: Bundestagsparteien } = useBundestagsParteien();
     const showLoader = useMinLoadingTime(loading);
-    const timeBeforeLoader = 75;
+    const timeBeforeLoader = 100;
 
-    const processStimmanteile = (data: Stimmanteil[] | undefined, summarizeOtherPartiesPar: boolean) => {
-        if (!data) return [];
-        data = data.sort((a, b) => a.party.shortname.localeCompare(b.party.shortname));
-        if (!summarizeOtherPartiesPar) return data;
+    interface ProcessedStimmanteile {
+        bundestagsParties: Stimmanteil[];
+        otherParties: Stimmanteil[];
+        sonstigeParty?: Stimmanteil;
+    }
 
-        const bundestagsParties = data.filter(s => 
-            Bundestagsparteien.some(bp => bp.id === s.party.id)
-        );
-
-        const otherParties = data.filter(s => 
-            !Bundestagsparteien.some(bp => bp.id === s.party.id)
-        );
-
+    const calculateSonstigeParty = (otherParties: Stimmanteil[], totalVotes: number): Stimmanteil => {
         const sonstigeAbsolute = otherParties.reduce((sum, party) => sum + party.absolute, 0);
-        const sonstigeShareCalculated = sonstigeAbsolute / (data.reduce((sum, party) => sum + party.absolute, 0));
-        console.log(sonstigeShareCalculated);
-        return [...bundestagsParties, {
+        const sonstigeShare = Math.round((sonstigeAbsolute / totalVotes) * 1000) / 10;
+        
+        return {
             party: {
                 id: -1,
                 name: "Sonstige Parteien",
                 shortname: "Sonstige"
             },
-            share: Math.round(sonstigeShareCalculated * 1000) / 10,
+            share: sonstigeShare,
             absolute: sonstigeAbsolute
-        }];
+        };
     };
 
+    const separateParties = (data: Stimmanteil[]): ProcessedStimmanteile => {
+        if (!data?.length) return { bundestagsParties: [], otherParties: [] };
+        const sortedData = [...data].sort((a, b) => a.party.shortname.localeCompare(b.party.shortname));
+        const bundestagsParties = sortedData.filter(s => 
+            Bundestagsparteien.some(bp => bp.id === s.party.id)
+        );
+        const otherParties = sortedData.filter(s => 
+            !Bundestagsparteien.some(bp => bp.id === s.party.id)
+        );
+        return { bundestagsParties, otherParties };
+    };
+
+    const processStimmanteile = (data: Stimmanteil[] | undefined, summarizeOtherParties: boolean): Stimmanteil[] => {
+        if (!data?.length) return [];
+        const { bundestagsParties, otherParties } = separateParties(data);
+        
+        if (!summarizeOtherParties) return [...bundestagsParties, ...otherParties];
+
+        const totalVotes = data.reduce((sum, party) => sum + party.absolute, 0);
+        const sonstigeParty = calculateSonstigeParty(otherParties, totalVotes);
+        
+        return [...bundestagsParties, sonstigeParty];
+    };
+
+    const fetchStimmanteile = async (electionId: number) => {
+        return showZweitstimmen 
+            ? await fetchStimmanteileZweitstimmen(electionId) 
+            : await fetchStimmanteileErststimmen(electionId);
+    };
 
     useEffect(() => {
         const getStimmanteile = async () => {
             try {
-                const loadingTimeout = setTimeout(() => setApiLoading(true), timeBeforeLoader);
-                const data = showZweitstimmen ? await fetchStimmanteileZweitstimmen(selectedElection?.id ?? 0) : await fetchStimmanteileErststimmen(selectedElection?.id ?? 0);
+                const loadingTimeout = setTimeout(() => setLoading(true), timeBeforeLoader);
+                const data = await fetchStimmanteile(selectedElection?.id ?? 0);
                 setComparedElection(null);
                 setStimmanteil(data);
+                setComparedStimmanteil(undefined);
+                setComparedStimmanteilSummarized(undefined);
                 clearTimeout(loadingTimeout);
-                setApiLoading(false);
+                setLoading(false);
             } catch (error) {
                 console.error('Error fetching Sitzverteilung:', error);
             }
@@ -82,25 +107,58 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
     }, [selectedElection]);
 
     useEffect(() => {
-        const getStimmanteile = async () => {
+        const updateData = async () => {
+            if (!selectedElection?.id) return;
+            
             try {
-                const loadingTimeout = setTimeout(() => setApiLoading(true), timeBeforeLoader);
-                const data = showZweitstimmen ? await fetchStimmanteileZweitstimmen(selectedElection?.id ?? 0) : await fetchStimmanteileErststimmen(selectedElection?.id ?? 0);
-                setStimmanteil(data);
-                if (comparedElection) {
-                    compareStimmanteile(comparedElection.id);
+                const loadingTimeout = setTimeout(() => setLoading(true), timeBeforeLoader);
+                
+                const currentData = await fetchStimmanteile(selectedElection.id);
+                setStimmanteil(currentData);
+
+                if (comparedElection?.id) {
+                    const comparedData = await fetchStimmanteile(comparedElection.id);
+                    
+                    const comparisonMap = new Map(comparedData.map(item => [item.party.id, item]));
+                    const stimmanteilWithDifference = currentData.map(item => {
+                        const comparedItem = comparisonMap.get(item.party.id) || { share: 0, absolute: 0 };
+                        return {
+                            ...item,
+                            share: Math.round((item.share - comparedItem.share) * 100) / 100,
+                            absolute: item.absolute - comparedItem.absolute
+                        };
+                    });
+
+                    const { bundestagsParties: bundestagsDifference } = separateParties(stimmanteilWithDifference);
+                    
+                    const currentProcessed = separateParties(currentData);
+                    const comparedProcessed = separateParties(comparedData);
+                    
+                    const totalCurrentVotes = currentData.reduce((sum, party) => sum + party.absolute, 0);
+                    const totalComparedVotes = comparedData.reduce((sum, party) => sum + party.absolute, 0);
+                    
+                    const currentSonstige = calculateSonstigeParty(currentProcessed.otherParties, totalCurrentVotes);
+                    const comparedSonstige = calculateSonstigeParty(comparedProcessed.otherParties, totalComparedVotes);
+                    
+                    const sonstigeDifference = [{
+                        party: currentSonstige.party,
+                        share: Math.round((currentSonstige.share - comparedSonstige.share) * 10) / 10,
+                        absolute: Math.round(currentSonstige.absolute - comparedSonstige.absolute)
+                    }];
+
+                    setComparedStimmanteil(stimmanteilWithDifference);
+                    setComparedStimmanteilSummarized([...bundestagsDifference, ...sonstigeDifference]);
                 }
+
                 clearTimeout(loadingTimeout);
-                setApiLoading(false);
+                setLoading(false);
             } catch (error) {
-                console.error('Error fetching Sitzverteilung:', error);
-            }
-            finally {
+                console.error('Error updating Stimmanteile:', error);
                 setLoading(false);
             }
         };
-        getStimmanteile();
-    }, [showZweitstimmen, fetchStimmanteileErststimmen, fetchStimmanteileZweitstimmen]);
+        updateData();
+    }, [showZweitstimmen, fetchStimmanteileErststimmen, fetchStimmanteileZweitstimmen, selectedElection, comparedElection]);
 
     const compareWahlDD: DropdownData = {
         items: [{ label: "Nicht vergleichen", id: -1 },
@@ -114,29 +172,53 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
     async function compareStimmanteile(wahlId: number) {
         if (wahlId < 1) {
             setComparedElection(null);
-        } else {
-            try {
-                const loadingTimeout = setTimeout(() => setApiLoading(true), 50);
-                const comparedData = showZweitstimmen ? await fetchStimmanteileZweitstimmen(wahlId) : await fetchStimmanteileErststimmen(wahlId);
-                const comparedMap = new Map(comparedData.map(item => [item.party.id, item]));
-                const stimmanteilWithDifference = stimmanteil?.map(item => {
-                    const comparedItem = comparedMap.get(item.party.id) || { share: 0, absolute: 0 };
-                    const shareDifference = Math.round((item.share - comparedItem.share) * 100) / 100;
-                    const absoluteDifference = item.absolute - comparedItem.absolute;
-                    return {
-                        ...item,
-                        share: shareDifference,
-                        absolute: absoluteDifference
-                    };
-                }) || [];
-                setComparedStimmanteil(stimmanteilWithDifference);
-                setComparedElection(elections.find(e => e.id === wahlId) ?? elections[0]);
-                
-                clearTimeout(loadingTimeout);
-                setApiLoading(false);
-            } catch (error) {
-                console.error('Error fetching Sitzverteilung:', error);
-            }
+            setComparedStimmanteil(undefined);
+            setComparedStimmanteilSummarized(undefined);
+            return;
+        }
+        try {
+            const loadingTimeout = setTimeout(() => setLoading(true), timeBeforeLoader);
+            const election = elections.find(e => e.id === wahlId);
+            if (!election) return;
+            
+            const data = await fetchStimmanteile(wahlId);
+            const currentData = await fetchStimmanteile(selectedElection?.id ?? 0);
+            
+            const comparisonMap = new Map(data.map(item => [item.party.id, item]));
+            const stimmanteilWithDifference = currentData.map(item => {
+                const comparedItem = comparisonMap.get(item.party.id) || { share: 0, absolute: 0 };
+                return {
+                    ...item,
+                    share: Math.round((item.share - comparedItem.share) * 100) / 100,
+                    absolute: item.absolute - comparedItem.absolute
+                };
+            });
+
+            const { bundestagsParties: bundestagsDifference } = separateParties(stimmanteilWithDifference);
+            
+            const currentProcessed = separateParties(currentData);
+            const comparedProcessed = separateParties(data);
+            
+            const totalCurrentVotes = currentData.reduce((sum, party) => sum + party.absolute, 0);
+            const totalComparedVotes = data.reduce((sum, party) => sum + party.absolute, 0);
+            
+            const currentSonstige = calculateSonstigeParty(currentProcessed.otherParties, totalCurrentVotes);
+            const comparedSonstige = calculateSonstigeParty(comparedProcessed.otherParties, totalComparedVotes);
+            
+            const sonstigeDifference = [{
+                party: currentSonstige.party,
+                share: Math.round((currentSonstige.share - comparedSonstige.share) * 10) / 10,
+                absolute: Math.round(currentSonstige.absolute - comparedSonstige.absolute)
+            }];
+
+            setComparedStimmanteil(stimmanteilWithDifference);
+            setComparedStimmanteilSummarized([...bundestagsDifference, ...sonstigeDifference]);
+            setComparedElection(election);
+            clearTimeout(loadingTimeout);
+            setLoading(false);
+        } catch (error) {
+            console.error('Error comparing Stimmanteile:', error);
+            setLoading(false);
         }
     }
 
@@ -156,17 +238,17 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
     };
 
     let comparedData: ChartDataNum = {
-        labels: processStimmanteile(comparedStimmanteil, true).map((partei) => {
+        labels: comparedStimmanteilSummarized?.map((partei) => {
             const value = showAbsoluteVotes ? partei.absolute : partei.share;
             return `${partei.party.shortname}: ${value > 0 ? '+' : ''}${showAbsoluteVotes ? formatNumberWithSpaces(value) : value + '%'}`;
-        }),
+        }) ?? [],
         datasets: [{
-            data: processStimmanteile(comparedStimmanteil, true).map((partei) => 
+            data: comparedStimmanteilSummarized?.map((partei) => 
                 showAbsoluteVotes ? partei.absolute : partei.share
-            ),
-            backgroundColor: processStimmanteile(comparedStimmanteil, true).map((partei) =>
+            ) ?? [],
+            backgroundColor: comparedStimmanteilSummarized?.map((partei) =>
                 partei.party.shortname === "Sonstige" ? "#808080" : getPartyColor(partei.party.shortname, true)
-            ),
+            ) ?? [],
             borderWidth: 0,
         }],
     };
@@ -180,7 +262,7 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
     };
 
     return (
-        <ContentTileC loading={showLoader || apiLoading} dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={title}>
+        <ContentTileC loading={showLoader || loading} dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={title}>
             {comparedElection ?
                 <BarchartC data={comparedData}></BarchartC>
                 :
