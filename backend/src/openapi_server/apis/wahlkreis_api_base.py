@@ -198,31 +198,36 @@ class BaseWahlkreisApi:
                 if generatefromaggregate:
                     stimmanteil_query = text('''
                                 SELECT
-                                    p.id, p.name, p."shortName",
+                                    COALESCE(p.id, -1) AS id,  
+                                    COALESCE(p.name, 'EINZELBEWERBER') AS name, 
+                                    COALESCE(p."shortName", 'EB') AS "shortName",
                                     stimmen_sum,
                                     ROUND(
                                         (stimmen_sum * 100.0) /
                                         (SELECT SUM(stimmen_sum)
                                          FROM erststimmen_wahlkreis_partei
-                                         WHERE wahlen_id = z.wahlen_id and wahlkreise_id = z.wahlkreise_id),
+                                         WHERE wahlen_id = z.wahlen_id AND wahlkreise_id = z.wahlkreise_id),
                                         1
                                     ) AS prozentualer_anteil
-                                FROM
-                                    erststimmen_wahlkreis_partei z JOIN parteien p ON z.parteien_id = p.id   
-                                WHERE wahlen_id = :wahlId and wahlkreise_id = :wahlkreisId;
+                                FROM erststimmen_wahlkreis_partei z
+                                LEFT JOIN parteien p ON z.parteien_id = p.id  
+                                WHERE wahlen_id = :wahlId 
+                                AND wahlkreise_id = :wahlkreisId;
                                 ''')
                 else:
                     stimmanteil_query = text('''
                                             SELECT
-                                                p.id, p.name, p."shortName",
+                                                COALESCE(p.id, -1) AS id,  
+                                                COALESCE(p.name, 'EINZELBEWERBER') AS name,
+                                                COALESCE(p."shortName", 'EB') AS "shortName",
                                                 COUNT(*) AS stimmenanzahl,
                                                 ROUND((COUNT(*) * 100.0) / SUM(COUNT(*)) OVER(), 1) AS prozentualer_anteil
-                                            FROM
-                                                erststimmen e JOIN wahlkreiskandidaturen wk ON e.wahlkreiskandidatur_id = wk.id JOIN parteien p ON wk.partei_id = p.id
-                                            WHERE
-                                                wahl_id = :wahlId and wahlkreis_id = :wahlkreisId
-                                            GROUP BY
-                                                p.id, p.name, p."shortName";
+                                            FROM erststimmen e
+                                            JOIN wahlkreiskandidaturen wk ON e.wahlkreiskandidatur_id = wk.id
+                                            LEFT JOIN parteien p ON wk.partei_id = p.id 
+                                            WHERE wahl_id = :wahlId
+                                            AND wahlkreis_id = :wahlkreisId
+                                            GROUP BY p.id, p.name, p."shortName";
                                                 ''')
 
                 stimmanteil_results = db.execute(stimmanteil_query,
