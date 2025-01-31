@@ -1,12 +1,12 @@
 Benutzerschnittstellen:
-	Eingabemaske für Ergebnisse
+	Schnittstelle zum Durchführen der Stimmabgabe
 	Seite zur Analyse der Ergebnisse
-	Schnittstelle zum Batch-Import
+	Admin Seite zum Erstellen von Tokens, Batch-Importen von CSV-Dateien und Refresh der gecacheden Daten
 
 
 Funktionale Anforderungen:
 	Stimmabgabe:
-		-> Authentifizierung (1.Schritt):
+		-> Authentifizierung (1. Schritt):
 			1. Token eingeben (bestimmt Wahlkreis)
 			2. Ausweisnummer eingeben, hash wird mit Token abgeglichen
 		-> Abgabe der 1. Stimme
@@ -14,13 +14,13 @@ Funktionale Anforderungen:
 		-> Abgabe der 2. Stimme
 			Anzeige aller zugelassenen Parteien im Bundesland
 	
-	Batch-Import:
-		-> Login Seite
-		-> Hochladen => (Formatprüfung mit potentieller Warnung) => Erfolgsmeldung
+	Admin Seite:
+	    -> Erstellen von Tokens
+	    -> Batch-Import von CSV-Dateien
+	    -> Refresh der gecacheden Daten
 
 	Seite zur Analyse der Ergebnisse
 		-> Sitzverteilungen
-		-> Potentielle Koalitionen
 		-> Pro Region & Partei
 			-> Erst- und Zweitstimmenverteilungen
 			-> Direktmandate
@@ -33,10 +33,9 @@ Nicht-Funktionale Anforderungen
 	- Sicherheit:
 		- Nur eine Stimmabgabe mit Token! (Keine Injections, ...)
 		- Nur eine Stimmabgabe pro Token!
-		- Kein Nicht-Autorisierter auf Stimmabgabe anderer Personen (z.B. am selben Rechner) möglich
-		- Batch-Upload ist nur autorisiert möglich
+		- Kein Nicht-Autorisierter Zugriff auf Stimmabgabe anderer Personen (z.B. am selben Rechner) möglich
 	- Einfache Bedienbarkeit/Übersichtlichkeit, beachte: Auch Rentner etc. müssen wählen!
-	- Fachliche Korrektheit
+	- Fachliche Korrektheit
 	- Wartbarkeit
 	- [Barrierefreiheit]
 
@@ -44,4 +43,4 @@ Abnahmekriterien:
 - Performancetest wird bestanden
 - Pentest wird bestanden
 - Einfache Bedienbarkeit/Übersichtlichkeit für die KOMPLETTE Bevölkerung
-- Fachliche Korrektheit => Daten können abgegeben werden, Analyse funktioniert
+- Fachliche Korrektheit => Daten können abgegeben werden, Analyse funktioniert
