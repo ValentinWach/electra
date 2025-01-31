@@ -8,8 +8,7 @@ export default function Stimmverteilungen() {
     return (
         <>
             <SitzverteilungC/>
-            <StimmanteileC fetchStimmanteile={fetchZweitstimmanteile} title="Zweitstimmanteile" />
-            <StimmanteileC fetchStimmanteile={fetchErststimmanteile} title="Erststimmanteile" />
+            <StimmanteileC fetchStimmanteileZweitstimmen={fetchZweitstimmanteile} fetchStimmanteileErststimmen={fetchErststimmanteile} title="Stimmanteile" />
         </>
     )
 }

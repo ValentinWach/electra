@@ -106,13 +106,13 @@ export default function WahlkreiseDetail() {
                 <div className="max-w-[1100px] sm:w-full xl:w-[90%] 2xl:w-3/4 flex flex-col justify-start gap-5 -mb-5">
                     <ToggleSwitchC defaultEnabled={!calcOnAggregate} setEnabledInputFunct={(calcOnEinzelstimmen: boolean) => setCalcOnAggregate(!calcOnEinzelstimmen)} label={"Ab hier auf Einzelstimmen berechnen"} />
                 </div>
-                <StimmanteileC fetchStimmanteile={wrapFetchZweitstimmanteileWahlkreis}
-                    showAbsoluteVotesDefault={true} title="Zweitstimmanteile" />
-                <StimmanteileC fetchStimmanteile={wrapFetchErststimmanteileWahlkreis}
-                    showAbsoluteVotesDefault={true} title="Erststimmanteile" />
+                <StimmanteileC fetchStimmanteileZweitstimmen={wrapFetchZweitstimmanteileWahlkreis}
+                    fetchStimmanteileErststimmen={wrapFetchErststimmanteileWahlkreis}
+                    showAllPartiesDefault={false} title="Stimmanteile" />
                 <DirektkandidatC overview={overview} loading={loading} />
                 <ContentTileC header={"Wahlbeteiligung nach Zweitstimmen"} loading={loading}>
                     <div className="flex flex-col w-2/3">
+
                         <AlertC alertData={{ type: AlertType.info, message: `Berechnet auf Basis der Einwohnerzahlen vom ${selectedElection?.date.getFullYear() === 2021 ? '31.12.2019' : '31.12.2015'}. Als wahlberechtigt gelten hier alle volljährigen deutschen Staatsbürger.` }} />
                     </div>
                     <DoughnutChart data={wahlbeteiligungData} fullCircle={true}></DoughnutChart>

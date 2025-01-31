@@ -40,7 +40,7 @@ export default function BarchartC(props: { data?: ChartDataNum }) {
     };
 
     return (
-        <div className="w-full max-w-[700px] sm:h-[300px] xl:h-[350px]  h-auto">
+        <div className="w-full max-w-[900px] sm:h-[350px] xl:h-[400px]">
             <Bar data={data} options={options} style={{ 
               width: '100%',
             }}/>

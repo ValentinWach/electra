@@ -48,7 +48,9 @@ export default function GridC({ gridData, usePagination = true, pageSize = 10, c
                 data.sort((a, b) => {
                     const aValue = a.values.find(col => col.column_id === sortConfig.columnId)?.value.replace(/\s+/g, '') || "";
                     const bValue = b.values.find(col => col.column_id === sortConfig.columnId)?.value.replace(/\s+/g, '') || "";
-
+                    if (!isNaN(parseFloat(aValue)) && !isNaN(parseFloat(bValue))) {
+                        return sortConfig.direction === 'asc' ? parseFloat(aValue) - parseFloat(bValue) : parseFloat(bValue) - parseFloat(aValue);
+                    }
                     if (sortConfig.direction === 'asc') {
                         return aValue.localeCompare(bValue, undefined, { numeric: true, sensitivity: 'base' });
                     } else {
@@ -109,9 +111,10 @@ export default function GridC({ gridData, usePagination = true, pageSize = 10, c
                     <tr>
                         {gridData.columns.map(column => (
                             <th key={column.id} scope="col">
-                                <div onClick={() => handleSort(column.id)}>
-                                    {column.label} {sortConfig.columnId === column.id ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
+                                <div className="overflow-hidden text-nowrap whitespace-nowrap text-ellipsis" title={column.label} onClick={() => handleSort(column.id)}>
+                                    {sortConfig.columnId === column.id ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''} {column.label}
                                 </div>
+
                                 {gridData.columns.some(col => col.searchable) && (
                                     <InputC placeholder={column.label + " filtern"}
                                         onInputFunction={(filter_val) => setFilters(column.id, filter_val)}
