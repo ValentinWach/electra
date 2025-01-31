@@ -11,7 +11,7 @@ Muss-Kriterien:
         - Es darf nicht möglich sein mehrmals abzustimmen
         - Es dürfen nur gültige Stimmen gezählt werden
     - Batch-Import:
-        - Es können mehrere Stimmen importiert werden; primär für vergleichsdaten vergangener Wahlen
+        - Es können mehrere Stimmen importiert werden; primär für Vergleichsdaten vergangener Wahlen
     - Analyse-Seiten
         - Anzeige der finalen Sitzverteilung
         - Anzeige der Erst-/Zweitstimmenverteilung
@@ -46,19 +46,18 @@ Kann-Kriterien:
 
 Muss-Kriterien:
     - Authentifizierung
-        - Man darf keinen Batch-Upload ohne Admin-Authentifizierung durchführen
         - Es muss sichergestellt sein, dass man nicht für andere Personen ohne deren Wissen abstimmt
-        - Es muss sichergestellt sein, dass nur berechtigte wählen
+        - Es muss sichergestellt sein, dass nur Berechtigte wählen
     - Fachliche Korrektheit
     - Skalierbarkeit
-        - Es müssen millionen von Stimmen in kurzer Zeit gespeichert werden
+        - Es müssen Millionen von Stimmen in kurzer Zeit gespeichert werden
         - Millionen von Menschen können gleichzeitig eine Analyse anfordern
     - Sicherheit
-        - Sicher gegen Angriffe durch die dritte Ergebnisse manipulieren können
+        - Sicher gegen Angriffe durch die Dritte Ergebnisse manipulieren können
             - Einschleusen
             - Löschen
             - Verändern
-        - Sicher gegen Angriffe durch die dritte sensible Daten abgreifen können
+        - Sicher gegen Angriffe durch die Dritte sensible Daten abgreifen können
         - Daten wie registrierte Kandidaten, Parteien, ... müssen sicher sein
     - Datenschutz
         - Es darf weder über die Logs noch über die Analyse-Seite zurückverfolgbar sein, wer wen gewählt hat
