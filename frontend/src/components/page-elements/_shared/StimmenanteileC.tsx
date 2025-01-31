@@ -27,10 +27,12 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
     const [showAllParties, setShowAllParties] = useState(showAllPartiesDefault);
     const [showAbsoluteVotes, setShowAbsoluteVotes] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [apiLoading, setApiLoading] = useState(false);
     const [showZweitstimmen, setShowZweitstimmen] = useState(true);
 
     const { parteien: Bundestagsparteien } = useBundestagsParteien();
     const showLoader = useMinLoadingTime(loading);
+    const timeBeforeLoader = 75;
 
     const processStimmanteile = (data: Stimmanteil[] | undefined, summarizeOtherPartiesPar: boolean) => {
         if (!data) return [];
@@ -45,16 +47,16 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
             !Bundestagsparteien.some(bp => bp.id === s.party.id)
         );
 
-        const sonstigeShare = otherParties.reduce((sum, party) => sum + party.share, 0);
         const sonstigeAbsolute = otherParties.reduce((sum, party) => sum + party.absolute, 0);
-
+        const sonstigeShareCalculated = sonstigeAbsolute / (data.reduce((sum, party) => sum + party.absolute, 0));
+        console.log(sonstigeShareCalculated);
         return [...bundestagsParties, {
             party: {
                 id: -1,
                 name: "Sonstige Parteien",
                 shortname: "Sonstige"
             },
-            share: Math.round(sonstigeShare * 100) / 100,
+            share: Math.round(sonstigeShareCalculated * 1000) / 10,
             absolute: sonstigeAbsolute
         }];
     };
@@ -63,9 +65,12 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
     useEffect(() => {
         const getStimmanteile = async () => {
             try {
+                const loadingTimeout = setTimeout(() => setApiLoading(true), timeBeforeLoader);
                 const data = showZweitstimmen ? await fetchStimmanteileZweitstimmen(selectedElection?.id ?? 0) : await fetchStimmanteileErststimmen(selectedElection?.id ?? 0);
                 setComparedElection(null);
                 setStimmanteil(data);
+                clearTimeout(loadingTimeout);
+                setApiLoading(false);
             } catch (error) {
                 console.error('Error fetching Sitzverteilung:', error);
             }
@@ -74,17 +79,19 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
             }
         };
         getStimmanteile();
-
     }, [selectedElection]);
 
     useEffect(() => {
         const getStimmanteile = async () => {
             try {
+                const loadingTimeout = setTimeout(() => setApiLoading(true), timeBeforeLoader);
                 const data = showZweitstimmen ? await fetchStimmanteileZweitstimmen(selectedElection?.id ?? 0) : await fetchStimmanteileErststimmen(selectedElection?.id ?? 0);
                 setStimmanteil(data);
                 if (comparedElection) {
                     compareStimmanteile(comparedElection.id);
                 }
+                clearTimeout(loadingTimeout);
+                setApiLoading(false);
             } catch (error) {
                 console.error('Error fetching Sitzverteilung:', error);
             }
@@ -93,26 +100,7 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
             }
         };
         getStimmanteile();
-    }, [showZweitstimmen]);
-
-    useEffect(() => {
-        const getStimmanteile = async () => {
-            try {
-                setLoading(true);
-                const data = showZweitstimmen ? await fetchStimmanteileZweitstimmen(selectedElection?.id ?? 0) : await fetchStimmanteileErststimmen(selectedElection?.id ?? 0);
-                setStimmanteil(data);
-                if (comparedElection) {
-                    compareStimmanteile(comparedElection.id);
-                }
-            } catch (error) {
-                console.error('Error fetching Sitzverteilung:', error);
-            }
-            finally {
-                setLoading(false);
-            }
-        };
-        getStimmanteile();
-    }, [fetchStimmanteileErststimmen, fetchStimmanteileZweitstimmen]);
+    }, [showZweitstimmen, fetchStimmanteileErststimmen, fetchStimmanteileZweitstimmen]);
 
     const compareWahlDD: DropdownData = {
         items: [{ label: "Nicht vergleichen", id: -1 },
@@ -128,10 +116,10 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
             setComparedElection(null);
         } else {
             try {
+                const loadingTimeout = setTimeout(() => setApiLoading(true), 50);
                 const comparedData = showZweitstimmen ? await fetchStimmanteileZweitstimmen(wahlId) : await fetchStimmanteileErststimmen(wahlId);
                 const comparedMap = new Map(comparedData.map(item => [item.party.id, item]));
                 const stimmanteilWithDifference = stimmanteil?.map(item => {
-
                     const comparedItem = comparedMap.get(item.party.id) || { share: 0, absolute: 0 };
                     const shareDifference = Math.round((item.share - comparedItem.share) * 100) / 100;
                     const absoluteDifference = item.absolute - comparedItem.absolute;
@@ -141,10 +129,11 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
                         absolute: absoluteDifference
                     };
                 }) || [];
-                console.log(stimmanteilWithDifference);
                 setComparedStimmanteil(stimmanteilWithDifference);
                 setComparedElection(elections.find(e => e.id === wahlId) ?? elections[0]);
-
+                
+                clearTimeout(loadingTimeout);
+                setApiLoading(false);
             } catch (error) {
                 console.error('Error fetching Sitzverteilung:', error);
             }
@@ -191,7 +180,7 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
     };
 
     return (
-        <ContentTileC loading={showLoader} dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={title}>
+        <ContentTileC loading={showLoader || apiLoading} dropDownContent={compareWahlDD} dropDownFunction={compareStimmanteile} header={title}>
             {comparedElection ?
                 <BarchartC data={comparedData}></BarchartC>
                 :
