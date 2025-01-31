@@ -166,7 +166,7 @@ class BaseGlobalApi:
                                     (SELECT SUM(stimmen_sum)
                                      FROM zweitstimmen_partei
                                      WHERE wahlen_id = z.wahlen_id),
-                                    2
+                                    1
                                 ) AS prozentualer_anteil
                             FROM
                                 zweitstimmen_partei z JOIN parteien p on z.parteien_id = p.id
@@ -204,17 +204,19 @@ class BaseGlobalApi:
             with db_session() as db:
                 stimmanteil_query = text('''
                             SELECT
-                                p.id, p.name, p."shortName",
+                                COALESCE(p.id, -1) AS id, 
+                                COALESCE(p.name, 'EINZELBEWERBER') AS name, 
+                                COALESCE(p."shortName", 'EB') AS "shortName",
                                 stimmen_sum,
                                 ROUND(
                                     (stimmen_sum * 100.0) /
                                     (SELECT SUM(stimmen_sum)
                                      FROM erststimmen_partei
                                      WHERE wahlen_id = z.wahlen_id),
-                                    2
+                                    1
                                 ) AS prozentualer_anteil
-                            FROM
-                                erststimmen_partei z JOIN parteien p on z.parteien_id = p.id
+                            FROM erststimmen_partei z
+                            LEFT JOIN parteien p ON z.parteien_id = p.id
                             WHERE wahlen_id = :wahlId;
                             ''')
                 stimmanteil_results = db.execute(stimmanteil_query,

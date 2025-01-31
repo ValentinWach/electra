@@ -39,7 +39,6 @@ GROUP BY wahlkreis_id, w.kandidat_id, w.partei_id, w.wahl_id;
 CREATE MATERIALIZED VIEW erststimmen_wahlkreis_partei AS
 SELECT wk.partei_id as parteien_id, wk.wahl_id as wahlen_id, wk.wahlkreis_id as wahlkreise_id, SUM(votes) as stimmen_sum
 FROM erststimmen_wahlkreis_partei_kandidat wk
-WHERE wk.partei_id IS NOT NULL
 GROUP BY wk.partei_id, wk.wahl_id, wk.wahlkreis_id;
 
 CREATE MATERIALIZED VIEW erststimmen_partei AS

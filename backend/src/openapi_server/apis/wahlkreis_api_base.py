@@ -143,7 +143,7 @@ class BaseWahlkreisApi:
                                         (SELECT SUM(stimmen_sum)
                                          FROM zweitstimmen_wahlkreis_partei
                                          WHERE wahlen_id = z.wahlen_id and wahlkreise_id = z.wahlkreise_id),
-                                        2
+                                        1
                                     ) AS prozentualer_anteil
                                 FROM
                                     zweitstimmen_wahlkreis_partei z JOIN parteien p ON z.parteien_id = p.id   
@@ -154,7 +154,7 @@ class BaseWahlkreisApi:
                                             SELECT
                                                 p.id, p.name, p."shortName",
                                                 COUNT(*) AS stimmenanzahl,
-                                                ROUND((COUNT(*) * 100.0) / SUM(COUNT(*)) OVER(), 2) AS prozentualer_anteil
+                                                ROUND((COUNT(*) * 100.0) / SUM(COUNT(*)) OVER(), 1) AS prozentualer_anteil
                                             FROM
                                                 zweitstimmen z JOIN parteien p ON z.partei_id = p.id   
                                             WHERE
@@ -205,7 +205,7 @@ class BaseWahlkreisApi:
                                         (SELECT SUM(stimmen_sum)
                                          FROM erststimmen_wahlkreis_partei
                                          WHERE wahlen_id = z.wahlen_id and wahlkreise_id = z.wahlkreise_id),
-                                        2
+                                        1
                                     ) AS prozentualer_anteil
                                 FROM
                                     erststimmen_wahlkreis_partei z JOIN parteien p ON z.parteien_id = p.id   
@@ -216,7 +216,7 @@ class BaseWahlkreisApi:
                                             SELECT
                                                 p.id, p.name, p."shortName",
                                                 COUNT(*) AS stimmenanzahl,
-                                                ROUND((COUNT(*) * 100.0) / SUM(COUNT(*)) OVER(), 2) AS prozentualer_anteil
+                                                ROUND((COUNT(*) * 100.0) / SUM(COUNT(*)) OVER(), 1) AS prozentualer_anteil
                                             FROM
                                                 erststimmen e JOIN wahlkreiskandidaturen wk ON e.wahlkreiskandidatur_id = wk.id JOIN parteien p ON wk.partei_id = p.id
                                             WHERE
