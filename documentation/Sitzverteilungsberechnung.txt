@@ -1,35 +1,26 @@
-Unsere Implementierung des Sitzverteilungsalgorithmus basiert auf dem Fünfundzwanzigsten Gesetz zur Änderung des Bundeswahlgesetzes (BWG)
-vom 14. November 2020.
+Unsere Implementierung des Sitzverteilungsalgorithmus basiert auf dem Fünfundzwanzigsten Gesetz zur Änderung des Bundeswahlgesetzes (BWG) vom 14. November 2020.
 
-Musterberechnungen der Sitzverteilungen mit diesem Verfahren für die Wahlen 2017 und 2021 können unter folgenden Links eingesehen werden:
+Musterberechnungen der Sitzverteilungen mit diesem Verfahren für die Wahlen 2017 und 2021 können unter den folgenden Links eingesehen werden:
 https://www.bundeswahlleiterin.de/dam/jcr/05c1185a-173f-4bab-80d6-51027c94b1bc/bwg2021_mustersitzberechnung_ergebnis2017.pdf
 https://www.bundeswahlleiterin.de/dam/jcr/bf33c285-ee92-455a-a9c3-8d4e3a1ee4b4/btw21_sitzberechnung.pdf
 
-Dabei ist zu beachten, dass die Musterberechnung für 2021 die Wiederholungswahl in Teilen Berlins nicht einschließt, im Zuge derer die FDP einen Sitz im Bundestag verlor.
+Dabei ist zu beachten, dass die Musterberechnung für 2021 die Wiederholungswahl in Teilen Berlins nicht einschließt, durch die die FDP einen Sitz im Bundestag verlor.
 
-Um schnelle Zugriffe auf unsere API-Endpunkte zu gewährleisten, nutzt unsere Implementierung der Sitzplatzberechnung materialized views um Zwischen- und Endergebnisse zu speichern.
-Die Definitionen dieser Relationen sind unter /backend/database-tools/sitzverteilung/sitzverteilung-views.sql abgelegt.
+Um schnelle Zugriffe auf unsere API-Endpunkte zu gewährleisten, nutzt unsere Implementierung der Sitzverteilung Materialized Views, um Zwischen- und Endergebnisse zu speichern. Die Definitionen dieser Relationen sind unter: /backend/database-tools/sitzverteilung/sitzverteilung-views.sql abgelegt.
+Weiterhin verwenden wir PostgreSQL-Funktionen, um gewisse Teilberechnungen der Sitzverteilung zu realisieren. Diese sind unter: /backend/database-tools/sitzverteilung/sitzverteilung-functions.sql zu finden.
 
-Weiterhin nutzen wir Postgres Funktionen, um gewisse Teilberechnungen der Sitzplatzberechnung zu realisieren.
-Diese können unter /backend/database-tools/sitzverteilung/sitzverteilung-functions.sql gefunden werden.
+Um das für die Sitzberechnung zentrale Sainte-Laguë-Verfahren zu implementieren, haben wir uns für das Höchstzahlverfahren entschieden. Dieses Verfahren teilt die als Input gegebenen Stimmen oder Bevölkerungszahlen schrittweise durch eine Reihe steigender Divisoren und ermittelt die höchsten resultierenden Werte. Die zu verteilenden Sitze werden der Reihe nach den Parteien mit den höchsten Werten zugewiesen, bis alle Sitze vergeben sind.
+Die Implementierung des Sainte-Laguë-Verfahrens erfolgt durch die Funktionen sainte_lague_table() und sainte_lague(). Während sainte_lague_table() die Tabelle der aus den Divisionen resultierenden Werte berechnet, ermittelt sainte_lague() die höchsten Werte.
+Mithilfe dieser Funktionen kann in einem ersten Schritt die erste Oberverteilung berechnet werden, die durch die View ov_1_sitzkontingente_bundeslaender dargestellt wird.
 
-Um das für die Sitzberechnung zentrale Sainte-Laguë-Verfahren zu implementieren haben wir uns für die Auszählung des Höchstzahlenschemas entschieden.
-Das Höchstzahlverfahren teilt die als Input gegebenen Stimmen oder Bevölkerungszahlen schrittweise durch eine Reihe von steigenden Divisoren und ermittelt die höchsten resultierenden Werte.
-Die zu verteilenden Sitze werden dann der Reihe nach an die Parteien mit den größten Zahlen zugewiesen, bis alle Sitze verteilt sind.
+Anschließend erfolgt die erste Unterverteilung, bei der die Sitzkontingente der Bundesländer auf die Landeslisten der Parteien verteilt werden. Diese Berechnung wird in der Relation uv_1_sitzkontingente_landeslisten gespeichert und durch die Funktion calculate_seats_per_party_per_bundesland_and_election() realisiert.
 
-Die Implementierung dieses Verfahrens bilden die Funktionen sainte_lague_table() und sainte_lague(). Während sainte_lague_table() die Tabelle der aus den Divisionen entstehenden Werte berechnet, führt sainte_lague() die Ermittlung der höchsten Werte durch.
+Das Ergebnis des nächsten Schritts des Sitzverteilungsalgorithmus ist die Feststellung der Mindestsitzzahlen der Parteien. Diese werden durch die Definition der Materialized View mindestsitzanspruch_partei_bundesland berechnet und gespeichert.
 
-Mit Hilfe, dieser Funktionen kann so in einem ersten Schritt die erste Oberverteilung, repräsentiert durch die view ov_1_sitzkontingente_bundesleander, berechnet werden.
+Die anschließende Berechnung der zweiten Oberverteilung erfolgt mithilfe der Relationen ov_2_sitzkontingente_bundesweit_erhoeht_basis, ov_2_sitzkontingente_bundesweit_erhoeht und der Funktion calculate_seats_per_party_per_election_nationwide().
+Dabei bildet die Relation ov_2_sitzkontingente_bundesweit_erhoeht_basis die Grundlage für die Erhöhung der Gesamtsitzzahl. Diese Erhöhung wird durch die Funktion calculate_seats_per_party_per_election_nationwide() realisiert, die die Werte aus ov_2_sitzkontingente_bundesweit_erhoeht_basis als Input verwendet und das Ergebnis in der Relation ov_2_sitzkontingente_bundesweit_erhoeht speichert. Um eine ineffiziente iterative Erhöhung der Sitzanzahl zu vermeiden, wurde diese Funktion mithilfe einer binären Suche implementiert, die effizient den korrekten Wert der Gesamtsitzzahl ermittelt.
 
-Anschließend wird die erste Unterverteilung, welche Sitzkontingente der Länder auf Landeslisten der Parteien verteilt berechnet und in der Relation uv_1_sitzkontingente_landeslisten abgelegt.
-Die Berechnung dieser Unterverteilung ist durch die Funktion calculate_seats_per_party_per_bundesland_and_election() realisiert.
+Die abschließende Unterverteilung der Sitze auf die Landeslisten der Parteien wird durch die Funktion calculate_increased_seats_per_party_per_bundesland_and_election() realisiert und in der Relation uv_2_sitzkontingente_landeslisten_erhoeht gespeichert.
 
-
-
-
-
-
-
-
-
+Aus dieser Relation berechnen wir die Abgeordneten, die sich aus den Gewinnern der Wahlkreise und denjenigen Kandidaten ergeben, die über ihre Listenplatzierung einziehen. Diese werden in der Materialized View abgeordnete gespeichert.
 
