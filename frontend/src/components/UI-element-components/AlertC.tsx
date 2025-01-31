@@ -57,7 +57,7 @@ export default function AlertC({ alertData }: { alertData: AlertData }) {
                 </div>
                 <div className="ml-3">
                     {alertData.title && <h3 className={`font-medium ${colorClasses.text}`}>{alertData.title}</h3>}
-                    <div className={`${alertData.title ? "mt-2" : ""} ${colorClasses.textLight}`}>
+                    <div className={`${alertData.title ? "mt-2" : ""} ${colorClasses.textLight} font-normal text-sm`}>
                         <p>
                             {alertData.message}
                         </p>

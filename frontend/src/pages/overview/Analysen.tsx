@@ -4,7 +4,6 @@ import { useBundestagsParteien } from "../../hooks/useBundestagsParteien";
 import FullPageLoadingC from "../../components/UI-element-components/FullPageLoadingC.tsx";
 import { useMinLoadingTime } from "../../hooks/useMinLoadingTime.ts";
 import BerufsgruppenC from "../../components/page-elements/Analysen/BerufsgruppenC.tsx";
-import BerufsgruppenBarC from "../../components/page-elements/Analysen/BerufsgruppenBarC.tsx";
 export default function Analysen() {
     const { parteien, isLoading } = useBundestagsParteien();
     const showLoader = useMinLoadingTime(isLoading);

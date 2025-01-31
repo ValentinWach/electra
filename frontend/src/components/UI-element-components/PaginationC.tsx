@@ -62,7 +62,7 @@ export default function PaginationC({numOfPages, switchPage, selectedPageProp}: 
                     disabled={selectedPage === 1}
                     className={`inline-flex items-center border-t-2 pr-1 pt-4 text-sm font-medium ${
                         selectedPage === 1
-                            ? 'border-transparent text-gray-300 cursor-not-allowed'
+                            ? 'border-transparent text-gray-300'
                             : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                     }`}
                     onClick={() => {

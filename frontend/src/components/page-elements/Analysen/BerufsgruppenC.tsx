@@ -351,7 +351,7 @@ export default function BerufsgruppenC({ parteien }: { parteien: Partei[] }) {
                     </div>
                     <div className="px-10 py-4">
                         <div className="font-bold mb-4">Berufsgruppen</div>
-                        <div className="grid sm:grid-cols-1 xl:grid-cols-2 gap-3">
+                        <div className="grid font-normal sm:grid-cols-1 xl:grid-cols-2 gap-3">
                             {legendData.map((item, index) => (
                                 <div key={index} className="flex items-center gap-2">
                                     <div

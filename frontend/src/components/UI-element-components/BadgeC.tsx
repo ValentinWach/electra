@@ -25,11 +25,12 @@ export default function BadgeC(props: { text: string, color: string }) {
     return (
         <span 
             ref={spanRef}
-            className="min-w-20 inline-flex max-w-full justify-center items-start rounded-xl px-2 py-0.5 max-h-[1.5rem] text-sm font-medium overflow-hidden" 
+            className="min-w-20 inline-flex max-w-full justify-center items-start rounded-xl px-2 py-0.5 max-h-[1.5rem] text-sm font-semibold overflow-hidden" 
             style={{
                 color: props.color,
                 backgroundColor: `${props.color}30`
             }}
+
             title={props.text}
         >
             {displayText}

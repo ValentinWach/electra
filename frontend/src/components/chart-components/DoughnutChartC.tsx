@@ -30,6 +30,10 @@ export default function DoughnutChart(props: { data?: ChartDataNum, fullCircle?:
                 display: true,
                 labels: {
                     usePointStyle: true,
+                    font: {
+                        size: 13,
+                        weight: '500',
+                    },
                 },
             },
         },
@@ -52,11 +56,15 @@ export default function DoughnutChart(props: { data?: ChartDataNum, fullCircle?:
                 display: true,
                 labels: {
                     usePointStyle: true,
+                    font: {
+                        size: 12,
+                        weight: '500',
+                    },
                 },
             },
         },
         hover: {
-            mode: 'index',
+            mode: 'index' as const,
             intersect: true,
         },
         elements: {

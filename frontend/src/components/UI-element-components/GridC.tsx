@@ -134,7 +134,7 @@ export default function GridC({ gridData, usePagination = true, pageSize = 10, c
                             {onRowClick && <td className="w-32">
                                 <button
                                     type="button"
-                                    className="rounded-full bg-white px-2.5 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-100"
+                                    className="rounded-full bg-white px-2.5 py-1 text-sm font-normal text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-100"
                                 >
                                     Details
                                 </button>

@@ -43,7 +43,7 @@ export default function WarningDialogC({ title, message, confirmText, cancelText
                                         <ExclamationTriangleIcon aria-hidden="true" className="size-6 text-yellow-600" />
                                     </div>
                                 )}
-                                <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <div className="mt-3 text-sm text-center sm:ml-4 sm:mt-0 sm:text-left">
                                     {warnMessage && (
                                         <div className="mt-2">
                                             <AlertC alertData={{

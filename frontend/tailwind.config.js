@@ -15,9 +15,14 @@ export default {
       },
       height: {
         'chart' : '600px'
-      }
+      },
+      fontFamily: {
+        sans: ['inter', 'sans-serif'],
+        heading: ['inter', 'sans-serif'],
+      },
     },
   },
+
   plugins: [],
 }
 
