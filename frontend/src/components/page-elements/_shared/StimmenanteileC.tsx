@@ -95,6 +95,25 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
         getStimmanteile();
     }, [showZweitstimmen]);
 
+    useEffect(() => {
+        const getStimmanteile = async () => {
+            try {
+                setLoading(true);
+                const data = showZweitstimmen ? await fetchStimmanteileZweitstimmen(selectedElection?.id ?? 0) : await fetchStimmanteileErststimmen(selectedElection?.id ?? 0);
+                setStimmanteil(data);
+                if (comparedElection) {
+                    compareStimmanteile(comparedElection.id);
+                }
+            } catch (error) {
+                console.error('Error fetching Sitzverteilung:', error);
+            }
+            finally {
+                setLoading(false);
+            }
+        };
+        getStimmanteile();
+    }, [fetchStimmanteileErststimmen, fetchStimmanteileZweitstimmen]);
+
     const compareWahlDD: DropdownData = {
         items: [{ label: "Nicht vergleichen", id: -1 },
         ...elections.filter(e => e.id != selectedElection?.id).map(election => ({

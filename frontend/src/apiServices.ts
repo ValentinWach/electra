@@ -1,5 +1,5 @@
-import { GeneralApi, GlobalApi, WahlkreisApi, ElectApi, AnalysisApi, AdminApi} from "./api";
-import {SeatDistribution, Wahl, Wahlkreis } from "./api";
+import { GeneralApi, GlobalApi, WahlkreisApi, ElectApi, AnalysisApi, AdminApi } from "./api";
+import { SeatDistribution, Wahl, Wahlkreis } from "./api";
 import * as runtime from './api/runtime';
 
 interface CacheEntry<T> {
@@ -164,8 +164,6 @@ export async function fetchZweitstimmanteile(wahlid: number) {
 }
 
 export async function fetchErststimmanteileWahlkreis(wahlid: number, wahlkreisid: number, generateFromAggregate: boolean = true) {
-    const cacheKey = getCacheKey('fetchErststimmanteileWahlkreis', wahlid, wahlkreisid, generateFromAggregate);
-    return withCache(cacheKey, async () => {
     try {
         const wahlkreisApi = new WahlkreisApi();
         const stimmanteile = await wahlkreisApi.getErststimmenWahlkreis({ wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate });
@@ -175,13 +173,10 @@ export async function fetchErststimmanteileWahlkreis(wahlid: number, wahlkreisid
     } catch (error) {
         console.error('Error fetching Stimmanteile:', error);
         throw error;
-        }
-    });
+    }
 }
 
 export async function fetchZweitstimmanteileWahlkreis(wahlid: number, wahlkreisid: number, generateFromAggregate: boolean = true) {
-    const cacheKey = getCacheKey('fetchZweitstimmanteileWahlkreis', wahlid, wahlkreisid, generateFromAggregate);
-    return withCache(cacheKey, async () => {
     try {
         const wahlkreisApi = new WahlkreisApi();
         const stimmanteile = await wahlkreisApi.getZweitstimmenWahlkreis({ wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate });
@@ -191,8 +186,7 @@ export async function fetchZweitstimmanteileWahlkreis(wahlid: number, wahlkreisi
     } catch (error) {
         console.error('Error fetching Zweitstimmanteile:', error);
         throw error;
-        }
-    });
+    }
 }
 
 export async function fetchWinningPartiesWahlkreis(wahlid: number, wahlkreisid: number) {
@@ -320,7 +314,7 @@ export async function fetchBerufsgruppen(wahlid: number, parteiid: number, showB
             const analysisApi = new AnalysisApi();
             const berufsgruppen = await analysisApi.getBerufsgruppen({ wahlid, parteiid, onlyAbgeordnete: showBundestagsabgeordneteOnly });
             console.log('Fetched Berufsgruppen:', berufsgruppen);
-            return {berufsgruppen: berufsgruppen.berufsgruppen?.sort((a, b) =>a.name.localeCompare(b.name))};
+            return { berufsgruppen: berufsgruppen.berufsgruppen?.sort((a, b) => a.name.localeCompare(b.name)) };
         } catch (error) {
             console.error('Error fetching Berufsgruppen:', error);
             throw error;
@@ -363,7 +357,7 @@ export async function authenticateVoter(token: string, idNumber: string): Promis
         const electApi = new ElectApi();
 
         const voter = await electApi.authenticate({
-            authenticationRequest: { token, idNumber}
+            authenticationRequest: { token, idNumber }
         });
         const { wahl, wahlkreis } = voter;
         console.log('Fetched Voter:', voter);
@@ -399,9 +393,9 @@ export async function submitVote(token: string, idNumber: string, directCandidat
 export async function generateTokens(amount: number, idNumbers: string[], wahlid: number, wahlkreisid: number) {
     const adminApi = new AdminApi();
     try {
-        const tokens = await adminApi.generateToken({ 
-            wahlid, 
-            wahlkreisid, 
+        const tokens = await adminApi.generateToken({
+            wahlid,
+            wahlkreisid,
             generateToken: { amount, idNumbers }
         });
         console.log('Fetched Tokens:', tokens);

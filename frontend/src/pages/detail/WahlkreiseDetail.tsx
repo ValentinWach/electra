@@ -85,11 +85,11 @@ export default function WahlkreiseDetail() {
     }, [wahlkreis, calcOnAggregate]);
 
     const wrapFetchZweitstimmanteileWahlkreis = useCallback(async (wahlId: number) => {
-        const data = await fetchZweitstimmanteileWahlkreis(wahlId, wahlkreis?.id ?? 1);
+        const data = await fetchZweitstimmanteileWahlkreis(wahlId, wahlkreis?.id ?? 1, calcOnAggregate);
         return data;
-    }, [wahlkreis]);
+    }, [wahlkreis, calcOnAggregate]);
 
-        const wrapFetchWinningPartiesWahlkreis = useCallback(async (wahlId: number) => {
+    const wrapFetchWinningPartiesWahlkreis = useCallback(async (wahlId: number) => {
         const data = await fetchWinningPartiesWahlkreis(wahlId, wahlkreis?.id ?? 1);
         return data;
     }, [wahlkreis]);
