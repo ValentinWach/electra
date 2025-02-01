@@ -2,7 +2,7 @@
 
 These benchmarks are run with the following setup:
 
-- **t values**: 0.5, 2.0, 5.0
+- **t-values**: 0.5, 2.0, 5.0
 - **Clients**: 100, 1000, 10000
 
 **Note**: Because the application is not deployed productively, the same machine that handled the requests also ran the server. This restricts the significance of the results as many resources are used to perform the requests.

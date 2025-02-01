@@ -4,7 +4,7 @@ This is the electra frontend application built with React, TypeScript, and Vite.
 It is build for ***Chromium Browsers*** like Google Chrome, so prefaribly use it there. Downloading the correct fonts from CDN requires an active internet connection, else a fallback font will be used.
 This sections quickly introduces the the frontend page structure, and below, there is a quickstart guide.
 
-The appllication is split into three subapplications:
+The application is split into three subapplications:
 - **Ergebnisse**: Analyse Election results, all paths start with `/ergebnisse`. Details: see below.
 - **Voting**: Page for citizens to hand in votes, all paths start with `/stimmabgabe`. Tokens created on Admin can be used for login.
 - **Admin**: Admin page, currently the only path is `/admin/start`. Create tokens, init recalculation of results and batch upload votes for testing.
@@ -12,8 +12,8 @@ The appllication is split into three subapplications:
 ### Ergebnisse
 - **Uebersicht**: Seat distribution and nationwide results.
 - **Wahlkreise**: A Wahlkreisliste, and a map which shows the winning parties per wahlkreis. A wahlkreis can be selected in the list or on the map to see detailed results.
-- **Parteien**: A list of all bundestagsparties and another one of all parties. By klicking on a party you see their closest winners/loosers, and below there is a table showing all Überhangsmandate if any exist.
-- **Analysen**: 3 Additional analyses.
+- **Parteien**: A list of all bundestagsparties and another one of all parties. By clicking on a party you see their closest winners/loosers, and below there is a table showing all Überhangsmandate if any exist.
+- **Analysen**: 3 additional analyses.
 
 ## Tech Stack
 

@@ -4,7 +4,7 @@ This is the backend server for the Electra election system, built with FastAPI. 
 
 ## Key Components
 
-- **Election Results Processing**: SQL queries and materialized views for efficient election result calculations
+- **Election Results Processing**: SQL queries and materialized views for efficient API requests
 - **Vote Management**: Secure handling of incoming votes and token validation
 - **Admin Operations**: APIs for token generation, result recalculation, and system management
 - **Performance Optimization**: Pre-calculated materialized views for frequently accessed data
@@ -42,7 +42,7 @@ backend/                     # Root directory
 
 - Python >= 3.10
 - pip
-- uv (pip install uv) globally
+- uv (`pip install uv` globally)
 - PostgreSQL 17.1
 
 After navigating to the backend directory, run the following commands to install dependencies & start the application:
@@ -90,14 +90,3 @@ Healthcheck: `http://localhost:8000` should return "Electra"
 The API documentation will be available at:
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
-
-
-
-
-## Development
-
-### Running with Docker
-
-```bash
-docker-compose up --build
-```

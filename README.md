@@ -16,13 +16,13 @@ The project is split into two main components:
 
 ### Backend (FastAPI + PostgreSQL)
 - Built with FastAPI, SQLAlchemy and PostgreSQL
-- Utilizes materialized views for efficient result calculations
+- Utilizes materialized views for efficient API requests
 - Supports both development and production configurations
 - Scalable with multi-worker deployment options
 
 ## Getting Started
 
-Each frontend and backend have their onw README.md file in their respective directories. The following is a quick summary of both.
+Each frontend and backend have their own README.md file in their respective directories. The following is a quick summary of both.
 
 ### Prerequisites
 
@@ -40,7 +40,7 @@ uv sync
 ```
 
 2. Set up the database:
-- Install PostgreSQL
+- Install and setup a Postgres database
 - Create an `.env` file based on `.env.example`
 - Run database setup:
 ```bash
