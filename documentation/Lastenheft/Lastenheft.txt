@@ -1,0 +1,46 @@
+Benutzerschnittstellen:
+	Schnittstelle zum Durchführen der Stimmabgabe
+	Seite zur Analyse der Ergebnisse
+	Admin Seite zum Erstellen von Tokens, Batch-Importen von CSV-Dateien und Refresh der gecacheden Daten
+
+
+Funktionale Anforderungen:
+	Stimmabgabe:
+		-> Authentifizierung (1. Schritt):
+			1. Token eingeben (bestimmt Wahlkreis)
+			2. Ausweisnummer eingeben, hash wird mit Token abgeglichen
+		-> Abgabe der 1. Stimme
+			Anzeige aller Direktkandidaten inkl. Partei & Beruf des Wahlkreises
+		-> Abgabe der 2. Stimme
+			Anzeige aller zugelassenen Parteien im Bundesland
+	
+	Admin Seite:
+	    -> Erstellen von Tokens
+	    -> Batch-Import von CSV-Dateien
+	    -> Refresh der gecacheden Daten
+
+	Seite zur Analyse der Ergebnisse
+		-> Sitzverteilungen
+		-> Pro Region & Partei
+			-> Erst- und Zweitstimmenverteilungen
+			-> Direktmandate
+		-> Landeslisten
+		-> Direktkandidaten
+		-> (Optional: Umschalten auf alte Sitzberechnung mit Überhangs- & Ausgleichsmandaten)
+
+Nicht-Funktionale Anforderungen
+	- Skalierbarkeit: Performance bei hohen Datenbeständen (Abrufen & Hinzufügen!), > 100 Mio
+	- Sicherheit:
+		- Nur eine Stimmabgabe mit Token! (Keine Injections, ...)
+		- Nur eine Stimmabgabe pro Token!
+		- Kein Nicht-Autorisierter Zugriff auf Stimmabgabe anderer Personen (z.B. am selben Rechner) möglich
+	- Einfache Bedienbarkeit/Übersichtlichkeit, beachte: Auch Rentner etc. müssen wählen!
+	- Fachliche Korrektheit
+	- Wartbarkeit
+	- [Barrierefreiheit]
+
+Abnahmekriterien:
+- Performancetest wird bestanden
+- Pentest wird bestanden
+- Einfache Bedienbarkeit/Übersichtlichkeit für die KOMPLETTE Bevölkerung
+- Fachliche Korrektheit => Daten können abgegeben werden, Analyse funktioniert

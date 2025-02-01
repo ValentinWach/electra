@@ -3,15 +3,22 @@ Prozessbeschreibung Stimmabgabe:
 Organisatorisch:
 
 Vor Beginn der Wahl wird den Wählenden postalisch ein einmaliger Token zugesendet.
-Bei Betreten des Wahllokals muss die Identität des Wählenden nicht mehr manuell durch Wahlhelfer bestätigt werden.
+Bei Betreten des Wahllokals muss die Identität des Wählenden nicht mehr manuell durch einen Wahlhelfer bestätigt werden.
 Stattdessen kann sich der Wählende direkt an ein elektronisches Terminal setzen und muss hier seinen Token und seine Ausweisnummer eingeben.
-Anschließend kann er Stimmen elektronisch abgeben.
+Anschließend kann er seine Stimmen elektronisch abgeben.
+Da zum Wählen zusätzlich zum Token die Ausweisnummer benötigt wird, ist ausgeschlossen, dass ein fremder Dritter den Brief mit Token abfängt und damit wählen kann.
+
 
 Technisch:
 
-Vor der Wahl werden die benötigten Token für alle Wahlberechtigten automatisch generiert und mit den jeweiligen Ausweisnummern konkateniert und gehashed.
-Um eine Rückverfolgung zu verhindern, wird ausschließlich dieser Hashwert gespeichert.
+Vor der Wahl werden die benötigten Token für alle Wahlberechtigten automatisch generiert, mit den jeweiligen Ausweisnummern konkateniert und anschließend gehashed in der Datenbank gespeichert.
+Der ursprüngliche Token wird dabei nicht gespeichert.
+So wird sichergestellt, dass ein einzelner Wähler nicht identifiziert werden kann.
 Wenn der Wählende im Wahllokal seinen Token und seine Ausweisnummer eingibt, werden diese ebenfalls gehashed und mit den gespeicherten Hashwerten verglichen.
 Falls ein Match gefunden wird, kann der Wählende seine Stimme abgeben.
-Das ausschließlich Stimmen vom Wahllokal aus abgegeben werden können, wird durch auf den Terminals hinterlegte Zertifikate sichergestellt.
+Durch Setzen der Datenbankisolationsstufe auf 'Serialisierbar' wird sichergestellt, dass keine zwei Wählenden gleichzeitig mit dem gleichen Token wählen können.
 
+Würde man das System produktiv schalten, müsste man es um folgende Funktionalität ergänzen:
+Dass ausschließlich Stimmen aus dem Wahllokal abgegeben werden können, wird sichergestellt, indem auf den Terminals hinterlegte Zertifikate verwendet werden.
+Um ein solches Terminal zu aktivieren, muss sich ein autorisierter Nutzer per Passwort anmelden und das entsprechende Zertifikat hinterlegen.
+Damit das Wahlsystem nicht über das öffentliche Netz erreichbar ist, wird der Zugriff ausschließlich über ein VPN ermöglicht.
