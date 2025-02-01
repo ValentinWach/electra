@@ -43,6 +43,7 @@ backend/                     # Root directory
 - Python >= 3.10
 - pip
 - uv (pip install uv) globally
+- PostgreSQL 17.1
 
 After navigating to the backend directory, run the following commands to install dependencies & start the application:
 

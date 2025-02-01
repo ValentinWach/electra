@@ -27,8 +27,8 @@ Each frontend and backend have their onw README.md file in their respective dire
 ### Prerequisites
 
 - Python >= 3.10
-- Node.js (LTS version)
-- PostgreSQL
+- Node.js (LTS version, best 22.12.0 or higher)
+- PostgreSQL 17.1
 - pip and npm
 - uv (Python package manager)
 
