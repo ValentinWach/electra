@@ -11,25 +11,33 @@ const cache = new Map<string, CacheEntry<any>>();
 const inFlightRequests = new Map<string, Promise<any>>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
+// New cache for non-aggregate data with 3 second duration
+const nonAggregateCache = new Map<string, CacheEntry<any>>();
+const NON_AGGREGATE_CACHE_DURATION = 3 * 1000; // 3 seconds in milliseconds
+
 function getCacheKey(functionName: string, ...params: any[]): string {
     return `${functionName}:${JSON.stringify(params)}`;
 }
 
-function getFromCache<T>(key: string): T | undefined {
-    const entry = cache.get(key);
+function getFromCache<T>(key: string, isNonAggregate: boolean = false): T | undefined {
+    const targetCache = isNonAggregate ? nonAggregateCache : cache;
+    const cacheDuration = isNonAggregate ? NON_AGGREGATE_CACHE_DURATION : CACHE_DURATION;
+    
+    const entry = targetCache.get(key);
     if (!entry) return undefined;
 
     const now = Date.now();
-    if (now - entry.timestamp > CACHE_DURATION) {
-        cache.delete(key);
+    if (now - entry.timestamp > cacheDuration) {
+        targetCache.delete(key);
         return undefined;
     }
 
     return entry.data;
 }
 
-function setInCache<T>(key: string, data: T): void {
-    cache.set(key, {
+function setInCache<T>(key: string, data: T, isNonAggregate: boolean = false): void {
+    const targetCache = isNonAggregate ? nonAggregateCache : cache;
+    targetCache.set(key, {
         data,
         timestamp: Date.now()
     });
@@ -38,7 +46,8 @@ function setInCache<T>(key: string, data: T): void {
 async function withCache<T>(
     cacheKey: string,
     fetchFn: () => Promise<T>,
-    bypassCache: boolean = false
+    bypassCache: boolean = false,
+    isNonAggregate: boolean = false
 ): Promise<T> {
     // If bypassing cache, directly make the request
     if (bypassCache) {
@@ -46,9 +55,9 @@ async function withCache<T>(
     }
 
     // Check cache first
-    const cachedData = getFromCache<T>(cacheKey);
+    const cachedData = getFromCache<T>(cacheKey, isNonAggregate);
     if (cachedData) {
-        console.log("Using cached data for:", cacheKey);
+        console.log("Using cached data for:", cacheKey, isNonAggregate ? "(non-aggregate cache)" : "");
         return cachedData;
     }
 
@@ -61,7 +70,7 @@ async function withCache<T>(
 
     // Create new request
     inFlightRequest = fetchFn().then(data => {
-        setInCache(cacheKey, data);
+        setInCache(cacheKey, data, isNonAggregate);
         inFlightRequests.delete(cacheKey);
         return data;
     }).catch(error => {
@@ -164,29 +173,35 @@ export async function fetchZweitstimmanteile(wahlid: number) {
 }
 
 export async function fetchErststimmanteileWahlkreis(wahlid: number, wahlkreisid: number, generateFromAggregate: boolean = true) {
-    try {
-        const wahlkreisApi = new WahlkreisApi();
-        const stimmanteile = await wahlkreisApi.getErststimmenWahlkreis({ wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate });
-        console.log('Fetched Stimmanteile:', stimmanteile);
-        console.log('Used aggregate: ', generateFromAggregate);
-        return stimmanteile;
-    } catch (error) {
-        console.error('Error fetching Stimmanteile:', error);
-        throw error;
-    }
+    const cacheKey = getCacheKey('fetchErststimmanteileWahlkreis', wahlid, wahlkreisid, generateFromAggregate);
+    return withCache(cacheKey, async () => {
+        try {
+            const wahlkreisApi = new WahlkreisApi();
+            const stimmanteile = await wahlkreisApi.getErststimmenWahlkreis({ wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate });
+            console.log('Fetched Stimmanteile:', stimmanteile);
+            console.log('Used aggregate: ', generateFromAggregate);
+            return stimmanteile;
+        } catch (error) {
+            console.error('Error fetching Stimmanteile:', error);
+            throw error;
+        }
+    }, false, !generateFromAggregate);
 }
 
 export async function fetchZweitstimmanteileWahlkreis(wahlid: number, wahlkreisid: number, generateFromAggregate: boolean = true) {
-    try {
-        const wahlkreisApi = new WahlkreisApi();
-        const stimmanteile = await wahlkreisApi.getZweitstimmenWahlkreis({ wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate });
-        console.log('Fetched Zweitstimmanteile:', stimmanteile);
-        console.log('Used aggregate: ', generateFromAggregate);
-        return stimmanteile;
-    } catch (error) {
-        console.error('Error fetching Zweitstimmanteile:', error);
-        throw error;
-    }
+    const cacheKey = getCacheKey('fetchZweitstimmanteileWahlkreis', wahlid, wahlkreisid, generateFromAggregate);
+    return withCache(cacheKey, async () => {
+        try {
+            const wahlkreisApi = new WahlkreisApi();
+            const stimmanteile = await wahlkreisApi.getZweitstimmenWahlkreis({ wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate });
+            console.log('Fetched Zweitstimmanteile:', stimmanteile);
+            console.log('Used aggregate: ', generateFromAggregate);
+            return stimmanteile;
+        } catch (error) {
+            console.error('Error fetching Zweitstimmanteile:', error);
+            throw error;
+        }
+    }, false, !generateFromAggregate);
 }
 
 export async function fetchWinningPartiesWahlkreis(wahlid: number, wahlkreisid: number) {
@@ -220,16 +235,19 @@ export async function fetchWinningPartiesWahlkreise(wahlid: number) {
 }
 
 export async function fetchWahlkreisOverview(wahlid: number, wahlkreisid: number, generateFromAggregate: boolean = true) {
-    try {
-        const wahlkreisApi = new WahlkreisApi();
-        const wahlkreisOverview = await wahlkreisApi.getOverviewWahlkreis({ wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate });
-        console.log('Fetched Wahlkreis Overview:', wahlkreisOverview);
-        console.log('Used aggregate: ', generateFromAggregate);
-        return wahlkreisOverview;
-    } catch (error) {
-        console.error('Error fetching Wahlkreis Overview:', error);
-        throw error;
-    }
+    const cacheKey = getCacheKey('fetchWahlkreisOverview', wahlid, wahlkreisid, generateFromAggregate);
+    return withCache(cacheKey, async () => {
+        try {
+            const wahlkreisApi = new WahlkreisApi();
+            const wahlkreisOverview = await wahlkreisApi.getOverviewWahlkreis({ wahlid, wahlkreisid, generatefromaggregate: generateFromAggregate });
+            console.log('Fetched Wahlkreis Overview:', wahlkreisOverview);
+            console.log('Used aggregate: ', generateFromAggregate);
+            return wahlkreisOverview;
+        } catch (error) {
+            console.error('Error fetching Wahlkreis Overview:', error);
+            throw error;
+        }
+    }, false, !generateFromAggregate);
 }
 
 export async function fetchAbgeordnete(wahlid: number) {

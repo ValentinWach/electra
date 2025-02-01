@@ -7,13 +7,13 @@ import GridC from "../../UI-element-components/GridC.tsx";
 import {ContentTileConfig} from "../../../models/GridData.ts";
 import { useMinLoadingTime } from "../../../hooks/useMinLoadingTime.ts";
 
-export default function WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisDetails: (id: number) => void }) {
+export default function     WahlkreislisteC({showWahlkreisDetails}: { showWahlkreisDetails: (id: number) => void }) {
 
     const {selectedElection} = useElection();
     const [wahlkreise, setWahlkreise] = useState<Wahlkreis[]>();
     const [wahlkreisGridData, setWahlkreisGridData] = useState<GridData>({columns: [], rows: []});
     const [loading, setLoading] = useState(true);
-    const showLoader = useMinLoadingTime(loading);
+    const showLoader = useMinLoadingTime(loading, 50);
 
     useEffect(() => {
         const getWahlkreise = async () => {
