@@ -15,7 +15,7 @@ import { resultPrefix } from '../constants/PathPrefixes';
 
 function ResultsContent() {
     const { isLoading } = useElection();
-    const showLoader = useMinLoadingTime(isLoading, 500);
+    const showLoader = useMinLoadingTime(isLoading, 150);
 
     if (showLoader) {
         return <FullPageLoadingC />;

@@ -237,9 +237,11 @@ class BaseElectApi:
             direktkandidat_valid, partei_valid = await self.validate_votes(wahl_id, wahlkreis_id, vote_request)
 
             with db_session() as db:
+                db.execute(text("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE"))
                 if direktkandidat_valid:
                     direktkandidatur_id_query = text("""
                         SELECT id FROM wahlkreiskandidaturen WHERE wahl_id = :wahlid AND wahlkreis_id = :wahlkreisid AND kandidat_id = :direct_candidate_id LIMIT 1
+                        FOR UPDATE
                     """)
                     direktkandidatur_id = db.execute(direktkandidatur_id_query, {"direct_candidate_id": vote_request.direct_candidate_id, "wahlid": wahl_id, "wahlkreisid": wahlkreis_id}).fetchone()
                     erststimme = Erststimme(wahlkreiskandidatur_id=direktkandidatur_id.id)

@@ -89,6 +89,7 @@ class BaseAdminApi:
             )
 
         with db_session() as db:
+            db.execute(text("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE"))
             self.verify_wahl_and_wahlkreis(db, wahlid, wahlkreisid)
 
             result = self.generate_random_tokens(amount, id_numbers)

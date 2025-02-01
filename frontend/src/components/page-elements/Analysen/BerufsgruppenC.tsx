@@ -61,6 +61,7 @@ export default function BerufsgruppenC({ parteien }: { parteien: Partei[] }) {
     // Effect for visualization updates
     useEffect(() => {
         async function fetchData() {
+            try {
             const data = await fetchBerufsgruppen(selectedElection?.id ?? 0, selectedParteiId ?? 0, showBundestagsabgeordneteOnly);
             if (!data.berufsgruppen || data.berufsgruppen.length === 0) {
                 console.log("No data available");
@@ -70,6 +71,9 @@ export default function BerufsgruppenC({ parteien }: { parteien: Partei[] }) {
             setDataIsAvailable(true);
             createVisualization(data);
             updateGridData(data);
+            } catch (error) {
+                console.error('Error fetching Berufsgruppen:', error);
+            }
         }
         fetchData();
     }, [selectedParteiId, selectedElection, parteien, containerWidth, showBundestagsabgeordneteOnly]);
@@ -334,7 +338,7 @@ export default function BerufsgruppenC({ parteien }: { parteien: Partei[] }) {
             containerRef={ref}
             dropDownContent={dropdownData}
             dropDownFunction={setSelectedParteiId}
-            header={"Ergebnisse nach Berufsgruppe"}
+            header={"Kandidaten nach Berufsgruppe"}
         >
             {dataIsAvailable ? (<>
                 <div className="flex mb-10 flex-col w-full">
@@ -382,6 +386,5 @@ export default function BerufsgruppenC({ parteien }: { parteien: Partei[] }) {
                 }} />
             )}
         </ContentTileC>
-
     );
 }

@@ -87,7 +87,7 @@ export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number)
 
     //Tooltips
     const onEachFeature = (feature: Feature, layer: L.Layer) => {
-        const winningParty = winningParties?.zweitstimme.find(w => w.regionId === feature.properties?.WKR_NR);
+        const winningParty = stimmenType === 1 ? winningParties?.erststimme.find(w => w.regionId === feature.properties?.WKR_NR) : winningParties?.zweitstimme.find(w => w.regionId === feature.properties?.WKR_NR);
         const party = winningParty?.party;
         const regionId = winningParty?.regionId;
         const regionName = winningParty?.regionName;
@@ -112,7 +112,7 @@ export default function WahlkreisMapC( {openDetails}: {openDetails: (id: number)
                           style={{height: '90vh', width: '100%', zIndex: '10'}}>
                 {typedGeoData && winningParties && (
                     <>
-                        <GeoJSON data={typedGeoData} style={getStyle} onEachFeature={onEachFeature}/>
+                        <GeoJSON key={stimmenType} data={typedGeoData} style={getStyle} onEachFeature={onEachFeature}/>
                         <BoundsFitter geoData={typedGeoData} />
                     </>
                 )}

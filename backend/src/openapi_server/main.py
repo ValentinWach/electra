@@ -31,7 +31,8 @@ app = FastAPI(
 
 # Configure CORS
 origins = [
-    "http://localhost:5173",  # Frontend origin (replace with actual URL in production)
+    "http://localhost:5173",  # Frontend origin
+    "http://localhost:4173",  # Frontend preview origin
 ]
 
 app.add_middleware(
