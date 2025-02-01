@@ -1,0 +1,149 @@
+@startuml
+skinparam linetype ortho
+' Entities
+class Wahl {
+    +id: Integer
+    +date: Date
+    +zweitstimmen: List[Zweitstimme]
+    +wahlkreiskandidaturen: List[Wahlkreiskandidatur]
+    +listenkandidaturen: List[Listenkandidatur]
+    +strukturdaten: List[Strukturdatum]
+}
+
+class Wahlkreis {
+    +id: Integer
+    +name: String
+    +zweitstimmen: List[Zweitstimme]
+    +bundesland: Bundesland
+    +bundesland_id: Integer
+    +wahlkreiskandidaturen: List[Wahlkreiskandidatur]
+    +strukturdaten: List[Strukturdatum]
+}
+
+class Bundesland {
+    +id: Integer
+    +name: String
+    +wahlkreise: List[Wahlkreis]
+    +listenkandidaturen: List[Listenkandidatur]
+}
+
+class Erststimme {
+    +id: Integer
+    +wahlkreiskandidatur: Wahlkreiskandidatur
+    +wahlkreiskandidatur_id: Integer
+}
+
+class Zweitstimme {
+    +id: Integer
+    +wahlkreis_id: Integer
+    +wahlkreis: Wahlkreis
+    +partei_id: Integer
+    +partei: Partei
+    +wahl_id: Integer
+    +wahl: Wahl
+}
+
+class Partei {
+    +id: Integer
+    +type: String
+    +name: String
+    +shortName: String
+    +wahlkreiskandidaturen: List[Wahlkreiskandidatur]
+    +listenkandidaturen: List[Listenkandidatur]
+    +zweitstimmen: List[Zweitstimme]
+}
+
+class Kandidat {
+    +id: Integer
+    +name: String
+    +firstname: String
+    +profession: String
+    +yearOfBirth: Integer
+    +profession_key: Integer
+    +wahlkreiskandidaturen: List[Wahlkreiskandidatur]
+    +listenkandidaturen: List[Listenkandidatur]
+}
+
+class Wahlkreiskandidatur {
+    +id: Integer
+    +kandidat: Kandidat
+    +kandidat_id: Integer
+    +wahlkreis: Wahlkreis
+    +wahlkreis_id: Integer
+    +partei: Partei
+    +partei_id: Integer
+    +erststimmen: List[Erststimme]
+    +wahl: Wahl
+    +wahl_id: Integer
+}
+
+class Listenkandidatur {
+    +id: Integer
+    +listPosition: Integer
+    +kandidat: Kandidat
+    +kandidat_id: Integer
+    +bundesland: Bundesland
+    +bundesland_id: Integer
+    +partei: Partei
+    +partei_id: Integer
+    +wahl: Wahl
+    +wahl_id: Integer
+}
+
+class Strukturdatum {
+    +id: Integer
+    +wahl: Wahl
+    +wahl_id: Integer
+    +wahlkreis: Wahlkreis
+    +wahlkreis_id: Integer
+    +ungueltige_zweistimmen: Integer
+    +einwohnerzahl: Integer
+    +wahlberechtigte: Integer
+    +auslaenderanteil: Float
+    +unternehmensdichte: Float
+    +einkommen: Integer
+}
+
+class Token {
+    +id: Integer
+    +wahl: Wahl
+    +wahl_id: Integer
+    +wahlkreis: Wahlkreis
+    +wahlkreis_id: Integer
+    +voted: Boolean
+    +hash: String
+}
+
+class BerufsKategorie {
+    +id: Integer
+    +name: String
+}
+
+' Relationships
+Wahl "1" --- "many" Zweitstimme
+Wahl "1" --- "many" Listenkandidatur
+Wahl "1" --- "many" Strukturdatum
+
+Wahlkreis "1" --- "many" Zweitstimme
+Wahlkreis "1" --- "many" Wahlkreiskandidatur
+Wahlkreis "1" --- "many" Strukturdatum
+Wahlkreis "many" -- "1" Bundesland
+
+Erststimme "many" -- "1" Wahlkreiskandidatur
+
+Partei "1" --- "many" Zweitstimme
+
+Kandidat "1" --- "many" Wahlkreiskandidatur
+
+Wahlkreiskandidatur "many" -- "1" Partei
+Wahlkreiskandidatur "many" -- "1" Wahl
+
+Listenkandidatur "many" -- "1" Kandidat
+Listenkandidatur "many" -- "1" Bundesland
+Listenkandidatur "many" -- "1" Partei
+
+Token "many" -- "1" Wahl
+Token "many" -- "1" Wahlkreis
+
+BerufsKategorie "n" -- "1" Kandidat
+@enduml
