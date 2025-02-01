@@ -14,7 +14,6 @@ class Wahl(Base):
     wahlkreiskandidaturen = relationship('Wahlkreiskandidatur', back_populates='wahl')
     listenkandidaturen = relationship('Listenkandidatur', back_populates='wahl')
     strukturdaten = relationship('Strukturdatum', back_populates='wahl')
-    einwohner_pro_bundesland_temp = relationship('einwohner_pro_bundesland_temp', back_populates='wahl')
     def __repr__(self):
         return f"<Wahl(id={self.id}, date={self.date})>"
 
@@ -42,8 +41,7 @@ class Bundesland(Base):
     # Relations
     wahlkreise = relationship('Wahlkreis', back_populates='bundesland')
     listenkandidaturen = relationship('Listenkandidatur', back_populates='bundesland')
-    einwohner_pro_bundesland_temp = relationship('einwohner_pro_bundesland_temp', back_populates='bundesland')
-    
+
     def __repr__(self):
         return f"<Bundesland(id={self.id})>"
 
@@ -90,16 +88,6 @@ class Partei(Base):
 
     def __repr__(self):
         return f"<Partei(id={self.id}, type={self.type}, name={self.name}, shortName={self.shortName})>"
-    
-class einwohner_pro_bundesland_temp(Base):
-    __tablename__ = 'einwohner_pro_bundesland_temp'
-
-    id = Column(Integer, primary_key=True, index=True)
-    einwohnerzahl = Column(Integer, nullable=False)
-    wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)
-    wahl = relationship('Wahl')
-    bundeslaender_id = Column(Integer, ForeignKey('bundeslaender.id'), nullable=False)
-    bundesland = relationship('Bundesland')
 
 class Kandidat(Base):
     __tablename__ = 'kandidaten'
