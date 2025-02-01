@@ -42,11 +42,20 @@ uv sync
 2. Set up the database:
 - Install PostgreSQL
 - Create an `.env` file based on `.env.example`
-- Run database setup: `python .\database-tools\scripts\setup_database.py`
+- Run database setup:
+```bash
+python .\database-tools\scripts\setup_database.py
+```
 
 3. Start the server:
-- Development mode: `python run_server.py dev`
-- Production mode: `python run_server.py prod`
+- Development mode:
+```bash
+python run_server.py dev
+```
+- Production mode:
+```bash
+python run_server.py prod
+```
 
 The API will be available at:
 - Main endpoint: `http://localhost:8000`

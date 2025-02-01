@@ -18,6 +18,8 @@ This is the backend server for the Electra election system, built with FastAPI. 
 - **Performance:** Uvicorn ASGI server with multi-worker support
 - **Data Processing:** Pandas for CSV data import
 
+## Project Structure
+
 ```
 backend/                     # Root directory
 ├── src/                    # Source code
@@ -56,18 +58,22 @@ On Linux it might be necessary to run `sudo apt-get install libpq-dev` first, ma
 Install postgres and create an `.env` file like `.env.example`, adding your database URL. Start the database server.
 
 3. Setup the database:
-From the backend directory, enter the virtual environment and run `python .\database-tools\scripts\setup_database.py`. This will reset the public schema, create the necessary tables, and insert the data for 2017 and 2021 elections read from the CSV source files in parallel. This should take about 3 minutes. After this, it will aggregate the votes (30-60 seconds), calculate election results and create relevant materialized views for the backend server.
+From the backend directory, enter the virtual environment and run:
+```bash
+python .\database-tools\scripts\setup_database.py
+```
+This will reset the public schema, create the necessary tables, and insert the data for 2017 and 2021 elections read from the CSV source files in parallel. This should take about 3 minutes. After this, it will aggregate the votes (30-60 seconds), calculate election results and create relevant materialized views for the backend server.
 
 4. Run the server:
-From the backend directory, enter the virtual environment and run `python run_server.py dev` to start with one server and incremental builds, or `python run_server.py prod` to start with a production build and up to 8 parallel workers, depending on your CPU count. This is only worth with enough clients, else overhead is higher than benefits. For local testing with frontend best run with 1 worker.
-
-```bash
-python run_server.py prod
-```
-
+From the backend directory, enter the virtual environment and run:
 ```bash
 python run_server.py dev
 ```
+to start with one server and incremental builds, or
+```bash
+python run_server.py prod
+```
+to start with a production build and up to 8 parallel workers, depending on your CPU count. This is only worth with enough clients, else overhead is higher than benefits. For local testing with frontend best run with 1 worker.
 
 Alternatively, start the server directly with uvicorn:
 For Development:
@@ -84,7 +90,6 @@ The API documentation will be available at:
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
 
-## Project Structure
 
 
 
@@ -94,18 +99,4 @@ The API documentation will be available at:
 
 ```bash
 docker-compose up --build
-```
-
-### Running Tests
-
-Using uv:
-```bash
-uv pip install pytest
-pytest tests
-```
-
-Using pip:
-```bash
-pip install pytest
-pytest tests
 ```
