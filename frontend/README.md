@@ -48,8 +48,8 @@ frontend/              # Root of the projec:, config files, ...
 
 ### Prerequisites
 
-- Node.js (LTS version recommended)
-- npm
+- Node.js (LTS version recommended, was developed with 22.12.0, so best use that or later)
+- npm (developed with 10.9.0)
 
 After navigating to the frontend directory, run the following commands to install dependencies & start the application:
 

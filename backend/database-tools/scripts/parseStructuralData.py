@@ -8,40 +8,69 @@ def parse_structural_data(session, Base):
     
     skd17 = pd.read_csv(source_dir / 'strukturdaten_2017.csv', delimiter=';')
     skd21 = pd.read_csv(source_dir / 'strukturdaten_2021.csv', delimiter=';')
+    
+    # Read KERG files with proper encoding and handle potential BOM
+    kerg17 = pd.read_csv(source_dir / 'kerg2_2017.csv', delimiter=';', encoding='utf-8-sig')
+    kerg21 = pd.read_csv(source_dir / 'kerg2_2021.csv', delimiter=';', encoding='utf-8-sig')
 
     filtered_skd17 = skd17[(skd17['Wahlkreis-Nr.'] < 900)]
     filtered_skd21 = skd21[(skd21['Wahlkreis-Nr.'] < 900)]
 
-    for index, row in filtered_skd17.iterrows():
-        wahlberechtigte = int(float(row['Bevölkerung am 31.12.2015 - Deutsche (in 1000)'].replace(",", ".")) * 1000 * (1 - float(row['Alter von ... bis ... Jahren am 31.12.2015 - unter 18 (%)'].replace(",", ".")) / 100))
-        strukturdatum = Strukturdatum(
-            wahlkreis_id=row['Wahlkreis-Nr.'],
-            wahl_id=2,
-            einwohnerzahl=int(float(row['Bevölkerung am 31.12.2015 - Deutsche (in 1000)'].replace(",", ".")) * 1000),
-            wahlberechtigte=wahlberechtigte,
-            auslaenderanteil=float(row['Bevölkerung am 31.12.2015 - Ausländer (%)'].replace(",", ".")),
-            unternehmensdichte=float(row['Unternehmensregister 2014 - Unternehmen insgesamt (je 1000 Einwohner)'].replace(",", ".")),
-            einkommen=int(row['Verfügbares Einkommen der privaten Haushalte 2014 (EUR je Einwohner)']),
-        )
+    def get_value_from_kerg(kerg_df, wahlkreis_nr, group_name, stimme_type= None):
+        # First try to get data from Wahlkreis level
+        result = kerg_df[
+            (kerg_df['Gebietsart'] == 'Wahlkreis') & 
+            (kerg_df['Gebietsnummer'] == wahlkreis_nr) & 
+            (kerg_df['Gruppenart'] == 'System-Gruppe') & 
+            (kerg_df['Gruppenname'] == group_name) & 
+            (kerg_df['Stimme'] == stimme_type if stimme_type is not None else True
+        )]
+        
+        if len(result) > 0:
+            # Convert numpy.int64 to Python int
+            return int(result['Anzahl'].iloc[0])
+                   
+        raise ValueError(f"No data found for Wahlkreis {wahlkreis_nr} and group {group_name}")
 
-        #print(strukturdatum)
-        session.add(strukturdatum)
+    for index, row in filtered_skd17.iterrows():
+        wahlkreis_nr = int(row['Wahlkreis-Nr.'])
+        try:
+            wahlberechtigte = get_value_from_kerg(kerg17, wahlkreis_nr, 'Wahlberechtigte')
+            ungueltige_zweistimmen = get_value_from_kerg(kerg17, wahlkreis_nr, 'Ungültige', 2)
+            # Convert all values to Python native types
+            strukturdatum = Strukturdatum(
+                wahlkreis_id=int(wahlkreis_nr),
+                wahl_id=2,
+                einwohnerzahl=int(float(row['Bevölkerung am 31.12.2015 - Deutsche (in 1000)'].replace(",", ".")) * 1000),
+                wahlberechtigte=int(wahlberechtigte),
+                auslaenderanteil=float(row['Bevölkerung am 31.12.2015 - Ausländer (%)'].replace(",", ".")),
+                unternehmensdichte=float(row['Unternehmensregister 2014 - Unternehmen insgesamt (je 1000 Einwohner)'].replace(",", ".")),
+                einkommen=int(row['Verfügbares Einkommen der privaten Haushalte 2014 (EUR je Einwohner)']),
+                ungueltige_zweistimmen=int(ungueltige_zweistimmen),
+            )
+            session.add(strukturdatum)
+        except Exception as e:
+            print(f"Error processing Wahlkreis {wahlkreis_nr} for 2017: {str(e)}")
 
     for index, row in filtered_skd21.iterrows():
-        wahlberechtigte = int(float(row['Bevölkerung am 31.12.2019 - Deutsche (in 1000)'].replace(",", ".")) * 1000 * (1 - float(row['Alter von ... bis ... Jahren am 31.12.2019 - unter 18 (%)'].replace(",", ".")) / 100))
-
-        strukturdatum = Strukturdatum(
-            wahlkreis_id=row['Wahlkreis-Nr.'],
-            wahl_id=1,
-            einwohnerzahl=int(float(row['Bevölkerung am 31.12.2019 - Deutsche (in 1000)'].replace(",", ".")) * 1000),
-            wahlberechtigte=wahlberechtigte,
-            auslaenderanteil=float(row['Bevölkerung am 31.12.2019 - Ausländer/-innen (%)'].replace(",", ".")),
-            unternehmensdichte=float(row['Unternehmensregister 2018 - Unternehmen insgesamt (je 1000 EW)'].replace(",", ".")),
-            einkommen=int(row['Verfügbares Einkommen der privaten Haushalte 2018 (EUR je EW)']),
-        )
-
-        #print(strukturdatum)
-        session.add(strukturdatum)
+        wahlkreis_nr = int(row['Wahlkreis-Nr.'])
+        try:
+            wahlberechtigte = get_value_from_kerg(kerg21, wahlkreis_nr, 'Wahlberechtigte')
+            ungueltige_zweistimmen = get_value_from_kerg(kerg21, wahlkreis_nr, 'Ungültige', 2)
+            # Convert all values to Python native types
+            strukturdatum = Strukturdatum(
+                wahlkreis_id=int(wahlkreis_nr),
+                wahl_id=1,
+                einwohnerzahl=int(float(row['Bevölkerung am 31.12.2019 - Deutsche (in 1000)'].replace(",", ".")) * 1000),
+                wahlberechtigte=int(wahlberechtigte),
+                auslaenderanteil=float(row['Bevölkerung am 31.12.2019 - Ausländer/-innen (%)'].replace(",", ".")),
+                unternehmensdichte=float(row['Unternehmensregister 2018 - Unternehmen insgesamt (je 1000 EW)'].replace(",", ".")),
+                einkommen=int(row['Verfügbares Einkommen der privaten Haushalte 2018 (EUR je EW)']),
+                ungueltige_zweistimmen=int(ungueltige_zweistimmen)
+            )
+            session.add(strukturdatum)
+        except Exception as e:
+            print(f"Error processing Wahlkreis {wahlkreis_nr} for 2021: {str(e)}")
 
     session.commit()
 

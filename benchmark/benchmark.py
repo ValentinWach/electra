@@ -6,7 +6,7 @@ class ElectionSystemUser(HttpUser):
     
     #use 0.5, 1, 3 seconds
     #users: 100, 1000, 10000
-    t = 15
+    t = 1
     wait_time = between(0.8*t, 1.2*t)
     
     
@@ -37,7 +37,8 @@ class ElectionSystemUser(HttpUser):
         # Get basic overview
         self.client.get(f"/results/{ids['wahl_id']}/overview/wahlkreis/{ids['wahlkreis_id']}", name="Q3_Wahlkreisübersicht")
         # Get vote distribution
-        self.client.get(f"/results/{ids['wahl_id']}/stimmanteil/wahlkreis/{ids['wahlkreis_id']}", name="Q3_Wahlkreisübersicht")
+        self.client.get(f"/results/{ids['wahl_id']}/stimmanteil/zweitstimmen/wahlkreis/{ids['wahlkreis_id']}", name="Q3_Wahlkreisübersicht")
+        self.client.get(f"/results/{ids['wahl_id']}/stimmanteil/erststimmen/wahlkreis/{ids['wahlkreis_id']}", name="Q3_Wahlkreisübersicht")
     
     @task(10)
     def q4_stimmkreissieger(self):

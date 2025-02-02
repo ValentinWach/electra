@@ -152,7 +152,7 @@ class Strukturdatum(Base):
     wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)
     wahlkreis = relationship('Wahlkreis', back_populates='strukturdaten')
     wahlkreis_id = Column(Integer, ForeignKey('wahlkreise.id'), nullable=False)
-
+    ungueltige_zweistimmen = Column(Integer, nullable=False)
 
     einwohnerzahl = Column(Integer, nullable=False)
     wahlberechtigte = Column(Integer, nullable=False)

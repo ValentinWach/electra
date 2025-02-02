@@ -45,15 +45,15 @@ class BaseWahlkreisApi:
                             ''')
 
                     wahlbeteiligung_query = text('''
-                                                    SELECT
-                                                        ROUND((SUM(zwp.stimmen_sum) / NULLIF(s.wahlberechtigte, 0)) * 100, 2) AS percentage
-                                                    FROM strukturdaten s
-                                                    JOIN zweitstimmen_wahlkreis_partei zwp
-                                                        ON s.wahlkreis_id = zwp.wahlkreise_id
-                                                        AND s.wahl_id = zwp.wahlen_id
-                                                    WHERE zwp.wahlkreise_id = :wahlkreisId
-                                                    AND zwp.wahlen_id = :wahlId
-                                                    GROUP BY s.wahlberechtigte;
+                                SELECT
+                                    ROUND(((SUM(zwp.stimmen_sum) + s.ungueltige_zweistimmen) / NULLIF(s.wahlberechtigte, 0)) * 100, 2) AS percentage
+                                FROM strukturdaten s
+                                JOIN zweitstimmen_wahlkreis_partei zwp
+                                    ON s.wahlkreis_id = zwp.wahlkreise_id
+                                    AND s.wahl_id = zwp.wahlen_id
+                                WHERE zwp.wahlkreise_id = :wahlkreisId
+                                AND zwp.wahlen_id = :wahlId
+                                GROUP BY s.wahlberechtigte, s.ungueltige_zweistimmen
                                                 ''')
                 else:
                     direktkandidat_query = text('''
@@ -73,14 +73,17 @@ class BaseWahlkreisApi:
                             ''')
 
                     wahlbeteiligung_query = text('''
+                                WITH strukturdatenCte AS (
+                                SELECT s.wahlberechtigte, s.ungueltige_zweistimmen
+                                FROM strukturdaten s
+                                WHERE s.wahlkreis_id = :wahlkreisId AND s.wahl_id = :wahlId
+                                LIMIT 1
+                                )
                                 SELECT
                                     ROUND(
-                                        (COUNT(*) * 100.0) / NULLIF(
+                                        ((COUNT(*) + (SELECT s.ungueltige_zweistimmen FROM strukturdatenCte s)) * 100.0) / NULLIF(
                                             (SELECT s.wahlberechtigte
-                                             FROM strukturdaten s
-                                             WHERE s.wahlkreis_id = :wahlkreisId
-                                             AND s.wahl_id = :wahlId
-                                             LIMIT 1), 0),
+                                            FROM strukturdatenCte s), 0),
                                         2
                                     ) AS percentage
                                 FROM zweitstimmen z
