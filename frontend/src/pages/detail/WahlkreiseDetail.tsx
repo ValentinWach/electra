@@ -111,11 +111,10 @@ export default function WahlkreiseDetail() {
                     showAllPartiesDefault={false} title="Stimmanteile" />
                 <DirektkandidatC overview={overview} loading={loading} />
                 <ContentTileC header={"Wahlbeteiligung"} loading={loading}>
-                    <div className="flex flex-col w-2/3">
-
-                        <AlertC alertData={{ type: AlertType.info, message: `Berechnet auf Basis der Zweitstimmen und der Einwohnerzahlen vom ${selectedElection?.date.getFullYear() === 2021 ? '31.12.2019' : '31.12.2015'}.` }} />
-                    </div>
                     <DoughnutChart data={wahlbeteiligungData} fullCircle={true}></DoughnutChart>
+                    <div className="flex flex-col w-1/3 mt-5">
+                        <AlertC alertData={{ type: AlertType.infoGrey, message: `Berechnet auf Basis der Zweitstimmen und der Einwohnerzahlen vom ${selectedElection?.date.getFullYear() === 2021 ? '31.12.2019' : '31.12.2015'}` }} />
+                    </div>
                 </ContentTileC>
             </>
         ));
