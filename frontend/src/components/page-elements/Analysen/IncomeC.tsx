@@ -7,6 +7,8 @@ import {fetchIncomeAnalysis} from "../../../apiServices.ts";
 import {useElection} from "../../../context/ElectionContext.tsx";
 import {ChartDataXYR} from "../../../models/ChartData.ts";
 import {getPartyColor} from "../../../utils/GetPartyColor.tsx";
+import AlertC from "../../UI-element-components/AlertC.tsx";
+import {AlertType} from "../../../models/AlertData.ts";
 
 export default function IncomeC({parteien} : {parteien: Partei[]}) {
     const {selectedElection} = useElection();
@@ -51,7 +53,8 @@ export default function IncomeC({parteien} : {parteien: Partei[]}) {
 
     return (
         <ChartTile dropDownContent={dropdownData} dropDownFunction={setSelectedParteiId} header={"Ergebnisse nach Durchschnittseinkommen"}>
-            <BubbleChartC data={incomeData} xLabel={"Durchschnittseinkommen in Euro"} yLabel={"Abweichung vom Durchschnitt"} xMin={15000} xMax={33000} yMin={-3} yMax={5} />
+            <BubbleChartC data={incomeData} xLabel={"Durchschnittseinkommen in Euro"} yLabel={"Zweitstimmenergebnis"} xMin={15000} xMax={33000} yMin={-3} yMax={5} />
+            <AlertC alertData={{type: AlertType.infoGrey, message: "Für diese Darstellung werden standardisierte Werte verwendet. Der Wert 0 steht jeweils für das mittlere Zweitstimmenergebnis der Partei."}} />
         </ChartTile>
     );
 } 

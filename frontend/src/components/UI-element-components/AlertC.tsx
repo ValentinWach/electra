@@ -11,6 +11,12 @@ export default function AlertC({ alertData }: { alertData: AlertData }) {
                     text: "text-blue-800",
                     textLight: "text-blue-700"
                 };
+            case AlertType.infoGrey:
+                return {
+                    bg: "bg-gray-200",
+                    text: "text-gray-500",
+                    textLight: "text-gray-600"
+                };
             case AlertType.warning:
                 return {
                     bg: "bg-yellow-100", 
@@ -43,6 +49,8 @@ export default function AlertC({ alertData }: { alertData: AlertData }) {
                 return <ExclamationCircleIcon aria-hidden="true" className="size-5 text-red-400" />;
             case AlertType.success:
                 return <CheckCircleIcon aria-hidden="true" className="size-5 text-green-400" />;
+            case AlertType.infoGrey:
+                return <InformationCircleIcon aria-hidden="true" className="size-5 text-gray-400" />;
             case AlertType.info:
             default:
                 return <InformationCircleIcon aria-hidden="true" className="size-5 text-blue-400" />;

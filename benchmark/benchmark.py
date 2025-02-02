@@ -6,7 +6,7 @@ class ElectionSystemUser(HttpUser):
     
     #use 0.5, 1, 3 seconds
     #users: 100, 1000, 10000
-    t = 1
+    t = 2
     wait_time = between(0.8*t, 1.2*t)
     
     
