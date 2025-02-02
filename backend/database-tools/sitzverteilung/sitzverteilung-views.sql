@@ -82,7 +82,7 @@ where stimmen_sum > 0;
 CREATE OR REPLACE VIEW ov_1_sitzkontingente_bundesleander as
 SELECT sl.id as bundeslaender_id, sl.slots, sl.wahl_id
 FROM sainte_lague('einwohner_pro_bundesland', 'bundeslaender_id', 'einwohnerzahl', 598, 1) sl
-UNION ALL
+UNION
 SELECT sl2.id as bundeslaender_id, sl2.slots, sl2.wahl_id
 FROM sainte_lague('einwohner_pro_bundesland', 'bundeslaender_id', 'einwohnerzahl', 598, 2) sl2;
 
@@ -115,7 +115,7 @@ SELECT wahl_id, partei_id, GREATEST(sum(sitze), sum(mindestsitzzahlen)) as minde
 FROM mindestsitzanspruch_partei_bundesland msa join zweitstimmen_partei zs on zs.wahlen_id = msa.wahl_id and zs.parteien_id = msa.partei_id
 GROUP BY wahl_id, partei_id, zs.stimmen_sum;
 
---Depends on dynamic statement and can thus not be a materialized view
+--Depends on dynamic statement and can thus not be a materialized view. Must use "union" instead of looping through elections in pgSQL 17.2. (probably error from their side, no problem in V14)
 CREATE TABLE ov_2_sitzkontingente_bundesweit_erhoeht AS
 SELECT wahl_id, partei_id, stimmen_sum, mindestsitzanspruch, verbleibender_ueberhang, sitze_nach_erhoehung from calculate_seats_per_party_per_election_nationwide(1)
 UNION
