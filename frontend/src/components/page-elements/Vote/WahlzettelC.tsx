@@ -38,7 +38,7 @@ export default function WahlzettelC({ wahlkreis, wahl, directCandidates, parties
                                         return (
                                             <tr key={index} className="border-solid border ">
                                                 <td className="border-solid border border-black text-center font-bold w-[40px]">{index + 1}</td>
-                                                <td className="border-solid border border-black pl-2 pr-4 w-[224px] border-r-0 h-24 overflow-hidden">
+                                                <td className="border-solid border border-black pl-2 pr-4 w-[224px] max-w-[224px] border-r-0 h-24 overflow-hidden">
                                                     <div className="flex flex-col items-start justify-between h-full">
                                                         <p className="flex flex-wrap">
                                                             <span className="font-bold text-xl">{candidate.name},&nbsp;</span>
@@ -49,7 +49,7 @@ export default function WahlzettelC({ wahlkreis, wahl, directCandidates, parties
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="border-solid border border-black border-l-0 align-bottom pb-3 w-[224px] h-24 overflow-hidden">
+                                                <td className="border-solid border border-black border-l-0 align-bottom pb-3 max-w-[224px] w-[224px] h-24 overflow-hidden">
                                                     <p className="font-bold text-lg">{candidate.party?.shortname ?? ""}</p>
                                                     <p className="text-xs">{candidate.party?.name ?? ""}</p>
                                                 </td>
@@ -98,14 +98,14 @@ export default function WahlzettelC({ wahlkreis, wahl, directCandidates, parties
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="border-solid border border-blue-900 pl-2 pr-4 w-[154px] border-r-0 h-24 overflow-hidden">
+                                            <td className="border-solid border border-blue-900 pl-2 pr-4 max-w-[154px] w-[154px] border-r-0 h-24 overflow-hidden">
                                                 <div className="flex flex-col items-start justify-center h-full">
                                                     <p className="flex flex-wrap">
-                                                        <span className="font-bold text-xl text-blue-900">{party.partei.shortname}</span>
+                                                        <span className="font-bold text-xl text-blue-900 break-words overflow-wrap hyphens-auto whitespace-normal" lang="de">{party.partei.shortname}</span>
                                                     </p>
                                                 </div>
                                             </td>
-                                            <td className="border-solid border border-blue-900 border-l-0 align-bottom pb-1 pr-3 w-[294px] h-24 overflow-hidden">
+                                            <td className="border-solid border border-blue-900 border-l-0 align-bottom pb-1 pr-3 max-w-[294px] w-[294px] h-24 text-wrap overflow-hidden">
                                                 <div className="flex flex-col items-start justify-between h-full">
                                                     <p className="font-bold text-sm text-blue-900">{party.partei.name ?? ""}</p>
                                                     <p className="text-xs text-blue-900">{party.topfive.map(p => `${p.name}, ${p.firstname}`).join("; ")}</p>
