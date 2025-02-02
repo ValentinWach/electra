@@ -240,7 +240,7 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
     let comparedData: ChartDataNum = {
         labels: comparedStimmanteilSummarized?.map((partei) => {
             const value = showAbsoluteVotes ? partei.absolute : partei.share;
-            return `${partei.party.shortname}: ${value > 0 ? '+' : ''}${showAbsoluteVotes ? formatNumberWithSpaces(value) : value + '%'}`;
+            return `${partei.party.shortname}: ${value > 0 ? '+' : ''}${showAbsoluteVotes ? formatNumberWithSpaces(value) : value + '%-Pkt.'}`;
         }) ?? [],
         datasets: [{
             data: comparedStimmanteilSummarized?.map((partei) => 
@@ -284,7 +284,7 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
                             { id: 1, label: 'Kürzel', searchable: true },
                             { id: 2, label: 'Partei', searchable: true },
                             { id: 3, label: showAbsoluteVotes ? "Anzahl Stimmen" : "Stimmenanteil (%)", searchable: false },
-                            ...(comparedElection != null ? [{ id: 4, label: "Differenz zum Vergleichszeitraum", searchable: false }] : [])
+                            ...(comparedElection != null ? [{ id: 4, label: showAbsoluteVotes ? "Differenz in Stimmen" : "Differenz in %-Pkt.", searchable: false }] : [])
                         ],
                         rows: processStimmanteile(stimmanteil, false).map(partei => {
                             const comparedValue = processStimmanteile(comparedStimmanteil, false).find(p => p.party.id === partei.party.id)?.[showAbsoluteVotes ? 'absolute' : 'share'] ?? 0;
