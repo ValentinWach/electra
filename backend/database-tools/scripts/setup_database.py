@@ -128,35 +128,6 @@ def insert_data():
 
         session.commit()
 
-        # Insert einwohner_pro_bundesland_temp data
-        einwohner_data = [
-            (1, 9313413, 1), (1, 9365001, 2),
-            (2, 11328866, 1), (2, 11362245, 2),
-            (3, 2942960, 1), (3, 2975745, 2),
-            (4, 2391746, 2), (4, 2397701, 1),
-            (5, 548941, 1), (5, 568510, 2),
-            (6, 1525090, 2), (6, 1537766, 1),
-            (7, 5222158, 1), (7, 5281198, 2),
-            (8, 1548400, 2), (8, 1532412, 1),
-            (9, 7207587, 1), (9, 7278789, 2),
-            (10, 15707569, 2), (10, 15415642, 1),
-            (11, 3661245, 2), (11, 3610865, 1),
-            (12, 899748, 2), (12, 865191, 1),
-            (13, 3826905, 1), (13, 3914671, 2),
-            (14, 2145671, 2), (14, 2056177, 1),
-            (15, 2659792, 1), (15, 2673803, 2),
-            (16, 1996822, 1), (16, 2077901, 2)
-        ]
-
-        for bundesland_id, einwohnerzahl, wahl_id in einwohner_data:
-            einwohner = einwohner_pro_bundesland_temp(
-                bundeslaender_id=bundesland_id,
-                einwohnerzahl=einwohnerzahl,
-                wahl_id=wahl_id
-            )
-            session.add(einwohner)
-
-        session.commit()
 
         # Insert profession categories
         profession_categories = [

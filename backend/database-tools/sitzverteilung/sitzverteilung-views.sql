@@ -1,3 +1,4 @@
+BEGIN;
 ----------Basisdaten----------
 CREATE OR REPLACE VIEW einwohner_pro_bundesland AS
 (
@@ -164,3 +165,5 @@ WHERE rank <= difference
 SELECT wahl_id, kandidat_id, partei_id FROM listenabgeordnete
 UNION
 SELECT wahl_id, kandidat_id, partei_id FROM wahlkreis_winners;
+
+COMMIT;
