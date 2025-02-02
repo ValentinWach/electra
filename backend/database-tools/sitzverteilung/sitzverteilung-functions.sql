@@ -288,7 +288,7 @@ CREATE OR REPLACE FUNCTION sainte_lague(
     table_name    TEXT,
     id_column     TEXT,
     value_column  TEXT,
-    totalSlots    INTEGER,
+    total_slots    INTEGER,
     wahl_id_init  INTEGER
 )
     RETURNS TABLE (
@@ -308,10 +308,10 @@ BEGIN
                 quote_literal(table_name) || '::text, ' ||
                 quote_literal(id_column) || '::text, ' ||
                 quote_literal(value_column) || '::text, ' ||
-                totalSlots || '::integer, ' ||
+                total_slots || '::integer, ' ||
                 wahl_id_init || '::integer)
             ORDER BY value DESC
-            LIMIT ' || totalSlots || '
+            LIMIT ' || total_slots || '
         ) AS top_values
         GROUP BY id, wahl_id';
 
@@ -323,7 +323,7 @@ CREATE OR REPLACE FUNCTION sainte_lague_table(
     table_name    TEXT,
     id_column     TEXT,
     value_column  TEXT,
-    totalSlots    INT,
+    total_slots    INT,
     wahl_id_init  INT
 )
     RETURNS TABLE (
@@ -364,7 +364,7 @@ BEGIN
                 value/(divisor + 1) as divided_value,
                 ' || wahl_id_init || ' as wahl_id
             FROM divide
-            WHERE divisor <= ' || totalSlots || '
+            WHERE divisor <= ' || total_slots || '
         )
         SELECT 
             id,
@@ -376,3 +376,4 @@ BEGIN
     RETURN QUERY EXECUTE query;
 END;
 $$ LANGUAGE plpgsql;
+

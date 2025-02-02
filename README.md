@@ -22,7 +22,7 @@ The project is split into two main components:
 
 ## Getting Started
 
-Each frontend and backend have their own README.md file in their respective directories. The following is a quick summary of both.
+Each frontend and backend have ***their own README.md file*** in their respective directories. The following is a quick summary of both.
 
 ### Prerequisites
 

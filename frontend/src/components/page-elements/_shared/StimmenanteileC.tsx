@@ -32,7 +32,7 @@ export default function StimmanteileC({ fetchStimmanteileZweitstimmen, fetchStim
 
     const { parteien: Bundestagsparteien } = useBundestagsParteien();
     const showLoader = useMinLoadingTime(loading);
-    const timeBeforeLoader = 100;
+    const timeBeforeLoader = 150;
 
     interface ProcessedStimmanteile {
         bundestagsParties: Stimmanteil[];
