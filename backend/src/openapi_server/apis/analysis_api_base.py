@@ -137,20 +137,45 @@ class BaseAnalysisApi:
         try:
             with db_session() as db:
                 auslaenderanteil_query = text('''
-                WITH total_stimmen AS (
-                    SELECT wahlkreise_id, SUM(stimmen_sum) AS total_stimmen_sum
-                    FROM zweitstimmen_wahlkreis_partei
-                    WHERE wahlen_id = :wahlId
-                    GROUP BY wahlkreise_id
-                )
-                SELECT s.wahlkreis_id, w.name, s.auslaenderanteil,
-                       ROUND(zwp1.stimmen_sum / ts.total_stimmen_sum * 100, 2) AS stimmanteil
-                FROM strukturdaten s
-                LEFT JOIN zweitstimmen_wahlkreis_partei zwp1
-                    ON s.wahlkreis_id = zwp1.wahlkreise_id AND s.wahl_id = zwp1.wahlen_id AND zwp1.parteien_id = :parteiId
-                JOIN wahlkreise w ON s.wahlkreis_id = w.id
-                LEFT JOIN total_stimmen ts ON s.wahlkreis_id = ts.wahlkreise_id
-                WHERE s.wahl_id = :wahlId;
+                    WITH total_stimmen AS (
+                        SELECT 
+                            wahlkreise_id, 
+                            SUM(stimmen_sum) AS total_stimmen_sum
+                        FROM zweitstimmen_wahlkreis_partei
+                        WHERE wahlen_id = :wahlId
+                        GROUP BY wahlkreise_id
+                    ),
+                    party_stimmen AS (
+                        SELECT 
+                            s.wahlkreis_id, 
+                            w.name, 
+                            s.auslaenderanteil,
+                            ROUND(COALESCE(zwp1.stimmen_sum, 0) / ts.total_stimmen_sum * 100, 2) AS stimmanteil
+                        FROM strukturdaten s
+                        JOIN zweitstimmen_wahlkreis_partei zwp1
+                            ON s.wahlkreis_id = zwp1.wahlkreise_id 
+                            AND s.wahl_id = zwp1.wahlen_id 
+                            AND zwp1.parteien_id = :parteiId
+                        JOIN wahlkreise w ON s.wahlkreis_id = w.id
+                        LEFT JOIN total_stimmen ts ON s.wahlkreis_id = ts.wahlkreise_id
+                        WHERE s.wahl_id = :wahlId
+                        AND zwp1.stimmen_sum > 0
+                    ),
+                    stats AS (
+                        SELECT 
+                            AVG(stimmanteil) AS mean_stimmanteil,
+                            STDDEV_POP(stimmanteil) AS stddev_stimmanteil
+                        FROM party_stimmen
+                    )
+                    SELECT 
+                        ps.wahlkreis_id,
+                        ps.name,
+                        ps.auslaenderanteil,
+                        CASE 
+                            WHEN st.stddev_stimmanteil = 0 THEN 0  -- Avoid division by zero
+                            ELSE ROUND((ps.stimmanteil - st.mean_stimmanteil) / st.stddev_stimmanteil, 2)
+                        END AS stimmanteil
+                    FROM party_stimmen ps, stats st;
                 ''')
 
                 auslaenderanteil_results = db.execute(
@@ -200,20 +225,47 @@ class BaseAnalysisApi:
         try:
             with db_session() as db:
                 einkommen_query = text('''
-                    WITH total_stimmen AS (
-                        SELECT wahlkreise_id, SUM(stimmen_sum) AS total_stimmen_sum
-                        FROM zweitstimmen_wahlkreis_partei
-                        WHERE wahlen_id = :wahlId
-                        GROUP BY wahlkreise_id
-                    )
-                    SELECT s.wahlkreis_id, w.name, s.einkommen,
-                           ROUND(zwp1.stimmen_sum / ts.total_stimmen_sum * 100, 2) AS stimmanteil
-                    FROM strukturdaten s
-                    LEFT JOIN zweitstimmen_wahlkreis_partei zwp1
-                        ON s.wahlkreis_id = zwp1.wahlkreise_id AND s.wahl_id = zwp1.wahlen_id AND zwp1.parteien_id = :parteiId
-                    JOIN wahlkreise w ON s.wahlkreis_id = w.id
-                    LEFT JOIN total_stimmen ts ON s.wahlkreis_id = ts.wahlkreise_id
-                    WHERE s.wahl_id = :wahlId;
+WITH total_stimmen AS (
+    SELECT 
+        wahlkreise_id, 
+        SUM(stimmen_sum) AS total_stimmen_sum
+    FROM zweitstimmen_wahlkreis_partei
+    WHERE wahlen_id = :wahlId
+    GROUP BY wahlkreise_id
+),
+party_stimmen AS (
+    SELECT 
+        s.wahlkreis_id, 
+        w.name, 
+        s.einkommen,
+        -- Calculate vote share, excluding districts where the party got 0 votes
+        ROUND(zwp1.stimmen_sum / ts.total_stimmen_sum * 100, 2) AS stimmanteil
+    FROM strukturdaten s
+    JOIN zweitstimmen_wahlkreis_partei zwp1
+        ON s.wahlkreis_id = zwp1.wahlkreise_id 
+        AND s.wahl_id = zwp1.wahlen_id 
+        AND zwp1.parteien_id = :parteiId
+    JOIN wahlkreise w ON s.wahlkreis_id = w.id
+    JOIN total_stimmen ts ON s.wahlkreis_id = ts.wahlkreise_id
+    WHERE s.wahl_id = :wahlId
+    AND zwp1.stimmen_sum > 0  -- Exclude districts with 0 votes for the party
+),
+stats AS (
+    SELECT 
+        AVG(stimmanteil) AS mean_stimmanteil,
+        STDDEV_POP(stimmanteil) AS stddev_stimmanteil
+    FROM party_stimmen
+)
+SELECT 
+    ps.wahlkreis_id,
+    ps.name,
+    ps.einkommen,
+    -- Z-score normalization
+    CASE 
+        WHEN st.stddev_stimmanteil = 0 THEN 0  -- Avoid division by zero
+        ELSE ROUND((ps.stimmanteil - st.mean_stimmanteil) / st.stddev_stimmanteil, 2)
+    END AS stimmanteil
+FROM party_stimmen ps, stats st;
                 ''')
 
                 einkommen_results = db.execute(

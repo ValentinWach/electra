@@ -12,8 +12,6 @@ export default function IncomeC({parteien} : {parteien: Partei[]}) {
     const {selectedElection} = useElection();
     const [selectedParteiId, setSelectedParteiId] = useState<number | null>(null);
     const [incomeData, setIncomeData] = useState<ChartDataXYR>();
-    const [xMin, setXMin] = useState<number | undefined>(undefined);
-    const [xMax, setXMax] = useState<number | undefined>(undefined);
 
     useEffect(() => {
         if (parteien.length > 0) {
@@ -25,21 +23,18 @@ export default function IncomeC({parteien} : {parteien: Partei[]}) {
         async function fetchIncomeData() {
             try {
                 if (selectedParteiId === null) return;
-
                 const data = await fetchIncomeAnalysis(selectedElection?.id ?? 0, selectedParteiId ?? 0);
+                const filteredData = data.wahlkreise.filter(w => w.stimmanteil !== undefined);
+                const sortedData = { ...data, wahlkreise: filteredData.sort((a, b) => a.einkommen - b.einkommen)};
                 const incomeData: ChartDataXYR = {
-                    labels: data.wahlkreise.map(w => `WK ${w.wahlkreisId}: ${w.wahlkreisName}`),
+                    labels: sortedData.wahlkreise.map(w => `WK ${w.wahlkreisId}: ${w.wahlkreisName}`),
                     datasets: [{
-                        data: data.wahlkreise
-                            .filter(w => w.stimmanteil !== undefined && w.stimmanteil > 0).sort((a, b) => a.einkommen - b.einkommen)
+                        data: sortedData.wahlkreise
                             .map(w => ({x: w.einkommen, y: w.stimmanteil!, r: 2.5})),
                         backgroundColor: [getPartyColor(parteien.find(p => p.id === selectedParteiId)?.shortname ?? '')],
                     }]
                 }
                 setIncomeData(incomeData);
-                const incomes = data.wahlkreise.map(w => w.einkommen);
-                setXMin(Math.min(...incomes));
-                setXMax(Math.max(...incomes));
             }
             catch (error) {
                 console.error('Error fetching Income Data:', error);
@@ -51,12 +46,12 @@ export default function IncomeC({parteien} : {parteien: Partei[]}) {
     const dropdownData: DropdownData = {
         label: undefined,
         defaultChosenId: parteien[0]?.id ?? 0,
-        items: parteien.map((partei: Partei) => ({label: partei.shortname, id: partei.id})),
+        items: parteien.filter(p => p.shortname != "SSW").map((partei: Partei) => ({label: partei.shortname, id: partei.id})),
     }
 
     return (
         <ChartTile dropDownContent={dropdownData} dropDownFunction={setSelectedParteiId} header={"Ergebnisse nach Durchschnittseinkommen"}>
-            <BubbleChartC data={incomeData} xLabel={"Durchschnittseinkommen in Euro"} yLabel={"Stimmanteil in Prozent"} xMin={xMin} xMax={xMax}/>
+            <BubbleChartC data={incomeData} xLabel={"Durchschnittseinkommen in Euro"} yLabel={"Abweichung vom Durchschnitt"} xMin={15000} xMax={33000} yMin={-3} yMax={5} />
         </ChartTile>
     );
 } 

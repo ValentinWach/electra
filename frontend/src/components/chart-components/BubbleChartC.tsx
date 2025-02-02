@@ -12,7 +12,7 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend, LinearScale, CategoryScale, PointElement);
 
-export default function BubbleChartC(props: { data?: ChartDataXYR, xLabel?: string, yLabel?: string, xMin?: number, xMax?: number }) {
+export default function BubbleChartC(props: { data?: ChartDataXYR, xLabel?: string, yLabel?: string, xMin?: number, xMax?: number, yMin?: number, yMax?: number }) {
     const defaultData: ChartDataXYR = {
         labels: [],
         datasets: [
@@ -26,15 +26,17 @@ export default function BubbleChartC(props: { data?: ChartDataXYR, xLabel?: stri
     const options = {
         scales: {
             x: {
-                min: props.xMin && props.xMax ? props.xMin - Math.round((props.xMax - props.xMin)  * 0.02) : undefined,
-                max: props.xMin && props.xMax ? props.xMax + Math.round((props.xMax - props.xMin)  * 0.02) : undefined,
+                min: props.xMin ?? undefined,
+                max: props.xMax ?? undefined,
                 title: props.xLabel ? {
                     display: true,
                     text: props.xLabel,
                 } : undefined,
             },
             y: {
-                title: props.xLabel ? {
+                max: props.yMax ?? undefined,
+                min: props.yMin ?? undefined,
+                title: props.yLabel ? {
                     display: true,
                     text: props.yLabel,
                 } : undefined,
