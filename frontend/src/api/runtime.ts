@@ -12,8 +12,8 @@
  * Do not edit the class manually.
  */
 
-
-export const BASE_PATH = "http://localhost:8000".replace(/\/+$/, "");
+// Get base path from environment variable, fallback to localhost if not set
+export const BASE_PATH = (import.meta.env.VITE_API_BASE_URL).replace(/\/+$/, "");
 
 export interface ConfigurationParameters {
     basePath?: string; // override base path
