@@ -44,16 +44,6 @@ def create_tables():
     with engine.connect() as conn:
         with conn.begin():
             Base.metadata.create_all(bind=engine)
-            # Remove constraints and indexes for votes tables
-            conn.execute(text("""
-                ALTER TABLE erststimmen DISABLE TRIGGER ALL;
-                DROP INDEX IF EXISTS ix_erststimmen_wahlkreiskandidatur_id;
-                
-                ALTER TABLE zweitstimmen DISABLE TRIGGER ALL;
-                DROP INDEX IF EXISTS ix_zweitstimmen_wahlkreis_id;
-                DROP INDEX IF EXISTS ix_zweitstimmen_partei_id;
-                DROP INDEX IF EXISTS ix_zweitstimmen_wahl_id;
-            """))
 
 def process_votes_for_year(year, database_url, vote_type):
     """Process either direct or list votes for a specific year with its own database connection"""
@@ -188,13 +178,6 @@ def insert_data():
 
         print("\nProcessing all votes in parallel...")
         process_all_votes_parallel(DATABASE_URL)
-
-        print("\nRebuilding indexes and constraints for votes tables...")
-        with session.connection().connection.cursor() as cursor:
-            cursor.execute("""
-                ALTER TABLE erststimmen ENABLE TRIGGER ALL;
-                ALTER TABLE zweitstimmen ENABLE TRIGGER ALL;
-            """)
 
         print("Committing changes...")
         session.commit()
