@@ -12,6 +12,8 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
+from typing import List
 
 from openapi_server.apis.general_api import router as GeneralApiRouter
 from openapi_server.apis.global_api import router as GlobalApiRouter
@@ -29,18 +31,17 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# Configure CORS
-origins = [
-    "http://localhost:5173",  # Frontend origin
-    "http://localhost:4173",  # Frontend preview origin
-]
+# Get CORS origins from environment variable
+# Format: "http://localhost:5173,http://localhost:4173"
+origins_env = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:4173")
+origins: List[str] = origins_env.split(",")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Allow specific origins
-    allow_credentials=True,  # Allow cookies and authorization headers
-    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers (Authorization, Content-Type, etc.)
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include API routers
