@@ -49,18 +49,20 @@ class Erststimme(Base):
     __tablename__ = 'erststimmen'
 
     id = Column(Integer, primary_key=True)
+    amount = Column(Integer, nullable=False)
 
     # Relations
     wahlkreiskandidatur = relationship('Wahlkreiskandidatur', back_populates='erststimmen')
     wahlkreiskandidatur_id = Column(Integer, ForeignKey('wahlkreiskandidaturen.id'), nullable=False)
 
     def __repr__(self):
-        return f"<Erststimme(id={self.id}), wahlkreiskandidatur_id={self.wahlkreiskandidatur_id}>"
+        return f"<Erststimme(id={self.id}), wahlkreiskandidatur_id={self.wahlkreiskandidatur_id}, amount={self.amount}>"
 
 class Zweitstimme(Base):
     __tablename__ = 'zweitstimmen'
 
     id = Column(Integer, primary_key=True)
+    amount = Column(Integer, nullable=False)
 
     # Relations
     wahlkreis_id = Column(Integer, ForeignKey('wahlkreise.id'), nullable=False)
@@ -71,7 +73,7 @@ class Zweitstimme(Base):
     wahl = relationship('Wahl', back_populates='zweitstimmen')
 
     def __repr__(self):
-        return f"<Zweitstimme(id={self.id}, wahlkreis_id={self.wahlkreis_id}, partei_id={self.partei_id})>"
+        return f"<Zweitstimme(id={self.id}, wahlkreis_id={self.wahlkreis_id}, partei_id={self.partei_id}, amount={self.amount})>"
 
 class Partei(Base):
     __tablename__ = 'parteien'
@@ -191,7 +193,7 @@ class Token(Base):
             f"voted={self.voted}, "
             f"token='{self.hash}')>"
         )
-    
+
 class BerufsKategorie(Base):
     __tablename__ = 'berufskategorien'
 

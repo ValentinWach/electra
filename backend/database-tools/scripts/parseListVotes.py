@@ -20,9 +20,8 @@ def parse_list_votes(session, Base, year):
         partei_lookup = {p.shortName: p.id for p in session.query(Partei).all()}
 
         print("Processing votes...")
-        chunk_size = 750 #adjust size according to your system's memory. 16 GB ~ 750	
+        chunk_size = 750
         total_votes = 0
-        
 
         grouped_df = filtered_df.groupby(['Gebietsname', 'Gruppenname'])['Anzahl'].sum().reset_index()
         
@@ -31,7 +30,7 @@ def parse_list_votes(session, Base, year):
             chunk_end = min(chunk_start + chunk_size, len(grouped_df))
             chunk_df = grouped_df.iloc[chunk_start:chunk_end]
             
-            foreign_keys = []
+            vote_records = []
             
             for _, row in chunk_df.iterrows():
                 wahlkreis_name = row['Gebietsname']
@@ -52,20 +51,18 @@ def parse_list_votes(session, Base, year):
                     continue
 
                 count = int(row['Anzahl'])
-                foreign_keys.extend([(wahlkreis_id, partei_id, wahl_id)] * count)
+                vote_records.append(f"{wahlkreis_id}\t{partei_id}\t{wahl_id}\t{count}")
+                total_votes += count
 
             # Insert chunk directly into database using COPY
-            if foreign_keys:
-                total_votes += len(foreign_keys)
-                print(f"Streaming chunk {chunk_start//chunk_size + 1} into database, votes in chunk: {len(foreign_keys)}")
+            if vote_records:
+                print(f"Streaming chunk {chunk_start//chunk_size + 1} into database, records in chunk: {len(vote_records)}")
                 
-                buffer = StringIO()
-                for wk_id, p_id, w_id in foreign_keys:
-                    buffer.write(f"{wk_id}\t{p_id}\t{w_id}\n")
+                buffer = StringIO('\n'.join(vote_records))
                 buffer.seek(0)
                 
                 with session.connection().connection.cursor() as cursor:
-                    cursor.copy_from(buffer, 'zweitstimmen', columns=('wahlkreis_id', 'partei_id', 'wahl_id'))
+                    cursor.copy_from(buffer, 'zweitstimmen', columns=('wahlkreis_id', 'partei_id', 'wahl_id', 'amount'))
                 
                 session.commit()
                 buffer.close()

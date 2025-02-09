@@ -7,20 +7,12 @@ FROM bundeslaender JOIN wahlkreise ON bundeslaender.id = wahlkreise.bundesland_i
 GROUP BY bundeslaender.id, wahl_id
 );
 
-CREATE MATERIALIZED VIEW zweitstimmen_wahlkreis_partei AS
-SELECT parteien.id as parteien_id, wahlen.id as wahlen_id, wahlkreise.id as wahlkreise_id, count(*) as stimmen_sum
-from zweitstimmen
-         join wahlen on zweitstimmen.wahl_id = wahlen.id
-         join parteien on zweitstimmen.partei_id = parteien.id
-         join wahlkreise on zweitstimmen.wahlkreis_id = wahlkreise.id
-group by parteien.id, wahlen.id, wahlkreise.id;
-
 CREATE MATERIALIZED VIEW zweitstimmen_bundesland_partei AS
-SELECT parteien_id, wahlen_id, bundeslaender.id as bundeslaender_id, sum(stimmen_sum) as stimmen_sum
-from zweitstimmen_wahlkreis_partei
-         join wahlkreise on wahlkreise_id = wahlkreise.id
+SELECT z.partei_id as parteien_id, z.wahl_id as wahlen_id, bundeslaender.id as bundeslaender_id, sum(z.amount) as stimmen_sum
+from zweitstimmen z
+         join wahlkreise on wahlkreis_id = wahlkreise.id
          join bundeslaender on wahlkreise.bundesland_id = bundeslaender.id
-group by parteien_id, wahlen_id, bundeslaender.id;
+group by z.partei_id, z.wahl_id, bundeslaender.id;
 
 CREATE OR REPLACE VIEW zweitstimmen_bundesland_partei_with_votes AS
 SELECT parteien_id, wahlen_id, bundeslaender_id, stimmen_sum
@@ -33,9 +25,9 @@ from zweitstimmen_bundesland_partei
 group by parteien_id, wahlen_id;
 
 CREATE MATERIALIZED VIEW erststimmen_wahlkreis_partei_kandidat AS
-SELECT wahlkreis_id, w.kandidat_id, w.partei_id, w.wahl_id, COUNT(*) AS votes
+SELECT wahlkreis_id, w.kandidat_id, w.partei_id, w.wahl_id, e.amount AS votes
 FROM erststimmen e JOIN wahlkreiskandidaturen w ON e.wahlkreiskandidatur_id = w.id
-GROUP BY wahlkreis_id, w.kandidat_id, w.partei_id, w.wahl_id;
+GROUP BY wahlkreis_id, w.kandidat_id, w.partei_id, w.wahl_id, e.amount;
 
 CREATE MATERIALIZED VIEW erststimmen_wahlkreis_partei AS
 SELECT wk.partei_id as parteien_id, wk.wahl_id as wahlen_id, wk.wahlkreis_id as wahlkreise_id, SUM(votes) as stimmen_sum

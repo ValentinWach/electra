@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION calculate_increased_seats_per_party_per_bundesland_an
         wahl_id             INT,
         bundesland_id       INT,
         partei_id          INT,
-        stimmen_sum        NUMERIC,
+        stimmen_sum        bigint,
         landeslistensitze  NUMERIC,
         mindestsitzanspruch BIGINT,
         sitze_final        NUMERIC

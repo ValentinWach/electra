@@ -26,9 +26,8 @@ def parse_direct_votes(session, Base, year):
             kandidaturen_lookup[key] = wk.id
 
         print("Processing votes...")
-        chunk_size = 1000 #adjust size according to your system's memory. 16 GB ~ 1000 as row is smaller than list votes
+        chunk_size = 1000
         total_votes = 0
-
 
         grouped_df = filtered_df.groupby(['Gebietsname', 'Gruppenname'])['Anzahl'].sum().reset_index()
         
@@ -37,11 +36,10 @@ def parse_direct_votes(session, Base, year):
             chunk_end = min(chunk_start + chunk_size, len(grouped_df))
             chunk_df = grouped_df.iloc[chunk_start:chunk_end]
             
-            wahlkreiskandidaturen_id = []
+            vote_records = []
             
             for _, row in chunk_df.iterrows():
                 wahlkreis_name = row['Gebietsname']
-
                 wahlkreis_name = 'Höxter – Gütersloh III – Lippe II' if wahlkreis_name == 'Höxter – Lippe II' else wahlkreis_name
                 wahlkreis_name = 'Paderborn' if wahlkreis_name == 'Paderborn – Gütersloh III' else wahlkreis_name
                 
@@ -67,20 +65,18 @@ def parse_direct_votes(session, Base, year):
                     continue
 
                 count = int(row['Anzahl'])
-                wahlkreiskandidaturen_id.extend([wahlkreiskandidatur_id] * count)
+                vote_records.append(f"{wahlkreiskandidatur_id}\t{count}")
+                total_votes += count
             
             # Insert chunk directly into database using COPY
-            if wahlkreiskandidaturen_id:
-                total_votes += len(wahlkreiskandidaturen_id)
-                print(f"Streaming chunk {chunk_start//chunk_size + 1} into database, votes in chunk: {len(wahlkreiskandidaturen_id)}")
+            if vote_records:
+                print(f"Streaming chunk {chunk_start//chunk_size + 1} into database, records in chunk: {len(vote_records)}")
                 
-                buffer = StringIO()
-                for id in wahlkreiskandidaturen_id:
-                    buffer.write(f"{id}\n")
+                buffer = StringIO('\n'.join(vote_records))
                 buffer.seek(0)
                 
                 with session.connection().connection.cursor() as cursor:
-                    cursor.copy_from(buffer, 'erststimmen', columns=('wahlkreiskandidatur_id',))
+                    cursor.copy_from(buffer, 'erststimmen', columns=('wahlkreiskandidatur_id', 'amount'))
                 
                 session.commit()
                 buffer.close()
