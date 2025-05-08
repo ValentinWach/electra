@@ -15,12 +15,12 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from typing import List
 
-from openapi_server.apis.general_api import router as GeneralApiRouter
-from openapi_server.apis.global_api import router as GlobalApiRouter
-from openapi_server.apis.wahlkreis_api import router as WahlkreisApiRouter
-from openapi_server.apis.elect_api import router as ElectApiRouter
-from openapi_server.apis.admin_api import router as AdminApiRouter
-from openapi_server.apis.analysis_api import router as AnalysisApiRouter
+from .apis.general_api import router as GeneralApiRouter
+from .apis.global_api import router as GlobalApiRouter
+from .apis.wahlkreis_api import router as WahlkreisApiRouter
+from .apis.elect_api import router as ElectApiRouter
+from .apis.admin_api import router as AdminApiRouter
+from .apis.analysis_api import router as AnalysisApiRouter
 
 
 

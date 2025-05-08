@@ -36,7 +36,7 @@ if __name__ == '__main__':
         print(f'Running with {config["workers"]} workers')
 
     uvicorn.run(
-        'src.openapi_server.main:app',
+        'app.main:app',
         host='0.0.0.0',
         port=8000,
         reload=config['reload'],

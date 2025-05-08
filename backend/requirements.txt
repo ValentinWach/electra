@@ -4,7 +4,6 @@ annotated-types==0.7.0
 anyio==4.7.0
 async-exit-stack==1.0.1
 async-generator==1.10
--e file:///Users/valentinwach/Documents/Master/firstSemester/DBS/electra/backend
 certifi==2024.12.14
 click==8.1.7
 dnspython==2.7.0

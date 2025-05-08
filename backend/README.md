@@ -22,12 +22,11 @@ This is the backend server for the Electra election system, built with FastAPI. 
 
 ```
 backend/                     # Root directory
-├── src/                    # Source code
-│   └── openapi_server/     # Main application code
-│       ├── apis/          # API route handlers and business logic
-│       ├── database/      # Database models and connection management
-│       ├── models/        # Pydantic models for request/response
-│       └── main.py        # Application entry point
+├── app/                    # Main application code
+│   ├── apis/              # API route handlers and business logic
+│   ├── database/          # Database models and connection management
+│   ├── models/            # Pydantic models for request/response
+│   └── main.py            # Application entry point
 ├── database-tools/         # Database management tools and election result calculation logic
 │   ├── scripts/           # Database setup and initialization scripts together with Election CSV files
 │   └── sitzverteilung/    # SQL logic to calculate seat distribution
@@ -49,7 +48,7 @@ After navigating to the backend directory, run the following commands to install
 
 ### Installation & Usage
 
-1. Create and activate a virtual environment and install dependencies:
+1. Install dependencies:
 ```bash
 uv sync
 ```
@@ -59,14 +58,14 @@ On Linux it might be necessary to run `sudo apt-get install libpq-dev` first, ma
 Install postgres and create an `.env` file like `.env.example`, adding your database URL. Start the database server.
 
 3. Setup the database:
-From the backend directory, enter the virtual environment and run:
+From the backend directory, run:
 ```bash
-python .\database-tools\scripts\setup_database.py
+python database-tools/scripts/setup_database.py
 ```
 This will reset the public schema, create the necessary tables, and insert the data for 2017 and 2021 elections read from the CSV source files in parallel. This should take about 3 minutes. After this, it will aggregate the votes (30-60 seconds), calculate election results and create relevant materialized views for the backend server.
 
 4. Run the server:
-From the backend directory, enter the virtual environment and run:
+From the backend directory, run:
 ```bash
 python run_server.py dev
 ```
@@ -79,12 +78,12 @@ to start with a production build and up to 8 parallel workers, depending on your
 Alternatively, start the server directly with uvicorn:
 For Development:
 ```bash
-uvicorn src.openapi_server.main:app --reload
+uvicorn app.main:app --reload
 ```
 
 For Production:
 ```bash
-uvicorn src.openapi_server.main:app --workers <number of workers>
+uvicorn app.main:app --workers <number of workers>
 ```
 Healthcheck: `http://localhost:8000` should return "Electra"
 The API documentation will be available at:

@@ -34,7 +34,7 @@ Each frontend and backend have ***their own README.md file*** in their respectiv
 
 ### Backend Setup
 
-1. Navigate to the `backend` directory and create both a virtual environment and install the dependencies at the same time via:
+1. Navigate to the `backend` directory and install dependencies:
 ```bash
 uv sync
 ```
@@ -44,7 +44,7 @@ uv sync
 - Create an `.env` file based on `.env.example`
 - Run database setup:
 ```bash
-python .\database-tools\scripts\setup_database.py
+python database-tools/scripts/setup_database.py
 ```
 
 3. Start the server:
@@ -92,7 +92,7 @@ The frontend will be available at:
 
 ```
 ├── backend/              # FastAPI backend server
-│   ├── src/             # Source code
+│   ├── app/             # Main application code
 │   └── database-tools/  # Database setup and election result calculation logic
 ├── frontend/            # React frontend application
 │   ├── src/            # Source code
