@@ -67,7 +67,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=electra_${ENVIRONMENT}
     volumes:
-      - postgres_data_${ENVIRONMENT}:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -83,5 +83,5 @@ networks:
     external: false
 
 volumes:
-  postgres_data_${ENVIRONMENT}:
+  postgres_data:
     name: electra_postgres_data_${ENVIRONMENT}
