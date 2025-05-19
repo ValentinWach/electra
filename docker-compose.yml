@@ -79,8 +79,8 @@ services:
       - web
 
 networks:
-  web:
-    external: true
+  web_${ENVIRONMENT}:
+    external: false
 
 volumes:
   postgres_data_${ENVIRONMENT}:
