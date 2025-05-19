@@ -27,7 +27,7 @@ jobs:
             cd /home/wach/electra/STAGE 
             eval $(ssh-agent -s)
             git pull origin main
-            docker compose up --build -d
+            docker compose -p electra-stage up --build -d
           EOF
 
   prod-deploy:
@@ -49,5 +49,5 @@ jobs:
             cd /home/wach/electra/PROD
             eval $(ssh-agent -s)
             git pull origin ${{ github.ref }}  # Holen des spezifischen Tags
-            docker compose up --build -d
+            docker compose -p electra-prod up --build -d
           EOF
