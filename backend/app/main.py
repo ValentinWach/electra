@@ -14,6 +14,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from typing import List
+from dotenv import load_dotenv
+
+# Load environment variables from top-level .env file
+load_dotenv(dotenv_path="../.env")
 
 from .apis.general_api import router as GeneralApiRouter
 from .apis.global_api import router as GlobalApiRouter
@@ -32,9 +36,12 @@ app = FastAPI(
 )
 
 # Get CORS origins from environment variable
-# Format: "http://localhost:5173,http://localhost:4173,https://*.vwach.de"
-origins_env = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:4173,https://*.vwach.de")
-origins: List[str] = origins_env.split(",")
+DOMAIN = os.getenv("DOMAIN")
+origins = [
+    "http://localhost:5173",
+    "http://localhost:4173",
+    f"https://{DOMAIN}",
+]
 
 app.add_middleware(
     CORSMiddleware,
