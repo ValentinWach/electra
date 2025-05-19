@@ -83,4 +83,4 @@ networks:
     external: true
 
 volumes:
-  postgres_data: 
+  postgres_data_${ENVIRONMENT}:
