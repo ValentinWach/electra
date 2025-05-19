@@ -28,6 +28,7 @@ jobs:
             eval $(ssh-agent -s)
             ssh-add ../.ssh/github
             git pull origin main
+            cp .env .env
             docker compose up --build -d
           EOF
 
@@ -51,5 +52,6 @@ jobs:
             eval $(ssh-agent -s)
             ssh-add ../.ssh/github
             git pull origin ${{ github.ref }}  # Holen des spezifischen Tags
+            cp .env .env
             docker compose up --build -d
           EOF
