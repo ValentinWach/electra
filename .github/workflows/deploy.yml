@@ -1,90 +1,55 @@
-version: "3.8"
+name: Deploy to Staging and Production Servers
 
-services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: electra-frontend-${ENVIRONMENT}
-    env_file:
-      - .env
-    environment:
-      - VITE_API_BASE_URL=//api.${DOMAIN}
-    depends_on:
-      - backend
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.entrypoints=websecure"
-      - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.tls=true"
-      - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.tls.certresolver=cloudflare"
-      - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.middlewares=auth-admin@docker"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    networks:
-      - web      # Traefik entrypoint
-      - default  # implicit per‑project network
+on:
+  push:
+    branches:
+      - main  # Trigger auf Commit im main-Branch
+    tags:
+      - 'v*'  # Trigger auf Tags in der Form v...
 
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: electra-backend-${ENVIRONMENT}
-    env_file:
-      - .env
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/electra_${ENVIRONMENT}
-      - ENVIRONMENT=${ENVIRONMENT}
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - ./backend:/app
-      - ./backend/database-tools:/app/database-tools
-      - ./backend/database-tools/sitzverteilung:/app/database-tools/sitzverteilung
-      - ./backend/database-tools/topTen:/app/database-tools/topTen
-    command: >
-      sh -c "
-        python -c 'import psycopg2; conn = psycopg2.connect(\"dbname=electra_${ENVIRONMENT} user=postgres password=postgres host=db\"); cur = conn.cursor(); cur.execute(\"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = \'wahlen\')\"); is_initialized = cur.fetchone()[0]; cur.close(); conn.close(); exit(0 if is_initialized else 1)' &&
-        echo \"Database already initialized, skipping setup...\" ||
-        (echo \"Database not initialized, running setup...\" && python database-tools/scripts/setup_database.py) &&
-        python run_server.py dev
-      "
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.electra-backend-${ENVIRONMENT}.rule=Host(`api.${DOMAIN}`)"
-      - "traefik.http.routers.electra-backend-${ENVIRONMENT}.entrypoints=websecure"
-      - "traefik.http.routers.electra-backend-${ENVIRONMENT}.tls=true"
-      - "traefik.http.routers.electra-backend-${ENVIRONMENT}.tls.certresolver=cloudflare"
-    networks:
-      - web      # Traefik entrypoint
-      - default  # implicit per‑project network
+jobs:
+  stage-deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'  # Nur wenn es ein Commit im main-Branch ist
 
-  db:
-    image: postgres:17.1
-    container_name: electra-db-${ENVIRONMENT}
-    env_file:
-      - .env
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=electra_${ENVIRONMENT}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - default  # implicit per‑project network
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-networks:
-  web:
-    external: true
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
 
-# No top-level volumes section: Compose will auto-create
-# <project>_postgres_data for you when you run with -p.
-volumes:
-  postgres_data:
+      - name: Deploy to Staging Server
+        run: |
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.DEPLOY_SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER_IP }} << 'EOF'
+            cd /home/wach/electra/STAGE 
+            eval $(ssh-agent -s)
+            ssh-add ~/.ssh/github
+            git pull origin main
+            docker compose -p electra-stage up --build -d
+          EOF
+
+  prod-deploy:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')  # Nur wenn es ein Tag mit "v" ist
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Deploy to Production Server
+        run: |
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.DEPLOY_SSH_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER_IP }} << 'EOF'
+            cd /home/wach/electra/PROD
+            eval $(ssh-agent -s)
+            ssh-add ~/.ssh/github
+            git pull origin ${{ github.ref }}  # Holen des spezifischen Tags
+            docker compose -p electra-prod up --build -d
+          EOF

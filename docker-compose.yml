@@ -6,6 +6,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: electra-frontend-${ENVIRONMENT}
+    env_file:
+      - .env
     environment:
       - VITE_API_BASE_URL=//api.${DOMAIN}
     depends_on:
@@ -20,17 +22,17 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    env_file:
-      - .env
     networks:
-      - web
-      - default
+      - web      # Traefik entrypoint
+      - default  # implicit per‑project network
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: electra-backend-${ENVIRONMENT}
+    env_file:
+      - .env
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/electra_${ENVIRONMENT}
       - ENVIRONMENT=${ENVIRONMENT}
@@ -44,9 +46,9 @@ services:
       - ./backend/database-tools/topTen:/app/database-tools/topTen
     command: >
       sh -c "
-        python -c 'import psycopg2; conn = psycopg2.connect(\"dbname=electra_${ENVIRONMENT} user=postgres password=postgres host=db\"); cur = conn.cursor(); cur.execute(\"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = \'wahlen\')\"); is_initialized = cur.fetchone()[0]; cur.close(); conn.close(); exit(0 if is_initialized else 1)' && 
-        echo \"Database already initialized, skipping setup...\" || 
-        (echo \"Database not initialized, running setup...\" && python database-tools/scripts/setup_database.py) && 
+        python -c 'import psycopg2; conn = psycopg2.connect(\"dbname=electra_${ENVIRONMENT} user=postgres password=postgres host=db\"); cur = conn.cursor(); cur.execute(\"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = \'wahlen\')\"); is_initialized = cur.fetchone()[0]; cur.close(); conn.close(); exit(0 if is_initialized else 1)' &&
+        echo \"Database already initialized, skipping setup...\" ||
+        (echo \"Database not initialized, running setup...\" && python database-tools/scripts/setup_database.py) &&
         python run_server.py dev
       "
     labels:
@@ -55,15 +57,15 @@ services:
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.entrypoints=websecure"
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.tls=true"
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.tls.certresolver=cloudflare"
-    env_file:
-      - .env
     networks:
-      - web
-      - default
+      - web      # Traefik entrypoint
+      - default  # implicit per‑project network
 
   db:
     image: postgres:17.1
     container_name: electra-db-${ENVIRONMENT}
+    env_file:
+      - .env
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -75,15 +77,14 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    env_file:
-      - .env
     networks:
-      - default
+      - default  # implicit per‑project network
 
 networks:
   web:
     external: true
 
+# No top-level volumes section: Compose will auto-create
+# <project>_postgres_data for you when you run with -p.
 volumes:
   postgres_data:
-
