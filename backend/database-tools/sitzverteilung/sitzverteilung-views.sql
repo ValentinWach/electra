@@ -7,6 +7,14 @@ FROM bundeslaender JOIN wahlkreise ON bundeslaender.id = wahlkreise.bundesland_i
 GROUP BY bundeslaender.id, wahl_id
 );
 
+CREATE MATERIALIZED VIEW zweitstimmen_wahlkreis_partei AS
+SELECT parteien.id as parteien_id, wahlen.id as wahlen_id, wahlkreise.id as wahlkreise_id, sum(z.amount) as stimmen_sum
+from zweitstimmen z
+         join wahlen on z.wahl_id = wahlen.id
+         join parteien on z.partei_id = parteien.id
+         join wahlkreise on z.wahlkreis_id = wahlkreise.id
+group by parteien.id, wahlen.id, wahlkreise.id;
+
 CREATE MATERIALIZED VIEW zweitstimmen_bundesland_partei AS
 SELECT z.partei_id as parteien_id, z.wahl_id as wahlen_id, bundeslaender.id as bundeslaender_id, sum(z.amount) as stimmen_sum
 from zweitstimmen z
