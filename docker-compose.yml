@@ -22,8 +22,6 @@ services:
       - /app/node_modules
     env_file:
       - .env
-    networks:
-      - web
 
   backend:
     build:
@@ -56,8 +54,6 @@ services:
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.tls.certresolver=cloudflare"
     env_file:
       - .env
-    networks:
-      - web
 
   db:
     image: postgres:17.1
@@ -75,8 +71,6 @@ services:
       retries: 5
     env_file:
       - .env
-    networks:
-      - web
 
 volumes:
   postgres_data:
