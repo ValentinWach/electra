@@ -93,3 +93,4 @@ async def vote(
     elect_api = BaseElectApi()
     return await elect_api.vote(vote_request)
 
+
