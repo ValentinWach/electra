@@ -23,7 +23,7 @@ services:
     env_file:
       - .env
     networks:
-      - web_${ENVIRONMENT}
+      - web
 
   backend:
     build:
@@ -57,7 +57,7 @@ services:
     env_file:
       - .env
     networks:
-      - web_${ENVIRONMENT}
+      - web
 
   db:
     image: postgres:17.1
@@ -76,11 +76,11 @@ services:
     env_file:
       - .env
     networks:
-      - web_${ENVIRONMENT}
+      - web
 
 networks:
-  web_${ENVIRONMENT}:
-    external: false
+  web:
+    external: true
 
 volumes:
   postgres_data:
