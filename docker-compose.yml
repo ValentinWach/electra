@@ -24,7 +24,7 @@ services:
       - .env
     networks:
       - web
-      - electra-${ENVIRONMENT}
+      - default
 
   backend:
     build:
@@ -59,7 +59,7 @@ services:
       - .env
     networks:
       - web
-      - electra-${ENVIRONMENT}
+      - default
 
   db:
     image: postgres:17.1
@@ -78,11 +78,8 @@ services:
     env_file:
       - .env
     networks:
-      - electra-${ENVIRONMENT}
+      - default
 
 networks:
   web:
     external: true
-
-  electra-${ENVIRONMENT}:
-    driver: bridge
