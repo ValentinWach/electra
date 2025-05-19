@@ -61,6 +61,7 @@ services:
 
   db:
     image: postgres:17.1
+    container_name: electra-db-${ENVIRONMENT}
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres

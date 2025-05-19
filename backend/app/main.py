@@ -32,8 +32,8 @@ app = FastAPI(
 )
 
 # Get CORS origins from environment variable
-# Format: "http://localhost:5173,http://localhost:4173"
-origins_env = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:4173")
+# Format: "http://localhost:5173,http://localhost:4173,https://*.vwach.de"
+origins_env = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:4173,https://*.vwach.de")
 origins: List[str] = origins_env.split(",")
 
 app.add_middleware(
