@@ -9,13 +9,14 @@ src/openapi_server/__init__.py
 src/openapi_server/main.py
 src/openapi_server/apis/admin_api.py
 src/openapi_server/apis/admin_api_base.py
+src/openapi_server/apis/analysis_api.py
+src/openapi_server/apis/analysis_api_base.py
 src/openapi_server/apis/elect_api.py
 src/openapi_server/apis/elect_api_base.py
 src/openapi_server/apis/general_api.py
 src/openapi_server/apis/general_api_base.py
 src/openapi_server/apis/global_api.py
 src/openapi_server/apis/global_api_base.py
-src/openapi_server/apis/security_api.py
 src/openapi_server/apis/wahlkreis_api.py
 src/openapi_server/apis/wahlkreis_api_base.py
 src/openapi_server/database/base.py
@@ -28,6 +29,8 @@ src/openapi_server/models/auslaenderanteil.py
 src/openapi_server/models/auslaenderanteil_wahlkreise_inner.py
 src/openapi_server/models/authenticated_response.py
 src/openapi_server/models/authentication_request.py
+src/openapi_server/models/berufsgruppen.py
+src/openapi_server/models/berufsgruppen_berufsgruppen_inner.py
 src/openapi_server/models/bundesland.py
 src/openapi_server/models/closest_winner.py
 src/openapi_server/models/closest_winners.py

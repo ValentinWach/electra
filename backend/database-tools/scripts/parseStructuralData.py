@@ -1,6 +1,13 @@
 import pandas as pd
+import numpy as np
+import sys
+import os
 from pathlib import Path
-from openapi_server.database.models import Strukturdatum
+
+# Add the parent directory to the Python path so we can import from app
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from app.database.models import Strukturdatum, Wahlkreis
 
 def parse_structural_data(session, Base):
     script_dir = Path(__file__).parent  # go up to database-tools directory

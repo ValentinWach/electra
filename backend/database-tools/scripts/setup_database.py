@@ -1,22 +1,27 @@
 import os
-from datetime import datetime
-from sqlalchemy import create_engine, Table, Column, Integer, MetaData, text
+import sys
+import time
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
 from dotenv import load_dotenv
-from pathlib import Path
+import concurrent.futures
+import pandas as pd
+import numpy as np
+from datetime import datetime
+from sqlalchemy import Table, Column, Integer, MetaData
 import multiprocessing as mp
 import platform
 from sqlalchemy.ext.automap import automap_base
 
+# Add the parent directory to the Python path so we can import from app
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from app.database.base import Base
+from app.database.models import *
+
 # Change to the script's directory
-os.chdir(Path(__file__).parent)
-
-import sys
-script_dir = Path(__file__).parent.parent.parent / 'src'
-sys.path.append(str(script_dir))
-
-from openapi_server.database.base import Base
-from openapi_server.database.models import *
+os.chdir(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Load environment variables and setup database connection
 load_dotenv()
@@ -198,13 +203,15 @@ def main():
         insert_data()
         
         print("\nAggregating votes, calculating election results and creating relevant materialized views...")
+        script_dir = os.path.dirname(os.path.abspath(__file__))
         sql_files = [
-            '../sitzverteilung/sitzverteilung-functions.sql',
-            '../sitzverteilung/sitzverteilung-views.sql',
-            '../topTen/closestWinners.sql'
+            os.path.join(script_dir, '..', 'sitzverteilung', 'sitzverteilung-functions.sql'),
+            os.path.join(script_dir, '..', 'sitzverteilung', 'sitzverteilung-views.sql'),
+            os.path.join(script_dir, '..', 'topTen', 'closestWinners.sql')
         ]
         
         for sql_file in sql_files:
+            print(f"Executing SQL file: {sql_file}")
             execute_sql_file(sql_file)
         
         print("\nDatabase setup completed successfully!")

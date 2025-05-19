@@ -3,15 +3,18 @@
 from typing import ClassVar, Dict, List, Tuple, Optional # noqa: F401
 from fastapi import HTTPException
 from sqlalchemy import text
-from openapi_server.database.connection import Session as db_session
+from ..database.connection import Session as db_session
 from pydantic import StrictBool, StrictInt
+import importlib
+import pkgutil
 
-from openapi_server.models.auslaenderanteil_wahlkreise_inner import AuslaenderanteilWahlkreiseInner
-from openapi_server.models.berufsgruppen_berufsgruppen_inner import BerufsgruppenBerufsgruppenInner
-from openapi_server.models.einkommen_wahlkreise_inner import EinkommenWahlkreiseInner
-from openapi_server.models.auslaenderanteil import Auslaenderanteil
-from openapi_server.models.berufsgruppen import Berufsgruppen
-from openapi_server.models.einkommen import Einkommen
+from ..database.models import Bundesland, Partei, Wahlkreis
+from ..models.auslaenderanteil_wahlkreise_inner import AuslaenderanteilWahlkreiseInner
+from ..models.berufsgruppen_berufsgruppen_inner import BerufsgruppenBerufsgruppenInner
+from ..models.einkommen_wahlkreise_inner import EinkommenWahlkreiseInner
+from ..models.auslaenderanteil import Auslaenderanteil
+from ..models.berufsgruppen import Berufsgruppen
+from ..models.einkommen import Einkommen
 
 
 class BaseAnalysisApi:

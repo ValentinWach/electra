@@ -4,8 +4,7 @@ from typing import Dict, List  # noqa: F401
 import importlib
 import pkgutil
 
-from openapi_server.apis.elect_api_base import BaseElectApi
-import openapi_server.impl
+from .elect_api_base import BaseElectApi
 
 from fastapi import (  # noqa: F401
     APIRouter,
@@ -21,21 +20,17 @@ from fastapi import (  # noqa: F401
     Security,
     status,
 )
+from fastapi.security import OAuth2PasswordBearer
 
-from openapi_server.models.authenticated_response import AuthenticatedResponse
-from openapi_server.models.authentication_request import AuthenticationRequest
-from openapi_server.models.direktkandidaten import Direktkandidaten
-from openapi_server.models.extra_models import TokenModel  # noqa: F401
+from ..models.authenticated_response import AuthenticatedResponse
+from ..models.authentication_request import AuthenticationRequest
+from ..models.direktkandidaten import Direktkandidaten
+from ..models.extra_models import TokenModel  # noqa: F401
 from pydantic import StrictInt
-from openapi_server.models.vote_request import VoteRequest
-from openapi_server.models.wahlzettel_parteien import WahlzettelParteien
+from ..models.vote_request import VoteRequest
+from ..models.wahlzettel_parteien import WahlzettelParteien
 
 router = APIRouter()
-
-ns_pkg = openapi_server.impl
-for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
-    importlib.import_module(name)
-
 
 @router.post(
     "/elect/authenticate",

@@ -1,6 +1,13 @@
 import pandas as pd
+import numpy as np
+import sys
+import os
 from pathlib import Path
-from openapi_server.database.models import Partei
+
+# Add the parent directory to the Python path so we can import from app
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from app.database.models import Partei
 
 def parse_parties(session, Base, year):
     script_dir = Path(__file__).parent  # go up to database-tools directory
@@ -36,7 +43,6 @@ def parse_parties(session, Base, year):
 
 if __name__ == '__main__':
     # This section only runs if script is called directly
-    import os
     import argparse
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker

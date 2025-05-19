@@ -2,28 +2,28 @@
 
 import hashlib
 from collections import defaultdict
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 
 from pydantic import StrictInt
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
-from openapi_server.database.models import Erststimme, Zweitstimme, Token
-from openapi_server.models.bundesland import Bundesland
-from openapi_server.models.abgeordneter import Abgeordneter
+from ..database.models import Erststimme, Zweitstimme, Token
+from ..models.bundesland import Bundesland
+from ..models.abgeordneter import Abgeordneter
 
-from openapi_server.models.authenticated_response import AuthenticatedResponse
-from openapi_server.models.authentication_request import AuthenticationRequest
-from openapi_server.models.direktkandidaten import Direktkandidaten
-from openapi_server.models.partei import Partei
+from ..models.authenticated_response import AuthenticatedResponse
+from ..models.authentication_request import AuthenticationRequest
+from ..models.direktkandidaten import Direktkandidaten
+from ..models.partei import Partei
 
-from openapi_server.database.connection import Session as db_session
-from openapi_server.models.vote_request import VoteRequest
-from openapi_server.models.wahl import Wahl
-from openapi_server.models.wahlkreis import Wahlkreis
-from openapi_server.models.wahlzettel_partei_wrapper import WahlzettelParteiWrapper
-from openapi_server.models.wahlzettel_parteien import WahlzettelParteien
+from ..database.connection import Session as db_session
+from ..models.vote_request import VoteRequest
+from ..models.wahl import Wahl
+from ..models.wahlkreis import Wahlkreis
+from ..models.wahlzettel_partei_wrapper import WahlzettelParteiWrapper
+from ..models.wahlzettel_parteien import WahlzettelParteien
 
 
 class BaseElectApi:

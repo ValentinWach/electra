@@ -3,8 +3,7 @@ from typing import Dict, List  # noqa: F401
 import importlib
 import pkgutil
 
-from openapi_server.apis.general_api_base import BaseGeneralApi
-import openapi_server.impl
+from .general_api_base import BaseGeneralApi
 
 from fastapi import (  # noqa: F401
     APIRouter,
@@ -20,20 +19,17 @@ from fastapi import (  # noqa: F401
     Security,
     status,
 )
+from fastapi.security import OAuth2PasswordBearer
 
 from pydantic import StrictInt
-from openapi_server.models.extra_models import TokenModel  # noqa: F401
+from ..models.extra_models import TokenModel  # noqa: F401
 from typing import List
-from openapi_server.models.bundesland import Bundesland
-from openapi_server.models.partei import Partei
-from openapi_server.models.wahl import Wahl
-from openapi_server.models.wahlkreis import Wahlkreis
+from ..models.bundesland import Bundesland
+from ..models.partei import Partei
+from ..models.wahl import Wahl
+from ..models.wahlkreis import Wahlkreis
 
 router = APIRouter()
-
-ns_pkg = openapi_server.impl
-for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
-    importlib.import_module(name)
 
 @router.get(
     "/",

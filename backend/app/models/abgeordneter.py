@@ -22,7 +22,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from openapi_server.models.partei import Partei
+from .partei import Partei
 try:
     from typing import Self
 except ImportError:

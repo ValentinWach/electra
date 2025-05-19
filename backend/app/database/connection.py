@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from dotenv import load_dotenv
 import os
 
-from openapi_server.database.base import Base
+from .base import Base
 
 load_dotenv()
 

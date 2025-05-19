@@ -6,79 +6,146 @@ Requires-Python: >=3.10
 Description-Content-Type: text/markdown
 Requires-Dist: aiofiles==23.1.0
 Requires-Dist: aniso8601==7.0.0
+Requires-Dist: annotated-types==0.7.0
+Requires-Dist: anyio==4.7.0
 Requires-Dist: async-exit-stack==1.0.1
 Requires-Dist: async-generator==1.10
-Requires-Dist: fastapi[all]>=0.115.6
+Requires-Dist: certifi==2024.12.14
+Requires-Dist: click==8.1.7
+Requires-Dist: dnspython==2.7.0
+Requires-Dist: email-validator==2.2.0
+Requires-Dist: fastapi==0.115.6
+Requires-Dist: fastapi-cli==0.0.7
 Requires-Dist: greenlet==3.1.1
+Requires-Dist: h11==0.14.0
+Requires-Dist: httpcore==1.0.7
+Requires-Dist: httptools==0.6.4
+Requires-Dist: httpx==0.28.1
+Requires-Dist: idna==3.10
+Requires-Dist: itsdangerous==2.2.0
+Requires-Dist: jinja2==3.1.5
+Requires-Dist: markdown-it-py==3.0.0
+Requires-Dist: markupsafe==3.0.2
+Requires-Dist: mdurl==0.1.2
 Requires-Dist: numpy==2.1.3
+Requires-Dist: orjson==3.10.15
 Requires-Dist: pandas==2.2.3
 Requires-Dist: psycopg2==2.9.10
+Requires-Dist: pydantic==2.10.3
+Requires-Dist: pydantic-core==2.27.1
+Requires-Dist: pydantic-extra-types==2.10.2
+Requires-Dist: pydantic-settings==2.7.1
+Requires-Dist: pygments==2.19.1
 Requires-Dist: python-dateutil==2.9.0.post0
-Requires-Dist: python-dotenv>=1.0.1
+Requires-Dist: python-dotenv==1.0.1
+Requires-Dist: python-multipart==0.0.20
 Requires-Dist: pytz==2024.2
+Requires-Dist: pyyaml==6.0.2
+Requires-Dist: rich==13.9.4
+Requires-Dist: rich-toolkit==0.13.2
+Requires-Dist: shellingham==1.5.4
+Requires-Dist: six==1.16.0
+Requires-Dist: sniffio==1.3.1
 Requires-Dist: sqlalchemy==2.0.36
+Requires-Dist: starlette==0.41.3
+Requires-Dist: typer==0.15.1
 Requires-Dist: typing-extensions==4.12.2
-Requires-Dist: uvicorn>=0.34.0
+Requires-Dist: tzdata==2024.2
+Requires-Dist: ujson==5.10.0
+Requires-Dist: uvicorn==0.34.0
+Requires-Dist: uvloop==0.21.0
+Requires-Dist: watchfiles==1.0.4
+Requires-Dist: websockets==14.2
 
 # Backend Server
 
-This is the backend server for the election system, built with FastAPI.
+This is the backend server for the Electra election system, built with FastAPI. The server provides a comprehensive API for managing election data, vote processing, and result calculations. It is designed to handle both real-time voting operations and post-election analysis.
 
-## Requirements
+## Key Components
 
-Python >= 3.7
+- **Election Results Processing**: SQL queries and materialized views for efficient API requests
+- **Vote Management**: Secure handling of incoming votes and token validation
+- **Admin Operations**: APIs for token generation, result recalculation, and system management
+- **Performance Optimization**: Pre-calculated materialized views for frequently accessed data
 
-## Installation & Usage
+## Tech Stack
 
-1. Create and activate a virtual environment:
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
+- **Framework:** FastAPI
+- **Database:** PostgreSQL with SQLAlchemy ORM
+- **API Documentation:** OpenAPI (Swagger) and ReDoc
+- **Package Management:** uv
+- **Performance:** Uvicorn ASGI server with multi-worker support
+- **Data Processing:** Pandas for CSV data import
+
+## Project Structure
+
+```
+backend/                     # Root directory
+├── src/                    # Source code
+│   └── openapi_server/     # Main application code
+│       ├── apis/          # API route handlers and business logic
+│       ├── database/      # Database models and connection management
+│       ├── models/        # Pydantic models for request/response
+│       └── main.py        # Application entry point
+├── database-tools/         # Database management tools and election result calculation logic
+│   ├── scripts/           # Database setup and initialization scripts together with Election CSV files
+│   └── sitzverteilung/    # SQL logic to calculate seat distribution
+├── requirements.txt       # Python dependencies
+├── pyproject.toml        # Project configuration
+└── .env.example          # Environment variables template
 ```
 
-2. Install dependencies (choose one option):
+## Getting started
 
-Using uv (recommended, faster):
+### Prerequisites
+
+- Python >= 3.10
+- pip
+- uv (`pip install uv` globally)
+- PostgreSQL 17.1
+
+After navigating to the backend directory, run the following commands to install dependencies & start the application:
+
+### Installation & Usage
+
+1. Create and activate a virtual environment and install dependencies:
 ```bash
-uv venv .venv
-uv pip install -e .
+uv sync
 ```
+On Linux it might be necessary to run `sudo apt-get install libpq-dev` first, maybe even `sudo apt-get install python3-dev libpq-dev` to be able to install all postgres dependencies.
 
-Using pip:
+2. Set up database:
+Install postgres and create an `.env` file like `.env.example`, adding your database URL. Start the database server.
+
+3. Setup the database:
+From the backend directory, enter the virtual environment and run:
 ```bash
-pip install -e .
+python .\database-tools\scripts\setup_database.py
 ```
-
-3. Set up environment variables:
-Copy `.env.example` to `.env` and update the values as needed.
+This will reset the public schema, create the necessary tables, and insert the data for 2017 and 2021 elections read from the CSV source files in parallel. This should take about 3 minutes. After this, it will aggregate the votes (30-60 seconds), calculate election results and create relevant materialized views for the backend server.
 
 4. Run the server:
+From the backend directory, enter the virtual environment and run:
+```bash
+python run_server.py dev
+```
+to start with one server and incremental builds, or
+```bash
+python run_server.py prod
+```
+to start with a production build and up to 8 parallel workers, depending on your CPU count. This is only worth with enough clients, else overhead is higher than benefits. For local testing with frontend best run with 1 worker.
+
+Alternatively, start the server directly with uvicorn:
+For Development:
 ```bash
 uvicorn src.openapi_server.main:app --reload
 ```
 
+For Production:
+```bash
+uvicorn src.openapi_server.main:app --workers <number of workers>
+```
+Healthcheck: `http://localhost:8000` should return "Electra"
 The API documentation will be available at:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
-
-## Development
-
-### Running with Docker
-
-```bash
-docker-compose up --build
-```
-
-### Running Tests
-
-Using uv:
-```bash
-uv pip install pytest
-pytest tests
-```
-
-Using pip:
-```bash
-pip install pytest
-pytest tests
-```
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`

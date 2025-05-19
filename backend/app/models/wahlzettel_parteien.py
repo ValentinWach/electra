@@ -22,7 +22,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List
-from openapi_server.models.wahlzettel_partei_wrapper import WahlzettelParteiWrapper
+from .wahlzettel_partei_wrapper import WahlzettelParteiWrapper
 try:
     from typing import Self
 except ImportError:

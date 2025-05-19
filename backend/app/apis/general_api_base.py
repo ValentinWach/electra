@@ -1,16 +1,15 @@
 # coding: utf-8
 from cgitb import text
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 
-from typing import List
-from openapi_server.models.wahl import Wahl
-from openapi_server.models.bundesland import Bundesland
-from openapi_server.database.models import Wahl as WahlModel
-from openapi_server.database.models import Bundesland as BundelandModel
-from openapi_server.database.connection import Session as db_session
-from openapi_server.models.wahlkreis import Wahlkreis
-from openapi_server.models.partei import Partei
+from ..models.wahl import Wahl
+from ..models.bundesland import Bundesland
+from ..database.models import Wahl as WahlModel
+from ..database.models import Bundesland as BundelandModel
+from ..database.connection import Session as db_session
+from ..models.wahlkreis import Wahlkreis
+from ..models.partei import Partei
 from sqlalchemy import text
 from pydantic import StrictInt
 

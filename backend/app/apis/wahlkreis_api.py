@@ -4,8 +4,7 @@ from typing import Dict, List  # noqa: F401
 import importlib
 import pkgutil
 
-from openapi_server.apis.wahlkreis_api_base import BaseWahlkreisApi
-import openapi_server.impl
+from .wahlkreis_api_base import BaseWahlkreisApi
 
 from fastapi import (  # noqa: F401
     APIRouter,
@@ -21,22 +20,19 @@ from fastapi import (  # noqa: F401
     Security,
     status,
 )
+from fastapi.security import OAuth2PasswordBearer
 
-from openapi_server.models.extra_models import TokenModel  # noqa: F401
+from ..models.extra_models import TokenModel  # noqa: F401
 from pydantic import StrictBool, StrictInt
 from typing import List, Optional
-from openapi_server.models.overview_wahlkreis import OverviewWahlkreis
-from openapi_server.models.stimmanteil import Stimmanteil
-from openapi_server.models.winning_parties import WinningParties
-from openapi_server.models.auslaenderanteil import Auslaenderanteil
-from openapi_server.models.einkommen import Einkommen
+from ..models.overview_wahlkreis import OverviewWahlkreis
+from ..models.stimmanteil import Stimmanteil
+from ..models.winning_parties import WinningParties
+from ..models.auslaenderanteil import Auslaenderanteil
+from ..models.einkommen import Einkommen
 
 
 router = APIRouter()
-
-ns_pkg = openapi_server.impl
-for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
-    importlib.import_module(name)
 
 
 @router.get(

@@ -4,8 +4,7 @@ from typing import Dict, List  # noqa: F401
 import importlib
 import pkgutil
 
-from openapi_server.apis.admin_api_base import BaseAdminApi
-import openapi_server.impl
+from .admin_api_base import BaseAdminApi
 from typing_extensions import Annotated
 from typing import Any, List, Optional, Tuple, Union
 
@@ -27,15 +26,13 @@ from fastapi import (  # noqa: F401
     File
 )
 
-from openapi_server.models.extra_models import TokenModel  # noqa: F401
+from fastapi.security import OAuth2PasswordBearer
 from pydantic import Field, StrictBytes, StrictInt, StrictStr
 from typing import List
 
-router = APIRouter()
+from ..models.extra_models import TokenModel  # noqa: F401
 
-ns_pkg = openapi_server.impl
-for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
-    importlib.import_module(name)
+router = APIRouter()
 
 @router.post(
     "/admin/batch-vote",

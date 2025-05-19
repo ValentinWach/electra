@@ -1,7 +1,14 @@
 import pandas as pd
+import numpy as np
+import sys
+import os
 from pathlib import Path
+
+# Add the parent directory to the Python path so we can import from app
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 from datetime import datetime
-from openapi_server.database.models import Kandidat, Bundesland, Partei, Wahl, Listenkandidatur
+from app.database.models import Kandidat, Bundesland, Partei, Wahl, Listenkandidatur
 
 def parse_listcandidacies(session, Base, year):
     script_dir = Path(__file__).parent
@@ -67,7 +74,6 @@ def parse_listcandidacies(session, Base, year):
         session.commit()
 
 if __name__ == '__main__':
-    import os
     import argparse
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker

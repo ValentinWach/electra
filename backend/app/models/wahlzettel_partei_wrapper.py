@@ -22,8 +22,8 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List
-from openapi_server.models.abgeordneter import Abgeordneter
-from openapi_server.models.partei import Partei
+from .abgeordneter import Abgeordneter
+from .partei import Partei
 try:
     from typing import Self
 except ImportError:

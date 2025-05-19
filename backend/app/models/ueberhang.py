@@ -22,7 +22,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List, Optional
-from openapi_server.models.ueberhang_bundesland import UeberhangBundesland
+from .ueberhang_bundesland import UeberhangBundesland
 try:
     from typing import Self
 except ImportError:

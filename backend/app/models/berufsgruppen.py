@@ -22,7 +22,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List, Optional
-from openapi_server.models.berufsgruppen_berufsgruppen_inner import BerufsgruppenBerufsgruppenInner
+from .berufsgruppen_berufsgruppen_inner import BerufsgruppenBerufsgruppenInner
 try:
     from typing import Self
 except ImportError:

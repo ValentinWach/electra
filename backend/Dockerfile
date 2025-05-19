@@ -10,20 +10,17 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv
-RUN pip install uv
+# Copy requirements first to leverage Docker cache
+COPY requirements.txt .
 
-# Copy entire project BEFORE installing requirements (required for local path references)
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application
 COPY . .
-
-# Create and activate virtual environment with uv
-RUN uv venv && uv pip install -r requirements.txt
-
-# Set environment path so all following commands use the venv
-ENV PATH="/app/.venv/bin:$PATH"
 
 # Expose the app port
 EXPOSE 8000
 
 # Start the application
-CMD ["python", "run_server.py", "prod"]
+CMD ["python", "run_server.py", "dev"]

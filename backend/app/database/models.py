@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Boolean, String, ForeignKey, Date, Float, Enum as SQLEnum
 from sqlalchemy.orm import relationship, declarative_base
 from enum import Enum
-from openapi_server.database.base import Base
+from .base import Base
 
 class Wahl(Base):
     __tablename__ = 'wahlen'
@@ -142,8 +142,8 @@ class Listenkandidatur(Base):
     wahl = relationship('Wahl', back_populates='listenkandidaturen')
     wahl_id = Column(Integer, ForeignKey('wahlen.id'), nullable=False)
 
-def __repr__(self):
-    return f"<Listenkandidatur(id={self.id}, kandidat={self.kandidat_id}, bundesland={self.bundesland_id}, partei={self.partei_id}, listPosition={self.listPosition}, wahl={self.wahl_id})>"
+    def __repr__(self):
+        return f"<Listenkandidatur(id={self.id}, kandidat={self.kandidat_id}, bundesland={self.bundesland_id}, partei={self.partei_id}, listPosition={self.listPosition}, wahl={self.wahl_id})>"
 
 class Strukturdatum(Base):
     __tablename__ = 'strukturdaten'

@@ -4,8 +4,7 @@ from typing import Dict, List, Optional  # noqa: F401
 import importlib
 import pkgutil
 
-from openapi_server.apis.analysis_api_base import BaseAnalysisApi
-import openapi_server.impl
+from .analysis_api_base import BaseAnalysisApi
 
 from fastapi import (  # noqa: F401
     APIRouter,
@@ -21,18 +20,16 @@ from fastapi import (  # noqa: F401
     Security,
     status,
 )
+from fastapi.security import OAuth2PasswordBearer
 
-from openapi_server.models.extra_models import TokenModel  # noqa: F401
+from ..models.extra_models import TokenModel  # noqa: F401
 from pydantic import StrictInt
-from openapi_server.models.auslaenderanteil import Auslaenderanteil
-from openapi_server.models.einkommen import Einkommen
-from openapi_server.models.berufsgruppen import Berufsgruppen
+from typing import List
+from ..models.auslaenderanteil import Auslaenderanteil
+from ..models.einkommen import Einkommen
+from ..models.berufsgruppen import Berufsgruppen
 
 router = APIRouter()
-
-ns_pkg = openapi_server.impl
-for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
-    importlib.import_module(name)
 
 
 @router.get(

@@ -22,7 +22,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List
-from openapi_server.models.bundesland import Bundesland
+from .bundesland import Bundesland
 try:
     from typing import Self
 except ImportError:

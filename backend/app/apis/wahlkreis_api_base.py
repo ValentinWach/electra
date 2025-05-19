@@ -3,21 +3,24 @@
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 from fastapi import HTTPException
 from sqlalchemy import text
-from openapi_server.database.connection import Session as db_session
+from ..database.connection import Session as db_session
 from pydantic import StrictBool, StrictInt
 from typing import List, Optional
+import importlib
+import pkgutil
 
-from openapi_server.models.auslaenderanteil_wahlkreise_inner import AuslaenderanteilWahlkreiseInner
-from openapi_server.models.einkommen_wahlkreise_inner import EinkommenWahlkreiseInner
-from openapi_server.models.overview_wahlkreis import OverviewWahlkreis
-from openapi_server.models.stimmanteil import Stimmanteil
-from openapi_server.models.winning_parties import WinningParties
-from openapi_server.models.abgeordneter import Abgeordneter
-from openapi_server.models.partei import Partei
-from openapi_server.models.winning_parties_erststimme_inner import WinningPartiesErststimmeInner
-from openapi_server.models.winning_parties_zweitstimme_inner import WinningPartiesZweitstimmeInner
-from openapi_server.models.auslaenderanteil import Auslaenderanteil
-from openapi_server.models.einkommen import Einkommen
+from ..database.models import Bundesland, Partei, Wahlkreis
+from ..models.auslaenderanteil_wahlkreise_inner import AuslaenderanteilWahlkreiseInner
+from ..models.einkommen_wahlkreise_inner import EinkommenWahlkreiseInner
+from ..models.overview_wahlkreis import OverviewWahlkreis
+from ..models.stimmanteil import Stimmanteil
+from ..models.winning_parties import WinningParties
+from ..models.abgeordneter import Abgeordneter
+from ..models.partei import Partei
+from ..models.winning_parties_erststimme_inner import WinningPartiesErststimmeInner
+from ..models.winning_parties_zweitstimme_inner import WinningPartiesZweitstimmeInner
+from ..models.auslaenderanteil import Auslaenderanteil
+from ..models.einkommen import Einkommen
 
 
 class BaseWahlkreisApi:

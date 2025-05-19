@@ -22,8 +22,8 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
-from openapi_server.models.closest_winner import ClosestWinner
-from openapi_server.models.partei import Partei
+from .closest_winner import ClosestWinner
+from .partei import Partei
 try:
     from typing import Self
 except ImportError:

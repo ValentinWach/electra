@@ -6,9 +6,9 @@ import io
 import hashlib
 import os
 
-from fastapi import UploadFile, File, HTTPException
+from fastapi import UploadFile, File, HTTPException, Depends
 from typing import ClassVar, Dict, List, Tuple, Any  # noqa: F401
-from openapi_server.database.connection import Session as db_session, engine
+from ..database.connection import Session as db_session, engine
 from sqlalchemy import text, insert
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -16,7 +16,7 @@ from pydantic import Field, StrictBytes, StrictInt, StrictStr
 from typing_extensions import Annotated
 from typing import Any, List, Optional, Tuple, Union
 
-from openapi_server.database.models import Token, Erststimme, Zweitstimme
+from ..database.models import Token, Erststimme, Zweitstimme
 
 
 class BaseAdminApi:

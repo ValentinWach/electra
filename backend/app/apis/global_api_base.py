@@ -1,23 +1,23 @@
 # coding: utf-8
-from fastapi import HTTPException
+from fastapi import Depends, HTTPException
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 
 from pydantic import StrictInt
 from typing import List
 from sqlalchemy import text
-from openapi_server.models.abgeordneter import Abgeordneter
-from openapi_server.models.closest_winner import ClosestWinner
-from openapi_server.models.closest_winners import ClosestWinners
-from openapi_server.models.seat_distribution import SeatDistribution
-from openapi_server.models.seat_distribution_distribution_inner import SeatDistributionDistributionInner
-from openapi_server.models.partei import Partei
-from openapi_server.models.stimmanteil import Stimmanteil
-from openapi_server.models.ueberhang import Ueberhang
-from openapi_server.models.ueberhang_bundesland import UeberhangBundesland
-from openapi_server.models.wahlkreis import Wahlkreis
-from openapi_server.models.bundesland import Bundesland
+from ..models.abgeordneter import Abgeordneter
+from ..models.closest_winner import ClosestWinner
+from ..models.closest_winners import ClosestWinners
+from ..models.seat_distribution import SeatDistribution
+from ..models.seat_distribution_distribution_inner import SeatDistributionDistributionInner
+from ..models.partei import Partei
+from ..models.stimmanteil import Stimmanteil
+from ..models.ueberhang import Ueberhang
+from ..models.ueberhang_bundesland import UeberhangBundesland
+from ..models.wahlkreis import Wahlkreis
+from ..models.bundesland import Bundesland
 
-from openapi_server.database.connection import Session as db_session
+from ..database.connection import Session as db_session
 
 
 class BaseGlobalApi:

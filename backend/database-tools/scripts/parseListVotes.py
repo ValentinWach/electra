@@ -1,7 +1,14 @@
 import pandas as pd
+import numpy as np
+import sys
+import os
 from pathlib import Path
+
+# Add the parent directory to the Python path so we can import from app
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from app.database.models import Wahlkreis, Partei, Wahl, Zweitstimme
 from datetime import datetime
-from openapi_server.database.models import Wahl, Wahlkreis, Partei
 from io import StringIO
 
 def parse_list_votes(session, Base, year):
@@ -76,7 +83,6 @@ def parse_list_votes(session, Base, year):
         session.commit()
 
 if __name__ == '__main__':
-    import os
     import argparse
     from sqlalchemy import create_engine, text
     from sqlalchemy.orm import sessionmaker

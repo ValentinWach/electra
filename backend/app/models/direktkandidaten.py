@@ -22,7 +22,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List, Optional
-from openapi_server.models.abgeordneter import Abgeordneter
+from .abgeordneter import Abgeordneter
 try:
     from typing import Self
 except ImportError:
