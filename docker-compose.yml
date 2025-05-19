@@ -6,8 +6,6 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: electra-frontend-${ENVIRONMENT}
-    ports:
-      - "5173:5173"
     environment:
       - VITE_API_BASE_URL=//api.${DOMAIN}
     depends_on:
@@ -32,8 +30,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: electra-backend-${ENVIRONMENT}
-    ports:
-      - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/electra
       - ENVIRONMENT=production
@@ -65,8 +61,6 @@ services:
 
   db:
     image: postgres:17.1
-    ports:
-      - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
