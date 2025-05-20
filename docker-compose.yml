@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: electra-frontend-${ENVIRONMENT}
     environment:
-      - VITE_API_BASE_URL=https://api.${DOMAIN}
+      - VITE_API_BASE_URL=//api.${DOMAIN}
     depends_on:
       - backend
     labels:
