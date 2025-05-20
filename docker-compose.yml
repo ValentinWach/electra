@@ -25,7 +25,6 @@ services:
       - .env
     networks:
       - web
-      - internal_net
 
   backend:
     build:
