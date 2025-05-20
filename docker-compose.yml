@@ -37,7 +37,7 @@ services:
     env_file:
       - .env
     environment:
-      - VITE_API_BASE_URL=http://electra-backend-${ENVIRONMENT}:8000
+      - VITE_API_BASE_URL=//api.${DOMAIN}
     depends_on:
       - backend
     labels:
@@ -52,6 +52,7 @@ services:
       - /app/node_modules
     networks:
       - web
+      - electra_net
 
   #################################
   # Backend-Service
@@ -82,16 +83,15 @@ services:
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.entrypoints=websecure"
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.tls=true"
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.tls.certresolver=cloudflare"
+      - "traefik.http.services.electra-backend-${ENVIRONMENT}.loadbalancer.server.port=8000"
     volumes:
       - ./backend:/app
       - ./backend/database-tools:/app/database-tools
       - ./backend/database-tools/sitzverteilung:/app/database-tools/sitzverteilung
       - ./backend/database-tools/topTen:/app/database-tools/topTen
     networks:
-      web:
-        aliases:
-          - "api.${DOMAIN}"
-      electra_net:
+      - web
+      - electra_net
 
   #################################
   # Database
