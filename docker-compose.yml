@@ -1,16 +1,34 @@
 version: '3.8'
 
+#################################
+# Volumes (statischer Schlüssel,
+# echter Name enthält ENVIRONMENT)
+#################################
+volumes:
+  postgres_data:
+    external: true
+    name: "postgres_data_${ENVIRONMENT}"
+
+#################################
+# Netzwerke
+#################################
 networks:
   web:
     external: true
-  electra-${ENVIRONMENT}:
+
+  electra_net:
     driver: bridge
+    external: true
+    name: "electra_${ENVIRONMENT}"
 
-volumes:
-  postgres_data_${ENVIRONMENT}:
-
+#################################
+# Services
+#################################
 services:
 
+  #################################
+  # Frontend-Service
+  #################################
   frontend:
     build:
       context: ./frontend
@@ -33,9 +51,11 @@ services:
       - ./frontend:/app
       - /app/node_modules
     networks:
-      - web                       # nur öffentliches Netz
+      - web
 
-  # -- B) BACKEND --
+  #################################
+  # Backend-Service
+  #################################
   backend:
     build:
       context: ./backend
@@ -58,8 +78,8 @@ services:
             SELECT FROM information_schema.tables WHERE table_name = \'wahl\'
           )\"); 
           exit(0 if cur.fetchone()[0] else 1)'
-        && echo \"DB ready\"
-        || (echo \"Initializing DB…\" && python database-tools/scripts/setup_database.py)
+        && echo \"Database already initialized, skipping setup...\"
+        || (echo \"Database not initialized, running setup...\" && python database-tools/scripts/setup_database.py)
         && python run_server.py dev
       "
     labels:
@@ -74,10 +94,12 @@ services:
       - ./backend/database-tools/sitzverteilung:/app/database-tools/sitzverteilung
       - ./backend/database-tools/topTen:/app/database-tools/topTen
     networks:
-      - web                       # damit Traefik den Service erreicht
-      - electra-${ENVIRONMENT}    # privates Netz, in dem nur Backend+DB hängen
+      - web
+      - electra_net
 
-  # -- C) DB --
+  #################################
+  # Database
+  #################################
   db:
     image: postgres:17.1
     container_name: electra-db-${ENVIRONMENT}
@@ -91,6 +113,6 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - postgres_data_${ENVIRONMENT}:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
-      - electra-${ENVIRONMENT}
+      - electra_net
