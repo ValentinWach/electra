@@ -42,6 +42,7 @@ services:
       - backend
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=web"
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.entrypoints=websecure"
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.tls=true"
