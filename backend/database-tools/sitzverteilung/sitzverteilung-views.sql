@@ -166,4 +166,5 @@ SELECT wahl_id, kandidat_id, partei_id FROM listenabgeordnete
 UNION
 SELECT wahl_id, kandidat_id, partei_id FROM wahlkreis_winners;
 
+
 COMMIT;
