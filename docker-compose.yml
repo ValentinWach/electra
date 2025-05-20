@@ -88,8 +88,10 @@ services:
       - ./backend/database-tools/sitzverteilung:/app/database-tools/sitzverteilung
       - ./backend/database-tools/topTen:/app/database-tools/topTen
     networks:
-      - web
-      - electra_net
+      web:
+        aliases:
+          - "api.${DOMAIN}"
+      electra_net:
 
   #################################
   # Database
