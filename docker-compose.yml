@@ -1,11 +1,23 @@
 version: '3.8'
 
+networks:
+  web:
+    external: true
+  electra-${ENVIRONMENT}:
+    driver: bridge
+
+volumes:
+  postgres_data_${ENVIRONMENT}:
+
 services:
+
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: electra-frontend-${ENVIRONMENT}
+    env_file:
+      - .env
     environment:
       - VITE_API_BASE_URL=//api.${DOMAIN}
     depends_on:
@@ -20,33 +32,35 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    env_file:
-      - .env
     networks:
-      - web
+      - web                       # nur öffentliches Netz
 
+  # -- B) BACKEND --
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: electra-backend-${ENVIRONMENT}
+    env_file:
+      - .env
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/electra
       - ENVIRONMENT=production
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - ./backend:/app
-      - ./backend/database-tools:/app/database-tools
-      - ./backend/database-tools/sitzverteilung:/app/database-tools/sitzverteilung
-      - ./backend/database-tools/topTen:/app/database-tools/topTen
     command: >
       sh -c "
-        python -c 'import psycopg2; conn = psycopg2.connect(\"dbname=electra user=postgres password=postgres host=db\"); cur = conn.cursor(); cur.execute(\"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = \'wahl\')\"); is_initialized = cur.fetchone()[0]; cur.close(); conn.close(); exit(0 if is_initialized else 1)' && 
-        echo \"Database already initialized, skipping setup...\" || 
-        (echo \"Database not initialized, running setup...\" && python database-tools/scripts/setup_database.py) && 
-        python run_server.py dev
+        python -c 'import psycopg2; conn = 
+          psycopg2.connect(\"dbname=electra user=postgres password=postgres host=db\"); 
+          cur = conn.cursor(); 
+          cur.execute(\"SELECT EXISTS (
+            SELECT FROM information_schema.tables WHERE table_name = \'wahl\'
+          )\"); 
+          exit(0 if cur.fetchone()[0] else 1)'
+        && echo \"DB ready\"
+        || (echo \"Initializing DB…\" && python database-tools/scripts/setup_database.py)
+        && python run_server.py dev
       "
     labels:
       - "traefik.enable=true"
@@ -54,11 +68,16 @@ services:
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.entrypoints=websecure"
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.tls=true"
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.tls.certresolver=cloudflare"
-    env_file:
-      - .env
+    volumes:
+      - ./backend:/app
+      - ./backend/database-tools:/app/database-tools
+      - ./backend/database-tools/sitzverteilung:/app/database-tools/sitzverteilung
+      - ./backend/database-tools/topTen:/app/database-tools/topTen
     networks:
-      - web
+      - web                       # damit Traefik den Service erreicht
+      - electra-${ENVIRONMENT}    # privates Netz, in dem nur Backend+DB hängen
 
+  # -- C) DB --
   db:
     image: postgres:17.1
     container_name: electra-db-${ENVIRONMENT}
@@ -66,21 +85,12 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=electra
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
-    env_file:
-      - .env
+    volumes:
+      - postgres_data_${ENVIRONMENT}:/var/lib/postgresql/data
     networks:
-      - web
-
-networks:
-  web:
-    external: true
-
-volumes:
-  postgres_data:
+      - electra-${ENVIRONMENT}
