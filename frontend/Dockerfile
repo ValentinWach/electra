@@ -1,4 +1,4 @@
-FROM node:22.12.0-alpine as builder
+FROM node:20-alpine as builder
 
 WORKDIR /app
 
@@ -23,8 +23,14 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Create a script to replace environment variables at runtime
+RUN echo '#!/bin/sh\n\
+envsubst < /usr/share/nginx/html/index.html > /usr/share/nginx/html/index.html.tmp\n\
+mv /usr/share/nginx/html/index.html.tmp /usr/share/nginx/html/index.html\n\
+nginx -g "daemon off;"' > /docker-entrypoint.sh && \
+chmod +x /docker-entrypoint.sh
+
 # Expose port 80
 EXPOSE 80
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"] 
+CMD ["/docker-entrypoint.sh"] 
