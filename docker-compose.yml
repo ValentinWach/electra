@@ -37,17 +37,16 @@ services:
     env_file:
       - .env
     environment:
-      - VITE_API_BASE_URL=//api.${DOMAIN}
+      - VITE_API_BASE_URL=
     depends_on:
       - backend
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=web"
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.entrypoints=websecure"
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.tls=true"
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.tls.certresolver=cloudflare"
-      - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.middlewares=auth-admin@docker"
+      - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.middlewares=authelia@docker"
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -80,12 +79,12 @@ services:
             "
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=web"
-      - "traefik.http.routers.electra-backend-${ENVIRONMENT}.rule=Host(`api.${DOMAIN}`)"
+      - "traefik.http.routers.electra-backend-${ENVIRONMENT}.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.entrypoints=websecure"
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.tls=true"
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.tls.certresolver=cloudflare"
       - "traefik.http.services.electra-backend-${ENVIRONMENT}.loadbalancer.server.port=8000"
+      - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.middlewares=authelia@docker"
     volumes:
       - ./backend:/app
       - ./backend/database-tools:/app/database-tools
