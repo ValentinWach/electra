@@ -42,7 +42,6 @@ services:
       - backend
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=web"
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.entrypoints=websecure"
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.tls=true"
@@ -80,7 +79,6 @@ services:
             "
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=web"
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.entrypoints=websecure"
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.tls=true"
