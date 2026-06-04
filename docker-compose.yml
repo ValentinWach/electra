@@ -83,8 +83,7 @@ services:
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.entrypoints=websecure"
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.tls=true"
       - "traefik.http.routers.electra-backend-${ENVIRONMENT}.tls.certresolver=cloudflare"
-      - "traefik.http.routers.electra-backend-${ENVIRONMENT}.middlewares=electra-stripprefix-${ENVIRONMENT}@docker,authelia@docker"
-      - "traefik.http.middlewares.electra-stripprefix-${ENVIRONMENT}.stripprefix.prefixes=/api"
+      - "traefik.http.routers.electra-backend-${ENVIRONMENT}.middlewares=authelia@docker"
       - "traefik.http.services.electra-backend-${ENVIRONMENT}.loadbalancer.server.port=8000"
     volumes:
       - ./backend:/app

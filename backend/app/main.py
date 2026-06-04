@@ -52,9 +52,9 @@ app.add_middleware(
 )
 
 # Include API routers
-app.include_router(GeneralApiRouter)
-app.include_router(GlobalApiRouter)
-app.include_router(WahlkreisApiRouter)
-app.include_router(ElectApiRouter)
-app.include_router(AdminApiRouter)
-app.include_router(AnalysisApiRouter)
+app.include_router(GeneralApiRouter, prefix="/api")
+app.include_router(GlobalApiRouter, prefix="/api")
+app.include_router(WahlkreisApiRouter, prefix="/api")
+app.include_router(ElectApiRouter, prefix="/api")
+app.include_router(AdminApiRouter, prefix="/api")
+app.include_router(AnalysisApiRouter, prefix="/api")
