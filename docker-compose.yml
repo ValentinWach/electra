@@ -47,6 +47,7 @@ services:
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.tls=true"
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.tls.certresolver=cloudflare"
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.middlewares=authelia@docker"
+      - "traefik.http.services.electra-frontend-${ENVIRONMENT}.loadbalancer.server.port=5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
