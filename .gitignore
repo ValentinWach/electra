@@ -4,3 +4,4 @@
 __pycache__/
 *.pyc
 /backend/database-tools/sitzverteilung/drop-mat-views.sql
+/backend/build/
