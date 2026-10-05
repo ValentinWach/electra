@@ -32,7 +32,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     container_name: electra-frontend-${ENVIRONMENT}
     env_file:
       - .env
@@ -47,9 +47,6 @@ services:
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.tls=true"
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.tls.certresolver=cloudflare"
       - "traefik.http.routers.electra-frontend-${ENVIRONMENT}.middlewares=authelia@docker"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
     networks:
       - web
       - electra_net
