@@ -11,6 +11,7 @@ import type {DropdownData} from "../models/DropDownData.ts";
 import { useElection } from '../context/ElectionContext.tsx';
 import { useNavigate } from 'react-router-dom';
 import { resultPrefix } from '../constants/PathPrefixes.ts';
+import electraLogo from '../assets/Electra-Logo.svg';
 
 
 const navigation = [
@@ -48,7 +49,7 @@ export default function Example() {
             <div className="flex h-16 shrink-0 justify-center mt-2 items-center">
                 <img
                     alt="Electra logo"
-                    src="/src/assets/Electra-Logo.svg"
+                    src={electraLogo}
                     className="h-8 w-auto hover:cursor-pointer"
                     onClick={() => {
                         navigate('/uebersicht');

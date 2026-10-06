@@ -3,6 +3,7 @@ import AlertC from '../../UI-element-components/AlertC'
 import { AlertType, AlertData } from '../../../models/AlertData'
 import { useState } from 'react';
 import ProgressLoaderFullWidthC from '../_shared/ProgressLoaderFullWidthC';
+import logoNoText from '../../../assets/ElectraLogoNoText.svg';
 
 export default function AuthenticationC({ authentificationError, isAuthenticating, onAuthenticate }: { authentificationError: boolean, isAuthenticating: boolean, onAuthenticate: (token: string, idNumber: string) => void }) {
     const [token, setToken] = useState<string>("");
@@ -43,7 +44,7 @@ export default function AuthenticationC({ authentificationError, isAuthenticatin
                 <div className="sm:mx-auto sm:w-full sm:max-w-md flex flex-col items-center justify-center">
                     <img
                         alt="Electra logo"
-                        src="/src/assets/ElectraLogoNoText.svg"
+                        src={logoNoText}
                         className="h-8 w-auto hover:cursor-pointer"
                     />
                     <h2 className="mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900">

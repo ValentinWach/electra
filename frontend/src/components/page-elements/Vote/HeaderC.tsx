@@ -2,6 +2,7 @@ import ProgressBarC from "../../UI-element-components/ProgressBar";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useVote } from "../../../context/VoteContext";
 import { handleLogout } from "../../../utils/Logout";
+import logoNoText from '../../../assets/ElectraLogoNoText.svg'
 
 export default function HeaderC() {
     const navigate = useNavigate();
@@ -11,7 +12,7 @@ export default function HeaderC() {
         <header className={"w-full h-auto top-0 sticky bg-white shadow-sm pt-5 pb-5 pl-10 pr-10 flex flex-row justify-between items-center"}>
             <img
                 alt="Electra logo"
-                src="/src/assets/Electra-Logo.svg"
+                src={logoNoText}
                 className="h-8 w-auto hover:cursor-pointer"
             />
             <div className={"w-2/3"}>
